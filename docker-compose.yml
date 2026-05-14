@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # PostgreSQL for local development
+  # Note: In production, use Neon PostgreSQL instead
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: memoire
+      POSTGRES_PASSWORD: memoire_dev
+      POSTGRES_DB: memoire
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U memoire"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend server
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://memoire:memoire_dev@postgres:5432/memoire
+      DIRECT_URL: postgresql://memoire:memoire_dev@postgres:5432/memoire
+      CLIENT_URL: http://localhost:3000
+      JWT_ACCESS_SECRET: local_dev_access_secret_change_in_production
+      JWT_REFRESH_SECRET: local_dev_refresh_secret_change_in_production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./server/src:/app/src
+
+  # Frontend
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:5000/api
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+    depends_on:
+      - server
+
+volumes:
+  postgres_data:
