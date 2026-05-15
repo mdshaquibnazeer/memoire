@@ -12,8 +12,8 @@ import { sendVerificationEmail, sendPasswordResetEmail } from '../services/email
 const generateAccessToken = (userId: string, role: string) => {
   return jwt.sign(
     { userId, role },
-    process.env.JWT_ACCESS_SECRET!,
-    { expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m' }
+    process.env.JWT_ACCESS_SECRET || 'fallback-secret',
+    { expiresIn: (process.env.JWT_ACCESS_EXPIRES_IN || '15m') as any }
   );
 };
 
