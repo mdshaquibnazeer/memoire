@@ -30,6 +30,7 @@ enum ThemeName {
   ROMANTIC_GLOW
   CINEMATIC_MEMORIES
   SCRAPBOOK_LOVE
+  AURORA_DREAMS
 }
 
 enum MediaType {

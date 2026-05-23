@@ -1,6 +1,6 @@
 // Shared types between client and server
 
-export type ThemeName = 'ROMANTIC_GLOW' | 'CINEMATIC_MEMORIES' | 'SCRAPBOOK_LOVE';
+export type ThemeName = 'ROMANTIC_GLOW' | 'CINEMATIC_MEMORIES' | 'SCRAPBOOK_LOVE' | 'AURORA_DREAMS';
 export type ProjectStatus = 'DRAFT' | 'PUBLISHED' | 'SCHEDULED' | 'ARCHIVED';
 export type MediaType = 'IMAGE' | 'VIDEO' | 'AUDIO';
 export type UserRole = 'USER' | 'ADMIN';

@@ -28,12 +28,14 @@ const themeColors: Record<string, string> = {
   ROMANTIC_GLOW: '#e8c4b8',
   CINEMATIC_MEMORIES: '#d4a654',
   SCRAPBOOK_LOVE: '#d4af7a',
+  AURORA_DREAMS: '#8b5cf6',
 };
 
 const themeNames: Record<string, string> = {
   ROMANTIC_GLOW: 'Romantic Glow',
   CINEMATIC_MEMORIES: 'Cinematic Memories',
   SCRAPBOOK_LOVE: 'Scrapbook Love',
+  AURORA_DREAMS: 'Aurora Dreams',
 };
 
 export default function ProjectsPage() {

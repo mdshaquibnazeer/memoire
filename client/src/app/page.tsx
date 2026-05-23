@@ -31,6 +31,14 @@ const themes = [
     accent: '#d4af7a',
     preview: '📖',
   },
+  {
+    id: 'AURORA_DREAMS',
+    name: 'Aurora Dreams',
+    description: 'Mystical, bioluminescent purple aurora effects and glowing parallax timelines',
+    gradient: 'from-purple-900/30 via-noir-deep to-noir-midnight',
+    accent: '#8b5cf6',
+    preview: '✨',
+  },
 ];
 
 const features = [

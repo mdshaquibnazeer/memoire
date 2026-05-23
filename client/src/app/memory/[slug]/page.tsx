@@ -9,6 +9,7 @@ import FloatingParticles from '@/components/animations/FloatingParticles';
 import RomanticGlowTheme from '@/components/themes/RomanticGlowTheme';
 import CinematicMemoriesTheme from '@/components/themes/CinematicMemoriesTheme';
 import ScrapbookLoveTheme from '@/components/themes/ScrapbookLoveTheme';
+import AuroraDreamsTheme from '@/components/themes/AuroraDreamsTheme';
 import MusicPlayer from '@/components/shared/MusicPlayer';
 
 interface Project {
@@ -154,6 +155,7 @@ export default function MemoryPage() {
       {project.theme === 'ROMANTIC_GLOW' && <RomanticGlowTheme project={project} />}
       {project.theme === 'CINEMATIC_MEMORIES' && <CinematicMemoriesTheme project={project} />}
       {project.theme === 'SCRAPBOOK_LOVE' && <ScrapbookLoveTheme project={project} />}
+      {project.theme === 'AURORA_DREAMS' && <AuroraDreamsTheme project={project} />}
     </>
   );
 }

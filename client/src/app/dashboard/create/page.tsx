@@ -33,6 +33,14 @@ const THEMES = [
     gradient: 'from-amber-700/20 to-noir-deep',
     accent: '#d4af7a',
   },
+  {
+    id: 'AURORA_DREAMS',
+    name: 'Aurora Dreams',
+    desc: 'Mystical memories with ethereal purple aurora effects',
+    preview: '✨',
+    gradient: 'from-purple-600 to-purple-900',
+    accent: '#8b5cf6',
+  },
 ];
 
 const OCCASIONS = [
