@@ -277,7 +277,9 @@ function EnvelopeLetter({
     disableLetterAutoScroll = false,
     disableWordByWord = false,
     letterScrollSpeed,
-    letterWordDelay
+    letterWordDelay,
+    letterAnimType = 'word',
+    letterCharDelay
 }: {
     message: string;
     personName: string;
@@ -287,9 +289,11 @@ function EnvelopeLetter({
     disableWordByWord?: boolean;
     letterScrollSpeed?: number;
     letterWordDelay?: number;
+    letterAnimType?: 'word' | 'char';
+    letterCharDelay?: number;
 }) {
     const [phase, setPhase] = useState<'closed' | 'opening' | 'open' | 'reading' | 'closing'>('closed');
-    const [visibleWordCount, setVisibleWordCount] = useState(disableWordByWord ? 99999 : 0);
+    const [visibleCount, setVisibleCount] = useState(disableWordByWord ? 99999 : 0);
     const letterScrollRef = useRef<HTMLDivElement>(null);
     const localAudioRef = useRef<HTMLAudioElement>(null);
     const autoCloseRef = useRef<NodeJS.Timeout | null>(null);
@@ -297,6 +301,9 @@ function EnvelopeLetter({
     const fullText = message || `Dear ${personName || 'Beautiful Soul'}, On this magical day, the universe paused just to celebrate you. Every star that shines tonight is wishing you joy. May every dream you hold be wrapped in love. Happy Birthday — you are endlessly cherished. With all my heart ✨`;
     const words = fullText.split(/\s+/).filter(Boolean);
     const totalWords = words.length;
+    const totalChars = fullText.length;
+    const isCharAnim = letterAnimType === 'char';
+    const totalCount = isCharAnim ? totalChars : totalWords;
 
     useEffect(() => {
         if (letterMusicUrl && localAudioRef.current) {
@@ -315,10 +322,10 @@ function EnvelopeLetter({
     useEffect(() => {
         if (phase !== 'reading') return;
         if (disableWordByWord) {
-            setVisibleWordCount(totalWords);
+            setVisibleCount(totalCount);
             return;
         }
-        if (visibleWordCount >= totalWords) {
+        if (visibleCount >= totalCount) {
             autoCloseRef.current = setTimeout(() => {
                 setPhase('closing');
                 if (localAudioRef.current) localAudioRef.current.pause();
@@ -326,10 +333,17 @@ function EnvelopeLetter({
             }, 3000);
             return () => { if (autoCloseRef.current) clearTimeout(autoCloseRef.current); };
         }
-        const delay = letterWordDelay !== undefined ? Number(letterWordDelay) : 120;
-        const t = setTimeout(() => setVisibleWordCount(c => c + 1), delay);
+        
+        let delay = 120;
+        if (isCharAnim) {
+            delay = letterCharDelay !== undefined ? Number(letterCharDelay) : 30;
+        } else {
+            delay = letterWordDelay !== undefined ? Number(letterWordDelay) : 120;
+        }
+        
+        const t = setTimeout(() => setVisibleCount(c => c + 1), delay);
         return () => clearTimeout(t);
-    }, [phase, visibleWordCount, totalWords, disableWordByWord, letterWordDelay]);
+    }, [phase, visibleCount, totalCount, disableWordByWord, letterWordDelay, letterCharDelay, isCharAnim]);
 
     useEffect(() => {
         if (disableLetterAutoScroll || phase !== 'reading') return;
@@ -364,7 +378,9 @@ function EnvelopeLetter({
         setTimeout(onClose, 1200);
     };
 
-    const visibleText = words.slice(0, visibleWordCount).join(' ');
+    const visibleText = isCharAnim
+        ? fullText.slice(0, visibleCount)
+        : words.slice(0, visibleCount).join(' ');
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -1540,6 +1556,8 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
                         disableWordByWord={project.heroConfig?.disableWordByWord}
                         letterScrollSpeed={project.heroConfig?.letterScrollSpeed}
                         letterWordDelay={project.heroConfig?.letterWordDelay}
+                        letterAnimType={project.heroConfig?.letterAnimType}
+                        letterCharDelay={project.heroConfig?.letterCharDelay}
                         onClose={() => setActiveModal(null)}
                     />
                 )}

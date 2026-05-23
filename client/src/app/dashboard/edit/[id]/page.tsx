@@ -48,6 +48,8 @@ export default function EditProjectPage() {
         letterWordDelay: data.project.heroConfig?.letterWordDelay !== undefined ? data.project.heroConfig.letterWordDelay : 120,
         useDifferentLetterText: data.project.heroConfig?.useDifferentLetterText || false,
         letterMessage: data.project.heroConfig?.letterMessage || '',
+        letterAnimType: data.project.heroConfig?.letterAnimType || 'word',
+        letterCharDelay: data.project.heroConfig?.letterCharDelay !== undefined ? data.project.heroConfig.letterCharDelay : 30,
         endingTitle: data.project.endingConfig?.title || '',
         endingMessage: data.project.endingConfig?.message || '',
         isPasswordProtected: data.project.isPasswordProtected || false,
@@ -83,6 +85,8 @@ export default function EditProjectPage() {
           letterWordDelay: form.letterWordDelay,
           useDifferentLetterText: form.useDifferentLetterText,
           letterMessage: form.letterMessage,
+          letterAnimType: form.letterAnimType,
+          letterCharDelay: form.letterCharDelay,
         },
         endingConfig: { title: form.endingTitle, message: form.endingMessage },
         isPasswordProtected: form.isPasswordProtected,
@@ -462,8 +466,40 @@ export default function EditProjectPage() {
                 </div>
               )}
 
-              {/* Word Animation Delay Selector */}
+              {/* Animation Mode Selector */}
               {!form.disableWordByWord && (
+                <div className="p-4 glass-card mb-4 space-y-3">
+                  <div>
+                    <p className="text-rose-cream font-serif text-sm">Animation Mode</p>
+                    <p className="text-rose-cream/30 text-xs font-sans">Choose whether the letter draws in word-by-word or character-by-character (letter-by-letter)</p>
+                  </div>
+                  <div className="flex gap-6">
+                    <label className="flex items-center gap-2 cursor-pointer text-xs text-rose-cream/75">
+                      <input
+                        type="radio"
+                        name="letterAnimType"
+                        checked={form.letterAnimType === 'word'}
+                        onChange={() => update('letterAnimType', 'word')}
+                        className="accent-rose-blush"
+                      />
+                      <span>Word-by-Word 📝</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer text-xs text-rose-cream/75">
+                      <input
+                        type="radio"
+                        name="letterAnimType"
+                        checked={form.letterAnimType === 'char'}
+                        onChange={() => update('letterAnimType', 'char')}
+                        className="accent-rose-blush"
+                      />
+                      <span>Letter-by-Letter 🔠</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {/* Word Animation Delay Selector */}
+              {!form.disableWordByWord && form.letterAnimType === 'word' && (
                 <div className="p-4 glass-card mb-4 space-y-3">
                   <div>
                     <p className="text-rose-cream font-serif text-sm">Word-by-Word Draw Delay</p>
@@ -520,6 +556,69 @@ export default function EditProjectPage() {
                         style={{ width: 80, padding: '4px 8px' }}
                       />
                       <span className="text-xs text-rose-cream/30 font-sans">(Range: 30 to 1500 ms)</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Letter-by-Letter Delay Selector */}
+              {!form.disableWordByWord && form.letterAnimType === 'char' && (
+                <div className="p-4 glass-card mb-4 space-y-3">
+                  <div>
+                    <p className="text-rose-cream font-serif text-sm">Letter-by-Letter Draw Delay</p>
+                    <p className="text-rose-cream/30 text-xs font-sans">Choose the delay between characters appearing in the letter</p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { label: 'Slow (60ms)', value: 60 },
+                      { label: 'Normal (30ms)', value: 30 },
+                      { label: 'Fast (12ms)', value: 12 },
+                      { label: 'Custom ⚙️', value: 'custom' },
+                    ].map((opt) => {
+                      const isSelected = opt.value === 'custom'
+                        ? ![60, 30, 12].includes(form.letterCharDelay)
+                        : form.letterCharDelay === opt.value;
+                      return (
+                        <button
+                          key={opt.label}
+                          type="button"
+                          onClick={() => {
+                            if (opt.value === 'custom') {
+                              update('letterCharDelay', 25);
+                            } else {
+                              update('letterCharDelay', opt.value);
+                            }
+                          }}
+                          className={`text-xs px-3 py-1.5 rounded-lg border font-sans transition-all ${
+                            isSelected
+                              ? 'border-rose-blush bg-rose-blush/20 text-rose-cream'
+                              : 'border-white/10 bg-white/5 text-rose-cream/50 hover:bg-white/10'
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Manual input for Custom character delay */}
+                  {![60, 30, 12].includes(form.letterCharDelay) && (
+                    <div className="flex items-center gap-3 mt-2">
+                      <span className="text-xs text-rose-cream/40 font-sans">Enter Delay (ms):</span>
+                      <input
+                        type="number"
+                        min={3}
+                        max={300}
+                        value={form.letterCharDelay || 30}
+                        onChange={(e) => {
+                          const val = Math.min(300, Math.max(3, Number(e.target.value)));
+                          update('letterCharDelay', val);
+                        }}
+                        className="input-romantic text-xs"
+                        style={{ width: 80, padding: '4px 8px' }}
+                      />
+                      <span className="text-xs text-rose-cream/30 font-sans">(Range: 3 to 300 ms)</span>
                     </div>
                   )}
                 </div>
