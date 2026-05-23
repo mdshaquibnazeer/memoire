@@ -266,271 +266,125 @@ function ConfettiExplosion({ trigger }: { trigger: boolean }) {
 // ─────────────────────────────────────────────
 // ANIMATED ENVELOPE + LETTER
 // ─────────────────────────────────────────────
-function EnvelopeLetter({ message, personName, onClose }: {
+function EnvelopeLetter({ message, personName, onClose, letterMusicUrl }: {
   message: string;
   personName: string;
   onClose: () => void;
+  letterMusicUrl?: string;
 }) {
   const [phase, setPhase] = useState<'closed' | 'opening' | 'open' | 'reading' | 'closing'>('closed');
-  const [visibleLines, setVisibleLines] = useState<string[]>([]);
-  const lines = message ? message.split('. ').filter(Boolean) : [
-    `Dear ${personName || 'Beautiful Soul'},`,
-    'On this magical day, the universe paused just to celebrate you.',
-    'Every star that shines tonight is wishing you joy.',
-    'May every dream you hold be wrapped in love.',
-    'Happy Birthday — you are endlessly cherished.',
-    'With all my heart ✨',
-  ];
+  const [visibleWordCount, setVisibleWordCount] = useState(0);
+  const letterScrollRef = useRef<HTMLDivElement>(null);
+  const localAudioRef = useRef<HTMLAudioElement>(null);
+  const autoCloseRef = useRef<NodeJS.Timeout | null>(null);
+
+  const fullText = message || `Dear ${personName || 'Beautiful Soul'}, On this magical day, the universe paused just to celebrate you. Every star that shines tonight is wishing you joy. May every dream you hold be wrapped in love. Happy Birthday — you are endlessly cherished. With all my heart ✨`;
+  const words = fullText.split(/\s+/).filter(Boolean);
+  const totalWords = words.length;
+
+  useEffect(() => {
+    if (letterMusicUrl && localAudioRef.current) {
+      localAudioRef.current.volume = 0.4;
+      localAudioRef.current.play().catch(() => {});
+    }
+    return () => { if (localAudioRef.current) { localAudioRef.current.pause(); } };
+  }, [letterMusicUrl]);
 
   useEffect(() => {
     setTimeout(() => setPhase('opening'), 400);
     setTimeout(() => setPhase('open'), 1600);
-    setTimeout(() => {
-      setPhase('reading');
-      lines.forEach((line, i) => {
-        setTimeout(() => setVisibleLines(v => [...v, line]), i * 700);
-      });
-    }, 2400);
+    setTimeout(() => setPhase('reading'), 2400);
   }, []);
 
+  useEffect(() => {
+    if (phase !== 'reading') return;
+    if (visibleWordCount >= totalWords) {
+      autoCloseRef.current = setTimeout(() => {
+        setPhase('closing');
+        if (localAudioRef.current) localAudioRef.current.pause();
+        setTimeout(onClose, 1200);
+      }, 3000);
+      return () => { if (autoCloseRef.current) clearTimeout(autoCloseRef.current); };
+    }
+    const t = setTimeout(() => setVisibleWordCount(c => c + 1), 120);
+    return () => clearTimeout(t);
+  }, [phase, visibleWordCount, totalWords]);
+
+  useEffect(() => {
+    if (letterScrollRef.current) letterScrollRef.current.scrollTo({ top: letterScrollRef.current.scrollHeight, behavior: 'smooth' });
+  }, [visibleWordCount]);
+
   const handleClose = () => {
+    if (autoCloseRef.current) clearTimeout(autoCloseRef.current);
     setPhase('closing');
+    if (localAudioRef.current) localAudioRef.current.pause();
     setTimeout(onClose, 1200);
   };
 
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[200] flex items-center justify-center"
-      style={{ background: 'rgba(10,0,20,0.92)', backdropFilter: 'blur(16px)' }}
-    >
-      {/* Ambient glow */}
-      <div className="absolute inset-0 pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse at 50% 50%, rgba(255,105,180,0.12) 0%, transparent 65%)' }} />
+  const visibleText = words.slice(0, visibleWordCount).join(' ');
 
-      {/* Floating petals */}
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[200] flex items-center justify-center"
+      style={{ background: 'rgba(10,0,20,0.92)', backdropFilter: 'blur(16px)' }}>
+      {letterMusicUrl && <audio ref={localAudioRef} src={letterMusicUrl} loop />}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 50%, rgba(255,105,180,0.12) 0%, transparent 65%)' }} />
       {Array.from({ length: 12 }).map((_, i) => (
-        <motion.div key={i}
-          animate={{ y: [-20, window.innerHeight + 20], x: [0, (Math.random() - 0.5) * 100], rotate: [0, 360], opacity: [0, 0.7, 0] }}
-          transition={{ duration: 5 + Math.random() * 4, delay: Math.random() * 3, repeat: Infinity, ease: 'linear' }}
-          style={{
-            position: 'absolute', fontSize: 18 + Math.random() * 12,
-            left: `${Math.random() * 100}%`, top: '-20px',
-            pointerEvents: 'none',
-          }}
-        >
-          {['🌸', '🌷', '✨', '💗', '🦋'][Math.floor(Math.random() * 5)]}
+        <motion.div key={i} animate={{ y: [-20, window.innerHeight + 20], x: [0, (Math.random()-0.5)*100], rotate: [0,360], opacity: [0,0.7,0] }}
+          transition={{ duration: 5+Math.random()*4, delay: Math.random()*3, repeat: Infinity, ease: 'linear' }}
+          style={{ position: 'absolute', fontSize: 18+Math.random()*12, left: `${Math.random()*100}%`, top: '-20px', pointerEvents: 'none' }}>
+          {['🌸','🌷','✨','💗','🦋'][Math.floor(Math.random()*5)]}
         </motion.div>
       ))}
-
       <div className="relative flex flex-col items-center" style={{ perspective: 1200 }}>
-
-        {/* ── ENVELOPE ── */}
         <AnimatePresence>
           {(phase === 'closed' || phase === 'opening' || phase === 'open') && (
-            <motion.div
-              key="envelope"
-              initial={{ scale: 0.6, opacity: 0, y: 60 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: -30 }}
-              transition={{ duration: 0.7, ease: 'easeOut' }}
-              style={{ width: 320, position: 'relative' }}
-            >
-              {/* Envelope body */}
-              <div style={{
-                width: 320, height: 220, borderRadius: 16, position: 'relative', overflow: 'visible',
-                background: 'linear-gradient(160deg, #fff0f8 0%, #ffe4f0 60%, #ffd0e8 100%)',
-                boxShadow: '0 20px 80px rgba(255,105,180,0.35), 0 4px 20px rgba(0,0,0,0.3)',
-                border: '1px solid rgba(255,182,213,0.5)',
-              }}>
-                {/* Envelope pattern */}
-                <div style={{
-                  position: 'absolute', inset: 0, borderRadius: 16,
-                  backgroundImage: `repeating-linear-gradient(45deg, rgba(255,105,180,0.05) 0px, rgba(255,105,180,0.05) 1px, transparent 1px, transparent 12px)`,
-                }} />
-
-                {/* Bottom triangle fold */}
-                <div style={{
-                  position: 'absolute', bottom: 0, left: 0, right: 0, height: 110,
-                  background: 'linear-gradient(160deg, #ffc0d8, #ffaac8)',
-                  clipPath: 'polygon(0 100%, 50% 0%, 100% 100%)',
-                  opacity: 0.5,
-                }} />
-                {/* Left fold */}
-                <div style={{
-                  position: 'absolute', top: 0, left: 0, width: 160, height: 220,
-                  background: 'linear-gradient(135deg, #ffd0e8, #ffc0d8)',
-                  clipPath: 'polygon(0 0, 100% 50%, 0 100%)',
-                  opacity: 0.4,
-                }} />
-                {/* Right fold */}
-                <div style={{
-                  position: 'absolute', top: 0, right: 0, width: 160, height: 220,
-                  background: 'linear-gradient(225deg, #ffd0e8, #ffc0d8)',
-                  clipPath: 'polygon(100% 0, 0 50%, 100% 100%)',
-                  opacity: 0.4,
-                }} />
-
-                {/* ── FLAP ── */}
-                <motion.div
-                  animate={phase === 'opening' || phase === 'open'
-                    ? { rotateX: -180, y: -2 }
-                    : { rotateX: 0 }}
-                  transition={{ duration: 1, ease: [0.4, 0, 0.2, 1] }}
-                  style={{
-                    position: 'absolute', top: 0, left: 0, right: 0, height: 120,
-                    transformOrigin: 'top center',
-                    transformStyle: 'preserve-3d',
-                    zIndex: 10,
-                  }}
-                >
-                  {/* Front face */}
-                  <div style={{
-                    position: 'absolute', inset: 0,
-                    background: 'linear-gradient(175deg, #ffe4f0, #ffd0e8)',
-                    clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
-                    backfaceVisibility: 'hidden',
-                    borderRadius: '16px 16px 0 0',
-                  }}>
-                    {/* Decorative lines on flap */}
-                    <div style={{ position:'absolute', top:14, left:'50%', transform:'translateX(-50%)', color:'rgba(255,105,180,0.4)', fontSize:11, fontFamily:'serif', letterSpacing:3, textTransform:'uppercase' }}>
-                      ✦ with love ✦
-                    </div>
+            <motion.div key="envelope" initial={{ scale:0.6, opacity:0, y:60 }} animate={{ scale:1, opacity:1, y:0 }} exit={{ scale:0.9, opacity:0, y:-30 }} transition={{ duration:0.7, ease:'easeOut' }} style={{ width:320, position:'relative' }}>
+              <div style={{ width:320, height:220, borderRadius:16, position:'relative', overflow:'visible', background:'linear-gradient(160deg, #fff0f8 0%, #ffe4f0 60%, #ffd0e8 100%)', boxShadow:'0 20px 80px rgba(255,105,180,0.35), 0 4px 20px rgba(0,0,0,0.3)', border:'1px solid rgba(255,182,213,0.5)' }}>
+                <div style={{ position:'absolute', inset:0, borderRadius:16, backgroundImage:`repeating-linear-gradient(45deg, rgba(255,105,180,0.05) 0px, rgba(255,105,180,0.05) 1px, transparent 1px, transparent 12px)` }} />
+                <div style={{ position:'absolute', bottom:0, left:0, right:0, height:110, background:'linear-gradient(160deg, #ffc0d8, #ffaac8)', clipPath:'polygon(0 100%, 50% 0%, 100% 100%)', opacity:0.5 }} />
+                <div style={{ position:'absolute', top:0, left:0, width:160, height:220, background:'linear-gradient(135deg, #ffd0e8, #ffc0d8)', clipPath:'polygon(0 0, 100% 50%, 0 100%)', opacity:0.4 }} />
+                <div style={{ position:'absolute', top:0, right:0, width:160, height:220, background:'linear-gradient(225deg, #ffd0e8, #ffc0d8)', clipPath:'polygon(100% 0, 0 50%, 100% 100%)', opacity:0.4 }} />
+                <motion.div animate={phase==='opening'||phase==='open'?{rotateX:-180,y:-2}:{rotateX:0}} transition={{duration:1,ease:[0.4,0,0.2,1]}} style={{position:'absolute',top:0,left:0,right:0,height:120,transformOrigin:'top center',transformStyle:'preserve-3d',zIndex:10}}>
+                  <div style={{position:'absolute',inset:0,background:'linear-gradient(175deg, #ffe4f0, #ffd0e8)',clipPath:'polygon(0 0, 100% 0, 50% 100%)',backfaceVisibility:'hidden',borderRadius:'16px 16px 0 0'}}>
+                    <div style={{position:'absolute',top:14,left:'50%',transform:'translateX(-50%)',color:'rgba(255,105,180,0.4)',fontSize:11,fontFamily:'serif',letterSpacing:3,textTransform:'uppercase'}}>✦ with love ✦</div>
                   </div>
-                  {/* Back face (inside of flap) */}
-                  <div style={{
-                    position: 'absolute', inset: 0,
-                    background: 'linear-gradient(175deg, #fff0f8, #ffeaf5)',
-                    clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
-                    backfaceVisibility: 'hidden',
-                    transform: 'rotateX(180deg)',
-                  }} />
+                  <div style={{position:'absolute',inset:0,background:'linear-gradient(175deg, #fff0f8, #ffeaf5)',clipPath:'polygon(0 0, 100% 0, 50% 100%)',backfaceVisibility:'hidden',transform:'rotateX(180deg)'}} />
                 </motion.div>
-
-                {/* ── WAX SEAL ── */}
-                <motion.div
-                  animate={phase === 'opening' || phase === 'open'
-                    ? { scale: 0, opacity: 0 }
-                    : { scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.4 }}
-                  style={{
-                    position: 'absolute', top: 72, left: '50%', transform: 'translateX(-50%)',
-                    width: 52, height: 52, borderRadius: '50%', zIndex: 20,
-                    background: 'radial-gradient(circle at 35% 35%, #e8607a, #b5264a)',
-                    boxShadow: '0 4px 12px rgba(181,38,74,0.5), inset 0 -2px 6px rgba(0,0,0,0.2)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 22, cursor: 'pointer',
-                  }}
-                >
-                  💖
-                </motion.div>
-
-                {/* Envelope body text */}
-                <div style={{
-                  position: 'absolute', bottom: 20, left: 0, right: 0,
-                  textAlign: 'center', fontSize: 13, color: 'rgba(180,60,120,0.5)',
-                  fontFamily: '"Dancing Script", cursive', letterSpacing: 1,
-                }}>
-                  {phase === 'closed' ? 'Click to open ✨' : ''}
-                </div>
+                <motion.div animate={phase==='opening'||phase==='open'?{scale:0,opacity:0}:{scale:1,opacity:1}} transition={{duration:0.4}} style={{position:'absolute',top:72,left:'50%',transform:'translateX(-50%)',width:52,height:52,borderRadius:'50%',zIndex:20,background:'radial-gradient(circle at 35% 35%, #e8607a, #b5264a)',boxShadow:'0 4px 12px rgba(181,38,74,0.5), inset 0 -2px 6px rgba(0,0,0,0.2)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22}}>💖</motion.div>
+                <div style={{position:'absolute',bottom:20,left:0,right:0,textAlign:'center',fontSize:13,color:'rgba(180,60,120,0.5)',fontFamily:'"Dancing Script", cursive',letterSpacing:1}}>{phase==='closed'?'Click to open ✨':''}</div>
               </div>
-
-              {/* Floating decoration */}
-              <motion.div animate={{ y: [0,-8,0], rotate:[0,5,0] }} transition={{ duration:3, repeat:Infinity, ease:'easeInOut' }}
-                style={{ position:'absolute', top:-16, right:-16, fontSize:28 }}>🌷</motion.div>
-              <motion.div animate={{ y:[0,8,0], rotate:[0,-5,0] }} transition={{ duration:3.5, repeat:Infinity, ease:'easeInOut' }}
-                style={{ position:'absolute', bottom:-12, left:-12, fontSize:22 }}>✨</motion.div>
+              <motion.div animate={{y:[0,-8,0],rotate:[0,5,0]}} transition={{duration:3,repeat:Infinity,ease:'easeInOut'}} style={{position:'absolute',top:-16,right:-16,fontSize:28}}>🌷</motion.div>
+              <motion.div animate={{y:[0,8,0],rotate:[0,-5,0]}} transition={{duration:3.5,repeat:Infinity,ease:'easeInOut'}} style={{position:'absolute',bottom:-12,left:-12,fontSize:22}}>✨</motion.div>
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* ── LETTER ── */}
         <AnimatePresence>
           {phase === 'reading' && (
-            <motion.div
-              key="letter"
-              initial={{ opacity: 0, y: 60, scale: 0.92 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 40 }}
-              transition={{ duration: 0.8, ease: 'easeOut' }}
-              style={{
-                width: 340, maxHeight: '70vh', overflowY: 'auto',
-                background: 'linear-gradient(160deg, #fff9fb 0%, #fff4f8 100%)',
-                borderRadius: 16,
-                boxShadow: '0 30px 100px rgba(255,105,180,0.3), 0 4px 20px rgba(0,0,0,0.25)',
-                border: '1px solid rgba(255,182,213,0.4)',
-                padding: '36px 32px 32px',
-                position: 'relative',
-              }}
-            >
-              {/* Paper lines */}
-              {Array.from({ length: 18 }).map((_, i) => (
-                <div key={i} style={{
-                  position: 'absolute', left: 32, right: 32,
-                  top: 60 + i * 28, height: 1,
-                  background: 'rgba(255,182,213,0.2)',
-                  pointerEvents: 'none',
-                }} />
-              ))}
-              {/* Left margin line */}
-              <div style={{ position:'absolute', left:52, top:0, bottom:0, width:1, background:'rgba(255,105,180,0.15)', pointerEvents:'none' }} />
-
-              {/* Red corner fold */}
-              <div style={{
-                position:'absolute', top:0, right:0, width:32, height:32,
-                background:'linear-gradient(225deg, #ffd0e8 50%, transparent 50%)',
-                borderRadius:'0 16px 0 0',
-              }} />
-
-              <div style={{ fontFamily:'"Dancing Script", "Segoe UI", cursive', position:'relative', zIndex:1 }}>
-                {visibleLines.map((line, i) => (
-                  <motion.p
-                    key={i}
-                    initial={{ opacity: 0, x: -12 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.55, ease: 'easeOut' }}
-                    style={{
-                      marginBottom: i === 0 ? 16 : 10,
-                      fontSize: i === 0 ? 17 : 15,
-                      fontWeight: i === 0 ? 700 : 400,
-                      color: i === 0 ? '#c0306a' : '#6b3050',
-                      lineHeight: 1.7,
-                    }}
-                  >
-                    {line}{i < lines.length - 1 && i > 0 ? '.' : ''}
+            <motion.div key="letter" ref={letterScrollRef} initial={{opacity:0,y:60,scale:0.92}} animate={{opacity:1,y:0,scale:1}} exit={{opacity:0,y:40}} transition={{duration:0.8,ease:'easeOut'}}
+              style={{ width:340, maxHeight:'70vh', overflowY:'auto', background:'linear-gradient(160deg, #fff9fb 0%, #fff4f8 100%)', borderRadius:16, boxShadow:'0 30px 100px rgba(255,105,180,0.3), 0 4px 20px rgba(0,0,0,0.25)', border:'1px solid rgba(255,182,213,0.4)', padding:'36px 32px 32px', position:'relative' }}>
+              {Array.from({length:18}).map((_,i)=>(<div key={i} style={{position:'absolute',left:32,right:32,top:60+i*28,height:1,background:'rgba(255,182,213,0.2)',pointerEvents:'none'}} />))}
+              <div style={{position:'absolute',left:52,top:0,bottom:0,width:1,background:'rgba(255,105,180,0.15)',pointerEvents:'none'}} />
+              <div style={{position:'absolute',top:0,right:0,width:32,height:32,background:'linear-gradient(225deg, #ffd0e8 50%, transparent 50%)',borderRadius:'0 16px 0 0'}} />
+              <div style={{fontFamily:'"Dancing Script","Segoe UI",cursive',position:'relative',zIndex:1}}>
+                <p style={{fontSize:16,color:'#6b3050',lineHeight:1.8}}>
+                  {visibleText}
+                  {visibleWordCount < totalWords && (
+                    <motion.span animate={{opacity:[1,0,1]}} transition={{duration:0.7,repeat:Infinity}} style={{color:'#ff69b4',fontSize:18,marginLeft:2}}>|</motion.span>
+                  )}
+                </p>
+                {visibleWordCount >= totalWords && (
+                  <motion.p initial={{opacity:0}} animate={{opacity:1}} transition={{delay:0.5}} style={{textAlign:'center',color:'rgba(255,105,180,0.5)',fontSize:12,marginTop:16,fontFamily:'serif'}}>
+                    ✨ Letter complete — closing soon...
                   </motion.p>
-                ))}
-
-                {/* Ink cursor blinking */}
-                {visibleLines.length < lines.length && (
-                  <motion.span
-                    animate={{ opacity: [1,0,1] }}
-                    transition={{ duration: 0.7, repeat: Infinity }}
-                    style={{ color:'#ff69b4', fontSize:18 }}
-                  >|</motion.span>
                 )}
               </div>
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Close button */}
         {phase === 'reading' && (
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: lines.length * 0.7 + 0.5 }}
-            onClick={handleClose}
-            style={{
-              marginTop: 20, padding: '10px 32px', borderRadius: 50,
-              background: 'linear-gradient(135deg, #ff69b4, #da70d6)',
-              color: 'white', border: 'none', cursor: 'pointer',
-              fontFamily:'"Dancing Script", cursive', fontSize: 16,
-              boxShadow: '0 4px 20px rgba(255,105,180,0.4)',
-            }}
-          >
+          <motion.button initial={{opacity:0}} animate={{opacity:1}} transition={{delay:1.5}} onClick={handleClose}
+            style={{marginTop:20,padding:'10px 32px',borderRadius:50,background:'linear-gradient(135deg, #ff69b4, #da70d6)',color:'white',border:'none',cursor:'pointer',fontFamily:'"Dancing Script", cursive',fontSize:16,boxShadow:'0 4px 20px rgba(255,105,180,0.4)'}}>
             Close Letter 💌
           </motion.button>
         )}
@@ -539,21 +393,61 @@ function EnvelopeLetter({ message, personName, onClose }: {
   );
 }
 
+
 // ─────────────────────────────────────────────
-// POLAROID GALLERY WALL
+// GALLERY SLIDESHOW + FULL GALLERY
 // ─────────────────────────────────────────────
-function PolaroidGallery({ items, onClose }: { items: GalleryItem[]; onClose: () => void }) {
+function PolaroidGallery({ items, onClose, initialPhase = 'slideshow' }: {
+  items: GalleryItem[];
+  onClose: () => void;
+  initialPhase?: 'slideshow' | 'grid';
+}) {
+  const [phase, setPhase] = useState<'slideshow' | 'grid'>(items.length > 0 ? initialPhase : 'grid');
+  const [slideIndex, setSlideIndex] = useState(0);
   const [lightbox, setLightbox] = useState<string | null>(null);
   const rotations = [-6, 4, -3, 7, -5, 3, -8, 5, -2, 6, -4, 8];
 
+  // Auto-advance slideshow
+  useEffect(() => {
+    if (phase !== 'slideshow' || items.length === 0) return;
+    if (slideIndex >= items.length) { setPhase('grid'); return; }
+    const t = setTimeout(() => setSlideIndex(i => i + 1), 2200);
+    return () => clearTimeout(t);
+  }, [phase, slideIndex, items.length]);
+
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className="fixed inset-0 z-[200] overflow-y-auto"
-      style={{ background: 'rgba(8,0,18,0.95)', backdropFilter: 'blur(20px)' }}
-    >
+      style={{ background: 'rgba(8,0,18,0.95)', backdropFilter: 'blur(20px)' }}>
+
+      {/* ── SLIDESHOW PHASE ── */}
+      <AnimatePresence>
+        {phase === 'slideshow' && slideIndex < items.length && (
+          <motion.div key={`slide-${slideIndex}`} initial={{ opacity: 0, scale: 1.05 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.6 }}
+            style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 10, background: 'radial-gradient(ellipse at 50% 50%, rgba(218,112,214,0.2) 0%, rgba(8,0,18,0.98) 70%)' }}>
+            <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}
+              style={{ position: 'relative', padding: '14px 14px 44px', background: '#fffaf9', borderRadius: 4, boxShadow: '0 20px 80px rgba(0,0,0,0.6), 0 0 60px rgba(255,105,180,0.2)', maxWidth: '80vw', maxHeight: '70vh' }}>
+              <img src={items[slideIndex].mediaUrl} alt={items[slideIndex].caption || ''} style={{ maxWidth: '70vw', maxHeight: '55vh', objectFit: 'contain', display: 'block', borderRadius: 2 }} />
+              <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', width: 60, height: 18, background: 'rgba(255,182,213,0.6)', borderRadius: 2 }} />
+              {items[slideIndex].caption && (
+                <p style={{ textAlign: 'center', marginTop: 8, fontFamily: '"Dancing Script",cursive', fontSize: 16, color: '#8b4070' }}>{items[slideIndex].caption}</p>
+              )}
+            </motion.div>
+            {/* Progress dots */}
+            <div style={{ display: 'flex', gap: 8, marginTop: 28 }}>
+              {items.map((_, i) => (
+                <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: i === slideIndex ? '#ff69b4' : 'rgba(255,182,213,0.3)', transition: 'background 0.3s' }} />
+              ))}
+            </div>
+            <button onClick={() => setPhase('grid')} style={{ marginTop: 20, background: 'transparent', border: '1px solid rgba(255,182,213,0.4)', borderRadius: 50, padding: '8px 24px', color: '#ffb3d9', fontFamily: '"Dancing Script",cursive', fontSize: 15, cursor: 'pointer' }}>
+              Skip to Gallery →
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── GRID PHASE ── */}
+
       <div style={{ background: 'radial-gradient(ellipse at 50% 20%, rgba(218,112,214,0.15) 0%, transparent 60%)', minHeight: '100%', padding: '40px 20px 60px' }}>
         <div style={{ maxWidth: 960, margin: '0 auto' }}>
           {/* Header */}
@@ -723,7 +617,72 @@ function TimelineModal({ memories, onClose }: { memories: Memory[]; onClose: () 
 }
 
 // ─────────────────────────────────────────────
-// FLOATING BALLOON
+// MEMORY DETAIL MODAL
+// ─────────────────────────────────────────────
+function MemoryDetailModal({ memory, onClose }: { memory: Memory; onClose: () => void }) {
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      onClick={onClose}
+      style={{ position: 'fixed', inset: 0, zIndex: 9000, background: 'rgba(5,0,15,0.92)', backdropFilter: 'blur(20px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+      <motion.div
+        initial={{ scale: 0.7, opacity: 0, rotateY: -20 }}
+        animate={{ scale: 1, opacity: 1, rotateY: 0 }}
+        exit={{ scale: 0.8, opacity: 0, y: 40 }}
+        transition={{ type: 'spring', stiffness: 100, damping: 18 }}
+        onClick={e => e.stopPropagation()}
+        style={{ background: 'linear-gradient(160deg, rgba(30,0,60,0.95), rgba(15,0,30,0.98))', border: '1px solid rgba(255,182,213,0.25)', borderRadius: 24, padding: 36, maxWidth: 480, width: '100%', boxShadow: '0 40px 120px rgba(255,105,180,0.25), 0 0 0 1px rgba(255,182,213,0.1)', position: 'relative' }}>
+
+        {/* Glow blob */}
+        <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, background: 'radial-gradient(circle, rgba(218,112,214,0.3) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
+
+        {/* Emoji + title */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+          {memory.emoji && <span style={{ fontSize: 36 }}>{memory.emoji}</span>}
+          <motion.h2 initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.1 }}
+            style={{ fontFamily: '"Dancing Script",cursive', fontSize: 30, background: 'linear-gradient(135deg, #ffb3d9, #da70d6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', margin: 0 }}>
+            {memory.title}
+          </motion.h2>
+        </div>
+
+        {/* Image */}
+        {memory.imageUrl && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+            style={{ marginBottom: 20, borderRadius: 16, overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}>
+            <img src={memory.imageUrl} alt={memory.title} style={{ width: '100%', objectFit: 'cover', maxHeight: 240, display: 'block' }} />
+          </motion.div>
+        )}
+
+        {/* Description */}
+        {memory.description && (
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
+            style={{ fontFamily: '"Dancing Script",cursive', fontSize: 18, color: 'rgba(255,200,230,0.85)', lineHeight: 1.7, marginBottom: 16 }}>
+            {memory.description}
+          </motion.p>
+        )}
+
+        {/* Meta */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
+          style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 24 }}>
+          <span style={{ background: 'rgba(255,105,180,0.12)', border: '1px solid rgba(255,105,180,0.2)', borderRadius: 50, padding: '4px 14px', color: 'rgba(255,182,213,0.7)', fontSize: 12, fontFamily: 'sans-serif' }}>
+            📅 {new Date(memory.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+          </span>
+          {memory.location && (
+            <span style={{ background: 'rgba(218,112,214,0.12)', border: '1px solid rgba(218,112,214,0.2)', borderRadius: 50, padding: '4px 14px', color: 'rgba(255,182,213,0.7)', fontSize: 12, fontFamily: 'sans-serif' }}>
+              📍 {memory.location}
+            </span>
+          )}
+        </motion.div>
+
+        <button onClick={onClose}
+          style={{ width: '100%', padding: '12px', borderRadius: 50, background: 'linear-gradient(135deg, rgba(255,105,180,0.15), rgba(147,112,219,0.15))', border: '1px solid rgba(255,182,213,0.3)', color: '#ffb3d9', fontFamily: '"Dancing Script",cursive', fontSize: 18, cursor: 'pointer' }}>
+          Close ✨
+        </button>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+
 // ─────────────────────────────────────────────
 function FloatingBalloon({ emoji, color, delay, x }: { emoji: string; color: string; delay: number; x: number }) {
   return (
@@ -848,11 +807,21 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
   const [confetti, setConfetti] = useState(false);
   const [wishMade, setWishMade] = useState(false);
   const [showBigCelebration, setShowBigCelebration] = useState(false);
+  const [celebrationSource, setCelebrationSource] = useState<'first' | 'again'>('first');
+  const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
+  const [galleryPhase, setGalleryPhase] = useState<'slideshow' | 'grid'>('slideshow');
   const audioRef = useRef<HTMLAudioElement>(null);
+  const letterAudioRef = useRef<HTMLAudioElement>(null);
 
   const name = project.personOneName || 'Beautiful Soul';
   const occasion = project.occasion || 'Birthday';
   const heroMessage = project.heroConfig?.message || '';
+  const celebrateText = project.heroConfig?.celebrateText || `Wishing you a Magical ${occasion}! 🌟`;
+  const celebrateAgainText = (project.heroConfig?.useDifferentCelebrateAgain && project.heroConfig?.celebrateAgainText)
+    ? project.heroConfig.celebrateAgainText
+    : celebrateText;
+  const letterMusicUrl = project.heroConfig?.letterMusicUrl || '';
+  const welcomePopupText = project.heroConfig?.welcomePopupText || 'a special surprise awaits…';
 
   // ── INTRO SEQUENCE ──
   useEffect(() => {
@@ -867,16 +836,19 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
     setTimeout(() => setConfetti(false), 3000);
   };
 
-  const handleCelebrate = () => {
+  const handleCelebrate = (source: 'first' | 'again' = 'first') => {
+    setCelebrationSource(source);
     setConfetti(true);
     setTimeout(() => setConfetti(false), 3000);
     setShowBigCelebration(true);
     if (audioRef.current) {
+        audioRef.current.currentTime = 0;
         audioRef.current.play().catch(e => console.error("Audio playback failed", e));
     }
   };
 
   const openModal = (m: typeof activeModal) => {
+    if (m === 'gallery') setGalleryPhase('slideshow');
     setActiveModal(m);
   };
 
@@ -907,7 +879,7 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
                 initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.2 }}
                 style={{ fontFamily:'"Dancing Script",cursive', fontSize:18, color:'rgba(255,182,213,0.6)', letterSpacing:4, textTransform:'uppercase', marginBottom:16 }}
               >
-                a special surprise awaits…
+                {welcomePopupText}
               </motion.p>
               <motion.h1
                 initial={{ opacity:0, y:30, scale:0.9 }} animate={{ opacity:1, y:0, scale:1 }} transition={{ delay:0.5, duration:0.9 }}
@@ -1051,7 +1023,7 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
             emoji="🎊" label="Celebrate!"
             color="linear-gradient(135deg,#ffd700,#ff69b4)"
             glow="rgba(255,215,0,0.4)"
-            onClick={handleCelebrate}
+            onClick={() => handleCelebrate('first')}
           />
         </motion.div>
 
@@ -1090,25 +1062,29 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
               <h2 style={{ fontFamily:'"Dancing Script",cursive', fontSize:34, color:'#ffb3d9' }}>Precious Moments ✨</h2>
             </div>
             <div style={{ display:'flex', gap:16, overflowX:'auto', padding:'16px 20px 24px', scrollbarWidth:'none' }}>
-              {project.memories.slice(0,6).map((m,i)=>(
+              {project.memories.slice(0,6).map((m,i) => (
                 <motion.div
                   key={m.id}
                   initial={{ opacity:0, x:40 }} whileInView={{ opacity:1, x:0 }}
                   transition={{ delay:i*0.1 }} viewport={{ once:true }}
+                  whileHover={{ scale: 1.04, y: -4 }}
+                  onClick={() => setSelectedMemory(m)}
                   style={{
                     minWidth:180, background:'rgba(255,255,255,0.05)',
                     border:'1px solid rgba(255,182,213,0.2)', borderRadius:16,
                     padding:16, flexShrink:0, backdropFilter:'blur(12px)',
+                    cursor: 'pointer',
                   }}
                 >
                   {m.imageUrl && <img src={m.imageUrl} alt="" style={{ width:'100%', borderRadius:10, marginBottom:10, aspectRatio:'1/1', objectFit:'cover' }} />}
                   <div style={{ display:'flex', gap:6, alignItems:'center', marginBottom:6 }}>
                     {m.emoji && <span style={{ fontSize:18 }}>{m.emoji}</span>}
-                    <span style={{ fontFamily:'"Dancing Script",cursive', fontSize:15, color:'#ffb3d9', fontWeight:700 }}>{m.title}</span>
+                    <span style={{ fontFamily:'"Dancing Script",cursive', fontSize:15, color:'#ffb3d9', fontWeight:700, textDecoration:'underline', textDecorationColor:'rgba(255,182,213,0.3)' }}>{m.title}</span>
                   </div>
                   <p style={{ color:'rgba(255,182,213,0.35)', fontSize:11, fontFamily:'sans-serif', margin:0 }}>
                     {new Date(m.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}
                   </p>
+                  <p style={{ color:'rgba(255,182,213,0.4)', fontSize:11, fontFamily:'serif', marginTop:4 }}>Tap to open ✨</p>
                 </motion.div>
               ))}
             </div>
@@ -1170,7 +1146,7 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
             {/* Re-celebrate */}
             <motion.button
               whileHover={{ scale:1.05 }} whileTap={{ scale:0.95 }}
-              onClick={handleCelebrate}
+              onClick={() => handleCelebrate('again')}
               style={{
                 background:'linear-gradient(135deg,#ff69b4,#da70d6,#9370db)',
                 border:'none', borderRadius:50, padding:'14px 40px',
@@ -1198,6 +1174,7 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
             key="letter-modal"
             message={heroMessage}
             personName={name}
+            letterMusicUrl={letterMusicUrl}
             onClose={() => setActiveModal(null)}
           />
         )}
@@ -1255,7 +1232,7 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
                 marginBottom: 20
               }}
             >
-              Wishing you a Magical {occasion}! 🌟
+              {celebrationSource === 'again' ? celebrateAgainText : celebrateText}
             </motion.h1>
             <motion.p
               initial={{ opacity: 0 }}
@@ -1292,6 +1269,17 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
               Close Magic ✨
             </motion.button>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── MEMORY DETAIL MODAL ── */}
+      <AnimatePresence>
+        {selectedMemory && (
+          <MemoryDetailModal
+            key="memory-detail"
+            memory={selectedMemory}
+            onClose={() => setSelectedMemory(null)}
+          />
         )}
       </AnimatePresence>
 

@@ -37,6 +37,11 @@ export default function EditProjectPage() {
         coverImageUrl: data.project.coverImageUrl || '',
         backgroundMusicUrl: data.project.backgroundMusicUrl || '',
         heroMessage: data.project.heroConfig?.message || '',
+        celebrateText: data.project.heroConfig?.celebrateText || '',
+        celebrateAgainText: data.project.heroConfig?.celebrateAgainText || '',
+        useDifferentCelebrateAgain: data.project.heroConfig?.useDifferentCelebrateAgain || false,
+        letterMusicUrl: data.project.heroConfig?.letterMusicUrl || '',
+        welcomePopupText: data.project.heroConfig?.welcomePopupText || '',
         endingTitle: data.project.endingConfig?.title || '',
         endingMessage: data.project.endingConfig?.message || '',
         isPasswordProtected: data.project.isPasswordProtected || false,
@@ -59,7 +64,14 @@ export default function EditProjectPage() {
         occasion: form.occasion,
         coverImageUrl: form.coverImageUrl,
         backgroundMusicUrl: form.backgroundMusicUrl,
-        heroConfig: { message: form.heroMessage },
+        heroConfig: {
+          message: form.heroMessage,
+          celebrateText: form.celebrateText,
+          celebrateAgainText: form.celebrateAgainText,
+          useDifferentCelebrateAgain: form.useDifferentCelebrateAgain,
+          letterMusicUrl: form.letterMusicUrl,
+          welcomePopupText: form.welcomePopupText,
+        },
         endingConfig: { title: form.endingTitle, message: form.endingMessage },
         isPasswordProtected: form.isPasswordProtected,
         ...(form.accessPassword && { accessPassword: form.accessPassword }),
@@ -255,6 +267,67 @@ export default function EditProjectPage() {
                 <textarea value={form.endingMessage} onChange={e => update('endingMessage', e.target.value)}
                   placeholder="Your final heartfelt note..." rows={3} className="input-romantic resize-none" />
               </Field>
+            </Section>
+
+            <Section title="🎊 Celebration Settings (Celestial Birthday)">
+              <Field label="Celebrate Text (max 30 words)">
+                <input value={form.celebrateText} onChange={e => {
+                  const words = e.target.value.split(/\s+/).filter(Boolean);
+                  if (words.length <= 30) update('celebrateText', e.target.value);
+                }}
+                  placeholder="Wishing you a Magical Birthday! 🌟"
+                  className="input-romantic" />
+                <p className="text-rose-cream/20 text-xs font-sans mt-1">{(form.celebrateText || '').split(/\s+/).filter(Boolean).length}/30 words</p>
+              </Field>
+
+              <div className="flex items-center justify-between p-3 glass-card mb-4">
+                <div>
+                  <p className="text-rose-cream font-serif text-sm">Use different text for "Celebrate Again"</p>
+                  <p className="text-rose-cream/30 text-xs font-sans">Otherwise uses the same celebrate text</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => update('useDifferentCelebrateAgain', !form.useDifferentCelebrateAgain)}
+                  className={`w-12 h-6 rounded-full transition-all duration-300 relative ${form.useDifferentCelebrateAgain ? 'bg-rose-blush' : 'bg-white/10'}`}
+                >
+                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${form.useDifferentCelebrateAgain ? 'left-7' : 'left-1'}`} />
+                </button>
+              </div>
+
+              {form.useDifferentCelebrateAgain && (
+                <Field label="Celebrate Again Text (max 30 words)">
+                  <input value={form.celebrateAgainText} onChange={e => {
+                    const words = e.target.value.split(/\s+/).filter(Boolean);
+                    if (words.length <= 30) update('celebrateAgainText', e.target.value);
+                  }}
+                    placeholder="Another round of magic for you! ✨"
+                    className="input-romantic" />
+                  <p className="text-rose-cream/20 text-xs font-sans mt-1">{(form.celebrateAgainText || '').split(/\s+/).filter(Boolean).length}/30 words</p>
+                </Field>
+              )}
+
+              <Field label="Welcome Popup Text">
+                <input value={form.welcomePopupText}
+                  onChange={e => update('welcomePopupText', e.target.value)}
+                  placeholder="A special surprise awaits…"
+                  className="input-romantic" />
+                <p className="text-rose-cream/20 text-xs font-sans mt-1">Text shown on the intro screen popup</p>
+              </Field>
+
+              <Field label="Letter Background Music URL">
+                <input value={form.letterMusicUrl}
+                  onChange={e => update('letterMusicUrl', e.target.value)}
+                  placeholder="https://... (plays when Secret Letter opens)"
+                  className="input-romantic mb-3" />
+              </Field>
+              <p className="text-rose-cream/30 text-sm font-sans mb-3">Or upload letter music:</p>
+              <MediaUploader
+                projectId={id as string}
+                accept="audio"
+                maxFiles={1}
+                label="Upload letter music"
+                onUpload={({ url }) => update('letterMusicUrl', url)}
+              />
             </Section>
           </motion.div>
         )}
@@ -468,6 +541,8 @@ function MemoriesEditor({ projectId, initialMemories }: { projectId: string; ini
 
 function GalleryEditor({ projectId, initialItems }: { projectId: string; initialItems: any[] }) {
   const [items, setItems] = useState(initialItems);
+  const [editingCaption, setEditingCaption] = useState<string | null>(null);
+  const [captionText, setCaptionText] = useState('');
 
   const onUpload = async ({ url, mediaType }: { url: string; mediaType: string }) => {
     try {
@@ -488,19 +563,56 @@ function GalleryEditor({ projectId, initialItems }: { projectId: string; initial
     } catch { toast.error('Failed to delete'); }
   };
 
+  const saveCaption = async (itemId: string) => {
+    try {
+      await projectsAPI.updateGalleryItem(projectId, itemId, { caption: captionText });
+      setItems(prev => prev.map(i => i.id === itemId ? { ...i, caption: captionText } : i));
+      setEditingCaption(null);
+      toast.success('Caption saved');
+    } catch { toast.error('Failed to save caption'); }
+  };
+
   return (
     <div>
       <h3 className="font-serif text-xl text-rose-cream mb-5">Gallery</h3>
       <MediaUploader projectId={projectId} accept="image" maxFiles={20} label="Upload gallery photos" onUpload={onUpload} />
 
       {items.length > 0 && (
-        <div className="grid grid-cols-3 md:grid-cols-4 gap-3 mt-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
           {items.map((item) => (
-            <div key={item.id} className="relative group aspect-square rounded-xl overflow-hidden">
-              <img src={item.mediaUrl} alt={item.caption || ''} className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <button onClick={() => deleteItem(item.id)} className="text-white bg-red-500/80 p-2 rounded-lg hover:bg-red-500">
-                  <Trash2 size={14} />
+            <div key={item.id} className="relative group rounded-xl overflow-hidden glass-card p-2">
+              <div className="aspect-square rounded-lg overflow-hidden">
+                <img src={item.mediaUrl} alt={item.caption || ''} className="w-full h-full object-cover" />
+              </div>
+              {/* Caption editing */}
+              <div className="mt-2">
+                {editingCaption === item.id ? (
+                  <div className="flex gap-2">
+                    <input
+                      value={captionText}
+                      onChange={e => setCaptionText(e.target.value)}
+                      placeholder="Add caption..."
+                      className="input-romantic text-xs flex-1"
+                      autoFocus
+                    />
+                    <button onClick={() => saveCaption(item.id)}
+                      className="text-xs px-2 py-1 rounded-lg" style={{ background: 'rgba(232,196,184,0.2)', color: '#e8c4b8' }}>✓</button>
+                    <button onClick={() => setEditingCaption(null)}
+                      className="text-xs px-2 py-1 text-rose-cream/40">✕</button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => { setEditingCaption(item.id); setCaptionText(item.caption || ''); }}
+                    className="text-xs text-rose-cream/40 hover:text-rose-cream/70 transition-colors w-full text-left truncate"
+                  >
+                    {item.caption || '+ Add caption'}
+                  </button>
+                )}
+              </div>
+              {/* Delete button */}
+              <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onClick={() => deleteItem(item.id)} className="text-white bg-red-500/80 p-1.5 rounded-lg hover:bg-red-500">
+                  <Trash2 size={12} />
                 </button>
               </div>
             </div>

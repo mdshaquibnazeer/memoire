@@ -323,6 +323,31 @@ export const addGalleryItem = async (req: Request, res: Response, next: NextFunc
   }
 };
 
+export const updateGalleryItem = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = (req as any).userId;
+    const { projectId, itemId } = req.params;
+
+    const project = await prisma.project.findFirst({ where: { id: projectId, userId } });
+    if (!project) return res.status(404).json({ error: 'Project not found' });
+
+    const { caption, altText, sortOrder } = req.body;
+
+    const item = await prisma.galleryItem.update({
+      where: { id: itemId },
+      data: {
+        ...(caption !== undefined && { caption }),
+        ...(altText !== undefined && { altText }),
+        ...(sortOrder !== undefined && { sortOrder }),
+      },
+    });
+
+    res.json({ item });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const deleteGalleryItem = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = (req as any).userId;

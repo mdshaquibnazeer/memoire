@@ -3,7 +3,7 @@ import {
   getProjects, getProject, createProject, updateProject,
   publishProject, deleteProject,
   addMemory, updateMemory, deleteMemory,
-  addGalleryItem, deleteGalleryItem,
+  addGalleryItem, updateGalleryItem, deleteGalleryItem,
 } from '../controllers/project.controller';
 import { authenticate } from '../middleware/auth.middleware';
 
@@ -27,6 +27,7 @@ router.delete('/:projectId/memories/:memoryId', deleteMemory);
 
 // Gallery
 router.post('/:projectId/gallery', addGalleryItem);
+router.patch('/:projectId/gallery/:itemId', updateGalleryItem);
 router.delete('/:projectId/gallery/:itemId', deleteGalleryItem);
 
 export default router;

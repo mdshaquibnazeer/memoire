@@ -115,6 +115,9 @@ export const projectsAPI = {
   addGalleryItem: (projectId: string, data: any) =>
     api.post(`/projects/${projectId}/gallery`, data),
   
+  updateGalleryItem: (projectId: string, itemId: string, data: any) =>
+    api.patch(`/projects/${projectId}/gallery/${itemId}`, data),
+  
   deleteGalleryItem: (projectId: string, itemId: string) =>
     api.delete(`/projects/${projectId}/gallery/${itemId}`),
 };
