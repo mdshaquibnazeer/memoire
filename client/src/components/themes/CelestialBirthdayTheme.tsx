@@ -35,6 +35,7 @@ interface Project {
     occasion: string | null;
     startDate: string | null;
     coverImageUrl: string | null;
+    backgroundMusicUrl?: string | null;
     heroConfig: any;
     endingConfig: any;
     memories: Memory[];
