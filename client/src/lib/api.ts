@@ -156,6 +156,8 @@ export const mediaAPI = {
 export const publicAPI = {
   getMemory: (slug: string, password?: string) =>
     api.get(`/public/memory/${slug}`, { params: { password } }),
+  submitWish: (slug: string, data: { wish: string; name?: string }) =>
+    api.post(`/public/memory/${slug}/wish`, data),
 };
 
 // ============================================

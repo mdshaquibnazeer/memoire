@@ -151,6 +151,16 @@ export const updateProject = async (req: Request, res: Response, next: NextFunct
       isPasswordProtected, accessPassword,
     } = req.body;
 
+    const mergedHeroConfig = heroConfig !== undefined ? {
+      ...((existing.heroConfig as any) || {}),
+      ...heroConfig,
+    } : undefined;
+
+    const mergedEndingConfig = endingConfig !== undefined ? {
+      ...((existing.endingConfig as any) || {}),
+      ...endingConfig,
+    } : undefined;
+
     const project = await prisma.project.update({
       where: { id },
       data: {
@@ -163,8 +173,8 @@ export const updateProject = async (req: Request, res: Response, next: NextFunct
         ...(startDate && { startDate: new Date(startDate) }),
         ...(coverImageUrl !== undefined && { coverImageUrl }),
         ...(backgroundMusicUrl !== undefined && { backgroundMusicUrl }),
-        ...(heroConfig !== undefined && { heroConfig }),
-        ...(endingConfig !== undefined && { endingConfig }),
+        ...(mergedHeroConfig !== undefined && { heroConfig: mergedHeroConfig }),
+        ...(mergedEndingConfig !== undefined && { endingConfig: mergedEndingConfig }),
         ...(seoTitle !== undefined && { seoTitle }),
         ...(seoDescription !== undefined && { seoDescription }),
         ...(isPasswordProtected !== undefined && { isPasswordProtected }),

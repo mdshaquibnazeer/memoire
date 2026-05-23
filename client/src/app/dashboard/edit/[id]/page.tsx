@@ -11,7 +11,7 @@ import {
 import { projectsAPI, aiAPI } from '@/lib/api';
 import MediaUploader from '@/components/shared/MediaUploader';
 
-type Tab = 'content' | 'gallery' | 'memories' | 'music' | 'settings';
+type Tab = 'content' | 'gallery' | 'memories' | 'music' | 'settings' | 'wishes';
 
 export default function EditProjectPage() {
   const { id } = useParams();
@@ -136,6 +136,7 @@ export default function EditProjectPage() {
     { id: 'memories', label: 'Timeline', icon: Clock },
     { id: 'gallery', label: 'Gallery', icon: Image },
     { id: 'music', label: 'Music', icon: Music },
+    { id: 'wishes', label: 'Wishes ✨', icon: Sparkles },
     { id: 'settings', label: 'Settings', icon: null },
   ];
 
@@ -397,6 +398,63 @@ export default function EditProjectPage() {
               <p className="text-rose-cream/20 text-xs font-sans mt-4">
                 💡 Use royalty-free music from Pixabay, Free Music Archive, or similar. Visitors can toggle music on/off.
               </p>
+            </Section>
+          </motion.div>
+        )}
+
+        {/* WISHES TAB */}
+        {activeTab === 'wishes' && (
+          <motion.div key="wishes" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
+            <Section title="Wishes & Messages Received 🌟">
+              <p className="text-rose-cream/40 text-sm font-sans mb-6">
+                Here are the wishes and messages submitted by visitors who clicked on your interactive Birthday Cake!
+              </p>
+              
+              {!project?.heroConfig?.wishes || project.heroConfig.wishes.length === 0 ? (
+                <div className="text-center py-12 glass-card rounded-2xl">
+                  <p className="text-rose-cream/30 font-serif text-lg">No wishes received yet 🌸</p>
+                  <p className="text-rose-cream/20 font-sans text-xs mt-1">They will appear here once visitors submit them on your live page!</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {project.heroConfig.wishes.map((w: any) => (
+                    <div key={w.id} className="p-5 glass-card rounded-2xl border border-rose-cream/10 relative group flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="font-serif text-rose-blush text-md font-semibold">✨ {w.name || 'Anonymous'}</span>
+                          <span className="text-xs text-rose-cream/30 font-sans">
+                            {new Date(w.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                        <p className="text-rose-cream/80 font-serif text-sm italic leading-relaxed">
+                          "{w.wish}"
+                        </p>
+                      </div>
+
+                      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={async () => {
+                            if (confirm('Are you sure you want to delete this wish?')) {
+                              try {
+                                const updatedWishes = project.heroConfig.wishes.filter((item: any) => item.id !== w.id);
+                                const updatedHeroConfig = { ...project.heroConfig, wishes: updatedWishes };
+                                await projectsAPI.update(project.id, { heroConfig: updatedHeroConfig });
+                                setProject((p: any) => ({ ...p, heroConfig: updatedHeroConfig }));
+                                toast.success('Wish deleted');
+                              } catch {
+                                toast.error('Failed to delete wish');
+                              }
+                            }
+                          }}
+                          className="text-white bg-red-500/80 p-1.5 rounded-lg hover:bg-red-500 transition-colors"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </Section>
           </motion.div>
         )}
