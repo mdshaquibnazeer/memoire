@@ -847,10 +847,25 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
   const [activeModal, setActiveModal] = useState<null | 'letter' | 'gallery' | 'timeline'>( null);
   const [confetti, setConfetti] = useState(false);
   const [wishMade, setWishMade] = useState(false);
+  const [showCelebrationOverlay, setShowCelebrationOverlay] = useState(false);
 
   const name = project.personOneName || 'Beautiful Soul';
   const occasion = project.occasion || 'Birthday';
   const heroMessage = project.heroConfig?.message || '';
+
+  const triggerCelebration = () => {
+    // Autoplay attached music if available
+    const audio = document.querySelector('audio');
+    if (audio) {
+      audio.play().catch(console.error);
+    }
+    setConfetti(true);
+    setShowCelebrationOverlay(true);
+    setTimeout(() => {
+      setConfetti(false);
+      setShowCelebrationOverlay(false);
+    }, 6000);
+  };
 
   // ── INTRO SEQUENCE ──
   useEffect(() => {
@@ -1040,7 +1055,7 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
             emoji="🎊" label="Celebrate!"
             color="linear-gradient(135deg,#ffd700,#ff69b4)"
             glow="rgba(255,215,0,0.4)"
-            onClick={() => { setConfetti(true); setTimeout(()=>setConfetti(false),3000); }}
+            onClick={triggerCelebration}
           />
         </motion.div>
 
@@ -1159,7 +1174,7 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
             {/* Re-celebrate */}
             <motion.button
               whileHover={{ scale:1.05 }} whileTap={{ scale:0.95 }}
-              onClick={()=>{ setConfetti(true); setTimeout(()=>setConfetti(false),3000); }}
+              onClick={triggerCelebration}
               style={{
                 background:'linear-gradient(135deg,#ff69b4,#da70d6,#9370db)',
                 border:'none', borderRadius:50, padding:'14px 40px',
@@ -1203,6 +1218,29 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
             memories={project.memories}
             onClose={() => setActiveModal(null)}
           />
+        )}
+        {showCelebrationOverlay && (
+          <motion.div
+            key="celebration-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[400] flex items-center justify-center pointer-events-none"
+            style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)' }}
+          >
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0, y: 50 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0, y: -50 }}
+              transition={{ type: 'spring', damping: 15 }}
+              style={{ textAlign: 'center' }}
+            >
+              <div style={{ fontSize: 80, marginBottom: 20 }}>🎉🎂🎊</div>
+              <h1 style={{ fontFamily: '"Dancing Script",cursive', fontSize: 'clamp(3rem, 8vw, 6rem)', background: 'linear-gradient(135deg,#ffb3d9,#da70d6,#9370db)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', filter: 'drop-shadow(0 0 30px rgba(255,105,180,0.6))', lineHeight: 1.2 }}>
+                Wishing You a Magical {occasion},<br/>{name}!
+              </h1>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
