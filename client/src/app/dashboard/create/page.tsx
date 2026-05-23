@@ -41,6 +41,14 @@ const THEMES = [
     gradient: 'from-purple-600 to-purple-900',
     accent: '#8b5cf6',
   },
+  {
+    id: 'CELESTIAL_BIRTHDAY',
+    name: 'Celestial Birthday',
+    desc: 'Interactive 3D cake, wax seal letter, and magical sparkles',
+    preview: '🎂',
+    gradient: 'from-pink-600 via-purple-700 to-purple-900',
+    accent: '#ff69b4',
+  },
 ];
 
 const OCCASIONS = [

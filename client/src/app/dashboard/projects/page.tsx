@@ -29,6 +29,7 @@ const themeColors: Record<string, string> = {
   CINEMATIC_MEMORIES: '#d4a654',
   SCRAPBOOK_LOVE: '#d4af7a',
   AURORA_DREAMS: '#8b5cf6',
+  CELESTIAL_BIRTHDAY: '#ff69b4',
 };
 
 const themeNames: Record<string, string> = {
@@ -36,6 +37,7 @@ const themeNames: Record<string, string> = {
   CINEMATIC_MEMORIES: 'Cinematic Memories',
   SCRAPBOOK_LOVE: 'Scrapbook Love',
   AURORA_DREAMS: 'Aurora Dreams',
+  CELESTIAL_BIRTHDAY: 'Celestial Birthday',
 };
 
 export default function ProjectsPage() {

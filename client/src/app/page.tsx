@@ -39,6 +39,14 @@ const themes = [
     accent: '#8b5cf6',
     preview: '✨',
   },
+  {
+    id: 'CELESTIAL_BIRTHDAY',
+    name: 'Celestial Birthday',
+    description: 'Interactive 3D cake blowing, wax seal letter surprise, and magical sparkles',
+    gradient: 'from-pink-900/30 via-noir-deep to-noir-midnight',
+    accent: '#ff69b4',
+    preview: '🎂',
+  },
 ];
 
 const features = [

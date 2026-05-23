@@ -10,6 +10,7 @@ import RomanticGlowTheme from '@/components/themes/RomanticGlowTheme';
 import CinematicMemoriesTheme from '@/components/themes/CinematicMemoriesTheme';
 import ScrapbookLoveTheme from '@/components/themes/ScrapbookLoveTheme';
 import AuroraDreamsTheme from '@/components/themes/AuroraDreamsTheme';
+import CelestialBirthdayTheme from '@/components/themes/CelestialBirthdayTheme';
 import MusicPlayer from '@/components/shared/MusicPlayer';
 
 interface Project {
@@ -156,6 +157,7 @@ export default function MemoryPage() {
       {project.theme === 'CINEMATIC_MEMORIES' && <CinematicMemoriesTheme project={project} />}
       {project.theme === 'SCRAPBOOK_LOVE' && <ScrapbookLoveTheme project={project} />}
       {project.theme === 'AURORA_DREAMS' && <AuroraDreamsTheme project={project} />}
+      {project.theme === 'CELESTIAL_BIRTHDAY' && <CelestialBirthdayTheme project={project} />}
     </>
   );
 }
