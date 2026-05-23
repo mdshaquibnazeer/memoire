@@ -1643,6 +1643,8 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
                         onClose={() => setSelectedMemory(null)}
                     />
                 )}
+            </AnimatePresence>
+
             {/* ── CAKE POP-UP MODAL ── */}
             <AnimatePresence>
                 {showCakeModal && (
