@@ -42,6 +42,8 @@ export default function EditProjectPage() {
         useDifferentCelebrateAgain: data.project.heroConfig?.useDifferentCelebrateAgain || false,
         letterMusicUrl: data.project.heroConfig?.letterMusicUrl || '',
         welcomePopupText: data.project.heroConfig?.welcomePopupText || '',
+        disableLetterAutoScroll: data.project.heroConfig?.disableLetterAutoScroll || false,
+        disableWordByWord: data.project.heroConfig?.disableWordByWord || false,
         endingTitle: data.project.endingConfig?.title || '',
         endingMessage: data.project.endingConfig?.message || '',
         isPasswordProtected: data.project.isPasswordProtected || false,
@@ -71,6 +73,8 @@ export default function EditProjectPage() {
           useDifferentCelebrateAgain: form.useDifferentCelebrateAgain,
           letterMusicUrl: form.letterMusicUrl,
           welcomePopupText: form.welcomePopupText,
+          disableLetterAutoScroll: form.disableLetterAutoScroll,
+          disableWordByWord: form.disableWordByWord,
         },
         endingConfig: { title: form.endingTitle, message: form.endingMessage },
         isPasswordProtected: form.isPasswordProtected,
@@ -328,6 +332,34 @@ export default function EditProjectPage() {
                 label="Upload letter music"
                 onUpload={({ url }) => update('letterMusicUrl', url)}
               />
+
+              <div className="flex items-center justify-between p-3 glass-card mb-4 mt-6">
+                <div>
+                  <p className="text-rose-cream font-serif text-sm">Disable Letter Auto-Scroll</p>
+                  <p className="text-rose-cream/30 text-xs font-sans">Stop the letter container from scrolling to the bottom automatically</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => update('disableLetterAutoScroll', !form.disableLetterAutoScroll)}
+                  className={`w-12 h-6 rounded-full transition-all duration-300 relative ${form.disableLetterAutoScroll ? 'bg-rose-blush' : 'bg-white/10'}`}
+                >
+                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${form.disableLetterAutoScroll ? 'left-7' : 'left-1'}`} />
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between p-3 glass-card mb-4">
+                <div>
+                  <p className="text-rose-cream font-serif text-sm">Disable Word-by-Word Animation</p>
+                  <p className="text-rose-cream/30 text-xs font-sans">Show the entire letter text immediately instead of drawing it word-by-word</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => update('disableWordByWord', !form.disableWordByWord)}
+                  className={`w-12 h-6 rounded-full transition-all duration-300 relative ${form.disableWordByWord ? 'bg-rose-blush' : 'bg-white/10'}`}
+                >
+                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${form.disableWordByWord ? 'left-7' : 'left-1'}`} />
+                </button>
+              </div>
             </Section>
           </motion.div>
         )}

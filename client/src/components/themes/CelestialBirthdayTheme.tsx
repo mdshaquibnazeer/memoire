@@ -266,14 +266,16 @@ function ConfettiExplosion({ trigger }: { trigger: boolean }) {
 // ─────────────────────────────────────────────
 // ANIMATED ENVELOPE + LETTER
 // ─────────────────────────────────────────────
-function EnvelopeLetter({ message, personName, onClose, letterMusicUrl }: {
+function EnvelopeLetter({ message, personName, onClose, letterMusicUrl, disableLetterAutoScroll = false, disableWordByWord = false }: {
   message: string;
   personName: string;
   onClose: () => void;
   letterMusicUrl?: string;
+  disableLetterAutoScroll?: boolean;
+  disableWordByWord?: boolean;
 }) {
   const [phase, setPhase] = useState<'closed' | 'opening' | 'open' | 'reading' | 'closing'>('closed');
-  const [visibleWordCount, setVisibleWordCount] = useState(0);
+  const [visibleWordCount, setVisibleWordCount] = useState(disableWordByWord ? 99999 : 0);
   const letterScrollRef = useRef<HTMLDivElement>(null);
   const localAudioRef = useRef<HTMLAudioElement>(null);
   const autoCloseRef = useRef<NodeJS.Timeout | null>(null);
@@ -298,6 +300,10 @@ function EnvelopeLetter({ message, personName, onClose, letterMusicUrl }: {
 
   useEffect(() => {
     if (phase !== 'reading') return;
+    if (disableWordByWord) {
+      setVisibleWordCount(totalWords);
+      return;
+    }
     if (visibleWordCount >= totalWords) {
       autoCloseRef.current = setTimeout(() => {
         setPhase('closing');
@@ -308,11 +314,12 @@ function EnvelopeLetter({ message, personName, onClose, letterMusicUrl }: {
     }
     const t = setTimeout(() => setVisibleWordCount(c => c + 1), 120);
     return () => clearTimeout(t);
-  }, [phase, visibleWordCount, totalWords]);
+  }, [phase, visibleWordCount, totalWords, disableWordByWord]);
 
   useEffect(() => {
+    if (disableLetterAutoScroll) return;
     if (letterScrollRef.current) letterScrollRef.current.scrollTo({ top: letterScrollRef.current.scrollHeight, behavior: 'smooth' });
-  }, [visibleWordCount]);
+  }, [visibleWordCount, disableLetterAutoScroll]);
 
   const handleClose = () => {
     if (autoCloseRef.current) clearTimeout(autoCloseRef.current);
@@ -822,6 +829,8 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
     : celebrateText;
   const letterMusicUrl = project.heroConfig?.letterMusicUrl || '';
   const welcomePopupText = project.heroConfig?.welcomePopupText || 'a special surprise awaits…';
+  const disableLetterAutoScroll = project.heroConfig?.disableLetterAutoScroll || false;
+  const disableWordByWord = project.heroConfig?.disableWordByWord || false;
 
   // ── INTRO SEQUENCE ──
   useEffect(() => {
@@ -1175,6 +1184,8 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
             message={heroMessage}
             personName={name}
             letterMusicUrl={letterMusicUrl}
+            disableLetterAutoScroll={disableLetterAutoScroll}
+            disableWordByWord={disableWordByWord}
             onClose={() => setActiveModal(null)}
           />
         )}
