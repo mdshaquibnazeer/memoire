@@ -1195,6 +1195,7 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
         ? project.heroConfig.celebrateAgainText
         : celebrateText;
     const letterMusicUrl = project.heroConfig?.letterMusicUrl || '';
+    const bgMusicUrl = project.backgroundMusicUrl || '/music/celebration.mp3';
     const welcomePopupText = project.heroConfig?.welcomePopupText || 'a special surprise awaits…';
     const disableLetterAutoScroll = project.heroConfig?.disableLetterAutoScroll || false;
     const disableWordByWord = project.heroConfig?.disableWordByWord || false;
@@ -1202,8 +1203,7 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
     // ── INTRO SEQUENCE ──
     useEffect(() => {
         const t1 = setTimeout(() => setIntroPhase('text'), 600);
-        const t2 = setTimeout(() => setIntroPhase('done'), 3400);
-        return () => { clearTimeout(t1); clearTimeout(t2); };
+        return () => { clearTimeout(t1); };
     }, []);
 
     const handleWish = () => {
@@ -1264,7 +1264,40 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
                                 Happy {occasion},<br />{name} 🎂
                             </motion.h1>
                             <motion.div initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 1, duration: 0.8 }}
-                                style={{ height: 1, background: 'linear-gradient(90deg, transparent, rgba(255,182,213,0.5), transparent)', maxWidth: 300, margin: '0 auto' }} />
+                                style={{ height: 1, background: 'linear-gradient(90deg, transparent, rgba(255,182,213,0.5), transparent)', maxWidth: 300, margin: '0 auto', marginBottom: 30 }} />
+                            <motion.button
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 1.4 }}
+                                onClick={() => {
+                                    setIntroPhase('done');
+                                    if (audioRef.current) {
+                                        audioRef.current.volume = 0.5;
+                                        audioRef.current.play().catch(e => console.error("Audio playback failed", e));
+                                    }
+                                }}
+                                style={{
+                                    padding: '12px 40px',
+                                    borderRadius: 50,
+                                    background: 'linear-gradient(135deg, #ff69b4, #da70d6)',
+                                    color: 'white',
+                                    fontFamily: '"Dancing Script", cursive',
+                                    fontSize: 20,
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    boxShadow: '0 0 25px rgba(255,105,180,0.5)',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: 8,
+                                    fontWeight: 'bold',
+                                    outline: 'none',
+                                    transition: 'all 0.3s'
+                                }}
+                                whileHover={{ scale: 1.05, boxShadow: '0 0 35px rgba(255,105,180,0.8)' }}
+                                whileTap={{ scale: 0.95 }}
+                            >
+                                Enter Magic 💖
+                            </motion.button>
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -1714,7 +1747,7 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
                 )}
             </AnimatePresence>
 
-            <audio ref={audioRef} src="/music/celebration.mp3" loop />
+            <audio ref={audioRef} src={bgMusicUrl} loop />
         </div>
     );
 }
