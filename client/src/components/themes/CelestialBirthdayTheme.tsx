@@ -382,6 +382,33 @@ function EnvelopeLetter({
         ? fullText.slice(0, visibleCount)
         : words.slice(0, visibleCount).join(' ');
 
+    const typedText = visibleText;
+    const typedLines: string[] = [];
+    const rawTypedLines = typedText.split('\n');
+    rawTypedLines.forEach(line => {
+        if (line.length > 42) {
+            const wordsInLine = line.split(' ');
+            let currentLine = '';
+            wordsInLine.forEach(w => {
+                if ((currentLine + ' ' + w).length > 42) {
+                    typedLines.push(currentLine.trim());
+                    currentLine = w;
+                } else {
+                    currentLine += ' ' + w;
+                }
+            });
+            if (currentLine.trim()) {
+                typedLines.push(currentLine.trim());
+            }
+        } else {
+            typedLines.push(line);
+        }
+    });
+
+    const visibleLinesToShow = typedLines.length > 15 
+        ? typedLines.slice(typedLines.length - 15) 
+        : typedLines;
+
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-[200] flex items-center justify-center"
@@ -426,12 +453,20 @@ function EnvelopeLetter({
                             <div style={{ position: 'absolute', left: 52, top: 0, bottom: 0, width: 1, background: 'rgba(255,105,180,0.15)', pointerEvents: 'none' }} />
                             <div style={{ position: 'absolute', top: 0, right: 0, width: 32, height: 32, background: 'linear-gradient(225deg, #ffd0e8 50%, transparent 50%)', borderRadius: '0 16px 0 0' }} />
                             <div style={{ fontFamily: '"Dancing Script","Segoe UI",cursive', position: 'relative', zIndex: 1 }}>
-                                <p style={{ fontSize: 16, color: '#6b3050', lineHeight: 1.8 }}>
-                                    {visibleText}
-                                    {visibleCount < totalCount && (
-                                        <motion.span animate={{ opacity: [1, 0, 1] }} transition={{ duration: 0.7, repeat: Infinity }} style={{ color: '#ff69b4', fontSize: 18, marginLeft: 2 }}>|</motion.span>
-                                    )}
-                                </p>
+                                <div style={{ fontSize: 16, color: '#6b3050', lineHeight: 1.8, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                    {visibleLinesToShow.map((line, idx) => {
+                                        const isLastLine = idx === visibleLinesToShow.length - 1;
+                                        const isComplete = visibleCount >= totalCount;
+                                        return (
+                                            <div key={idx} style={{ minHeight: '1.8em', wordBreak: 'break-word', transition: 'all 0.3s ease' }}>
+                                                {line}
+                                                {isLastLine && !isComplete && (
+                                                    <motion.span animate={{ opacity: [1, 0, 1] }} transition={{ duration: 0.7, repeat: Infinity }} style={{ color: '#ff69b4', fontSize: 18, marginLeft: 2 }}>|</motion.span>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                                 {visibleCount >= totalCount && (
                                     <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} style={{ textAlign: 'center', color: 'rgba(255,105,180,0.5)', fontSize: 12, marginTop: 16, fontFamily: 'serif' }}>
                                         ✨ Letter complete — closing soon...
