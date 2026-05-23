@@ -269,13 +269,24 @@ function ConfettiExplosion({ trigger }: { trigger: boolean }) {
 // ─────────────────────────────────────────────
 // ANIMATED ENVELOPE + LETTER
 // ─────────────────────────────────────────────
-function EnvelopeLetter({ message, personName, onClose, letterMusicUrl, disableLetterAutoScroll = false, disableWordByWord = false }: {
+function EnvelopeLetter({
+    message,
+    personName,
+    onClose,
+    letterMusicUrl,
+    disableLetterAutoScroll = false,
+    disableWordByWord = false,
+    letterScrollSpeed,
+    letterWordDelay
+}: {
     message: string;
     personName: string;
     onClose: () => void;
     letterMusicUrl?: string;
     disableLetterAutoScroll?: boolean;
     disableWordByWord?: boolean;
+    letterScrollSpeed?: number;
+    letterWordDelay?: number;
 }) {
     const [phase, setPhase] = useState<'closed' | 'opening' | 'open' | 'reading' | 'closing'>('closed');
     const [visibleWordCount, setVisibleWordCount] = useState(disableWordByWord ? 99999 : 0);
@@ -315,14 +326,36 @@ function EnvelopeLetter({ message, personName, onClose, letterMusicUrl, disableL
             }, 3000);
             return () => { if (autoCloseRef.current) clearTimeout(autoCloseRef.current); };
         }
-        const t = setTimeout(() => setVisibleWordCount(c => c + 1), 120);
+        const delay = letterWordDelay !== undefined ? Number(letterWordDelay) : 120;
+        const t = setTimeout(() => setVisibleWordCount(c => c + 1), delay);
         return () => clearTimeout(t);
-    }, [phase, visibleWordCount, totalWords, disableWordByWord]);
+    }, [phase, visibleWordCount, totalWords, disableWordByWord, letterWordDelay]);
 
     useEffect(() => {
-        if (disableLetterAutoScroll) return;
-        if (letterScrollRef.current) letterScrollRef.current.scrollTo({ top: letterScrollRef.current.scrollHeight, behavior: 'smooth' });
-    }, [visibleWordCount, disableLetterAutoScroll]);
+        if (disableLetterAutoScroll || phase !== 'reading') return;
+        
+        const scrollSpeed = letterScrollSpeed !== undefined ? Number(letterScrollSpeed) : 25;
+        if (scrollSpeed <= 0) return;
+
+        let lastTime = performance.now();
+        let frameId: number;
+        const el = letterScrollRef.current;
+
+        const scroll = (now: number) => {
+            if (el) {
+                const delta = (now - lastTime) / 1000;
+                // Only auto-scroll if user is not manually scrolling or reached bottom
+                if (el.scrollTop + el.clientHeight < el.scrollHeight) {
+                    el.scrollTop += scrollSpeed * delta;
+                }
+            }
+            lastTime = now;
+            frameId = requestAnimationFrame(scroll);
+        };
+
+        frameId = requestAnimationFrame(scroll);
+        return () => cancelAnimationFrame(frameId);
+    }, [phase, disableLetterAutoScroll, letterScrollSpeed]);
 
     const handleClose = () => {
         if (autoCloseRef.current) clearTimeout(autoCloseRef.current);
@@ -1500,6 +1533,10 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
                         message={heroMessage}
                         personName={name}
                         letterMusicUrl={letterMusicUrl}
+                        disableLetterAutoScroll={project.heroConfig?.disableLetterAutoScroll}
+                        disableWordByWord={project.heroConfig?.disableWordByWord}
+                        letterScrollSpeed={project.heroConfig?.letterScrollSpeed}
+                        letterWordDelay={project.heroConfig?.letterWordDelay}
                         onClose={() => setActiveModal(null)}
                     />
                 )}

@@ -44,6 +44,8 @@ export default function EditProjectPage() {
         welcomePopupText: data.project.heroConfig?.welcomePopupText || '',
         disableLetterAutoScroll: data.project.heroConfig?.disableLetterAutoScroll || false,
         disableWordByWord: data.project.heroConfig?.disableWordByWord || false,
+        letterScrollSpeed: data.project.heroConfig?.letterScrollSpeed !== undefined ? data.project.heroConfig.letterScrollSpeed : 25,
+        letterWordDelay: data.project.heroConfig?.letterWordDelay !== undefined ? data.project.heroConfig.letterWordDelay : 120,
         endingTitle: data.project.endingConfig?.title || '',
         endingMessage: data.project.endingConfig?.message || '',
         isPasswordProtected: data.project.isPasswordProtected || false,
@@ -75,6 +77,8 @@ export default function EditProjectPage() {
           welcomePopupText: form.welcomePopupText,
           disableLetterAutoScroll: form.disableLetterAutoScroll,
           disableWordByWord: form.disableWordByWord,
+          letterScrollSpeed: form.letterScrollSpeed,
+          letterWordDelay: form.letterWordDelay,
         },
         endingConfig: { title: form.endingTitle, message: form.endingMessage },
         isPasswordProtected: form.isPasswordProtected,
@@ -361,6 +365,132 @@ export default function EditProjectPage() {
                   <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${form.disableWordByWord ? 'left-7' : 'left-1'}`} />
                 </button>
               </div>
+
+              {/* Scroll Speed Selector */}
+              {!form.disableLetterAutoScroll && (
+                <div className="p-4 glass-card mb-4 space-y-3">
+                  <div>
+                    <p className="text-rose-cream font-serif text-sm">Letter Auto-Scroll Speed</p>
+                    <p className="text-rose-cream/30 text-xs font-sans">Choose how fast the cosmic letter automatically scrolls down</p>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { label: 'Slow (15 px/s)', value: 15 },
+                      { label: 'Normal (25 px/s)', value: 25 },
+                      { label: 'Fast (45 px/s)', value: 45 },
+                      { label: 'Custom ⚙️', value: 'custom' },
+                    ].map((opt) => {
+                      const isSelected = opt.value === 'custom' 
+                        ? ![15, 25, 45].includes(form.letterScrollSpeed)
+                        : form.letterScrollSpeed === opt.value;
+                      return (
+                        <button
+                          key={opt.label}
+                          type="button"
+                          onClick={() => {
+                            if (opt.value === 'custom') {
+                              update('letterScrollSpeed', 30);
+                            } else {
+                              update('letterScrollSpeed', opt.value);
+                            }
+                          }}
+                          className={`text-xs px-3 py-1.5 rounded-lg border font-sans transition-all ${
+                            isSelected
+                              ? 'border-rose-blush bg-rose-blush/20 text-rose-cream'
+                              : 'border-white/10 bg-white/5 text-rose-cream/50 hover:bg-white/10'
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Manual input for Custom scroll speed */}
+                  {![15, 25, 45].includes(form.letterScrollSpeed) && (
+                    <div className="flex items-center gap-3 mt-2">
+                      <span className="text-xs text-rose-cream/40 font-sans">Enter Speed (px/s):</span>
+                      <input
+                        type="number"
+                        min={5}
+                        max={150}
+                        value={form.letterScrollSpeed || 25}
+                        onChange={(e) => {
+                          const val = Math.min(150, Math.max(5, Number(e.target.value)));
+                          update('letterScrollSpeed', val);
+                        }}
+                        className="input-romantic text-xs"
+                        style={{ width: 80, padding: '4px 8px' }}
+                      />
+                      <span className="text-xs text-rose-cream/30 font-sans">(Range: 5 to 150 px/s)</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Word Animation Delay Selector */}
+              {!form.disableWordByWord && (
+                <div className="p-4 glass-card mb-4 space-y-3">
+                  <div>
+                    <p className="text-rose-cream font-serif text-sm">Word-by-Word Draw Delay</p>
+                    <p className="text-rose-cream/30 text-xs font-sans">Choose the delay between words appearing in the letter</p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { label: 'Slow (300ms)', value: 300 },
+                      { label: 'Normal (120ms)', value: 120 },
+                      { label: 'Fast (70ms)', value: 70 },
+                      { label: 'Custom ⚙️', value: 'custom' },
+                    ].map((opt) => {
+                      const isSelected = opt.value === 'custom'
+                        ? ![300, 120, 70].includes(form.letterWordDelay)
+                        : form.letterWordDelay === opt.value;
+                      return (
+                        <button
+                          key={opt.label}
+                          type="button"
+                          onClick={() => {
+                            if (opt.value === 'custom') {
+                              update('letterWordDelay', 150);
+                            } else {
+                              update('letterWordDelay', opt.value);
+                            }
+                          }}
+                          className={`text-xs px-3 py-1.5 rounded-lg border font-sans transition-all ${
+                            isSelected
+                              ? 'border-rose-blush bg-rose-blush/20 text-rose-cream'
+                              : 'border-white/10 bg-white/5 text-rose-cream/50 hover:bg-white/10'
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Manual input for Custom word delay */}
+                  {![300, 120, 70].includes(form.letterWordDelay) && (
+                    <div className="flex items-center gap-3 mt-2">
+                      <span className="text-xs text-rose-cream/40 font-sans">Enter Delay (ms):</span>
+                      <input
+                        type="number"
+                        min={30}
+                        max={1500}
+                        value={form.letterWordDelay || 120}
+                        onChange={(e) => {
+                          const val = Math.min(1500, Math.max(30, Number(e.target.value)));
+                          update('letterWordDelay', val);
+                        }}
+                        className="input-romantic text-xs"
+                        style={{ width: 80, padding: '4px 8px' }}
+                      />
+                      <span className="text-xs text-rose-cream/30 font-sans">(Range: 30 to 1500 ms)</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </Section>
           </motion.div>
         )}
