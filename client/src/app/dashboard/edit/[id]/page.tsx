@@ -46,6 +46,8 @@ export default function EditProjectPage() {
         disableWordByWord: data.project.heroConfig?.disableWordByWord || false,
         letterScrollSpeed: data.project.heroConfig?.letterScrollSpeed !== undefined ? data.project.heroConfig.letterScrollSpeed : 25,
         letterWordDelay: data.project.heroConfig?.letterWordDelay !== undefined ? data.project.heroConfig.letterWordDelay : 120,
+        useDifferentLetterText: data.project.heroConfig?.useDifferentLetterText || false,
+        letterMessage: data.project.heroConfig?.letterMessage || '',
         endingTitle: data.project.endingConfig?.title || '',
         endingMessage: data.project.endingConfig?.message || '',
         isPasswordProtected: data.project.isPasswordProtected || false,
@@ -79,6 +81,8 @@ export default function EditProjectPage() {
           disableWordByWord: form.disableWordByWord,
           letterScrollSpeed: form.letterScrollSpeed,
           letterWordDelay: form.letterWordDelay,
+          useDifferentLetterText: form.useDifferentLetterText,
+          letterMessage: form.letterMessage,
         },
         endingConfig: { title: form.endingTitle, message: form.endingMessage },
         isPasswordProtected: form.isPasswordProtected,
@@ -337,6 +341,35 @@ export default function EditProjectPage() {
                 label="Upload letter music"
                 onUpload={({ url }) => update('letterMusicUrl', url)}
               />
+
+              {/* Custom Secret Letter Text Toggle */}
+              <div className="flex items-center justify-between p-3 glass-card mb-4 mt-6">
+                <div>
+                  <p className="text-rose-cream font-serif text-sm">Use different text for Secret Letter</p>
+                  <p className="text-rose-cream/30 text-xs font-sans">Write a separate, personalized message for the letter modal instead of reusing the main hero message</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => update('useDifferentLetterText', !form.useDifferentLetterText)}
+                  className={`w-12 h-6 rounded-full transition-all duration-300 relative ${form.useDifferentLetterText ? 'bg-rose-blush' : 'bg-white/10'}`}
+                >
+                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${form.useDifferentLetterText ? 'left-7' : 'left-1'}`} />
+                </button>
+              </div>
+
+              {form.useDifferentLetterText && (
+                <div className="mb-4">
+                  <Field label="Secret Letter Message (No word limits ✨)">
+                    <textarea
+                      value={form.letterMessage}
+                      onChange={e => update('letterMessage', e.target.value)}
+                      placeholder="Write your secret heart-touching birthday letter here... There are no word limits, write as much as you wish!"
+                      rows={6}
+                      className="input-romantic font-sans text-sm w-full p-3"
+                    />
+                  </Field>
+                </div>
+              )}
 
               <div className="flex items-center justify-between p-3 glass-card mb-4 mt-6">
                 <div>

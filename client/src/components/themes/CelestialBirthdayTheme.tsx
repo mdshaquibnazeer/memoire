@@ -1136,6 +1136,9 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
     const name = project.personOneName || 'Beautiful Soul';
     const occasion = project.occasion || 'Birthday';
     const heroMessage = project.heroConfig?.message || '';
+    const letterMessage = (project.heroConfig?.useDifferentLetterText && project.heroConfig?.letterMessage)
+        ? project.heroConfig.letterMessage
+        : heroMessage;
     const celebrateText = project.heroConfig?.celebrateText || `Wishing you a Magical ${occasion}! 🌟`;
     const celebrateAgainText = (project.heroConfig?.useDifferentCelebrateAgain && project.heroConfig?.celebrateAgainText)
         ? project.heroConfig.celebrateAgainText
@@ -1530,7 +1533,7 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
                 {activeModal === 'letter' && (
                     <EnvelopeLetter
                         key="letter-modal"
-                        message={heroMessage}
+                        message={letterMessage}
                         personName={name}
                         letterMusicUrl={letterMusicUrl}
                         disableLetterAutoScroll={project.heroConfig?.disableLetterAutoScroll}
