@@ -847,25 +847,12 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
   const [activeModal, setActiveModal] = useState<null | 'letter' | 'gallery' | 'timeline'>( null);
   const [confetti, setConfetti] = useState(false);
   const [wishMade, setWishMade] = useState(false);
-  const [showCelebrationOverlay, setShowCelebrationOverlay] = useState(false);
+  const [showBigCelebration, setShowBigCelebration] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const name = project.personOneName || 'Beautiful Soul';
   const occasion = project.occasion || 'Birthday';
   const heroMessage = project.heroConfig?.message || '';
-
-  const triggerCelebration = () => {
-    // Autoplay attached music if available
-    const audio = document.querySelector('audio');
-    if (audio) {
-      audio.play().catch(console.error);
-    }
-    setConfetti(true);
-    setShowCelebrationOverlay(true);
-    setTimeout(() => {
-      setConfetti(false);
-      setShowCelebrationOverlay(false);
-    }, 6000);
-  };
 
   // ── INTRO SEQUENCE ──
   useEffect(() => {
@@ -878,6 +865,15 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
     setWishMade(true);
     setConfetti(true);
     setTimeout(() => setConfetti(false), 3000);
+  };
+
+  const handleCelebrate = () => {
+    setConfetti(true);
+    setTimeout(() => setConfetti(false), 3000);
+    setShowBigCelebration(true);
+    if (audioRef.current) {
+        audioRef.current.play().catch(e => console.error("Audio playback failed", e));
+    }
   };
 
   const openModal = (m: typeof activeModal) => {
@@ -1055,7 +1051,7 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
             emoji="🎊" label="Celebrate!"
             color="linear-gradient(135deg,#ffd700,#ff69b4)"
             glow="rgba(255,215,0,0.4)"
-            onClick={triggerCelebration}
+            onClick={handleCelebrate}
           />
         </motion.div>
 
@@ -1174,7 +1170,7 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
             {/* Re-celebrate */}
             <motion.button
               whileHover={{ scale:1.05 }} whileTap={{ scale:0.95 }}
-              onClick={triggerCelebration}
+              onClick={handleCelebrate}
               style={{
                 background:'linear-gradient(135deg,#ff69b4,#da70d6,#9370db)',
                 border:'none', borderRadius:50, padding:'14px 40px',
@@ -1219,30 +1215,87 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
             onClose={() => setActiveModal(null)}
           />
         )}
-        {showCelebrationOverlay && (
+      </AnimatePresence>
+
+      {/* ── BIG CELEBRATION OVERLAY ── */}
+      <AnimatePresence>
+        {showBigCelebration && (
           <motion.div
-            key="celebration-overlay"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[400] flex items-center justify-center pointer-events-none"
-            style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)' }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 9999,
+              background: 'rgba(0, 0, 0, 0.85)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              backdropFilter: 'blur(10px)',
+              padding: 20,
+              textAlign: 'center'
+            }}
+            onClick={() => setShowBigCelebration(false)}
           >
-            <motion.div
-              initial={{ scale: 0.5, opacity: 0, y: 50 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.8, opacity: 0, y: -50 }}
-              transition={{ type: 'spring', damping: 15 }}
-              style={{ textAlign: 'center' }}
+            <ConfettiExplosion trigger={showBigCelebration} />
+            <motion.h1
+              initial={{ scale: 0.5, y: 50, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              transition={{ type: 'spring', bounce: 0.5, duration: 1 }}
+              style={{
+                fontFamily: '"Dancing Script",cursive',
+                fontSize: 'clamp(3rem, 10vw, 6rem)',
+                background: 'linear-gradient(135deg, #ffb3d9, #da70d6, #9370db)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                filter: 'drop-shadow(0 0 20px rgba(255,105,180,0.6))',
+                marginBottom: 20
+              }}
             >
-              <div style={{ fontSize: 80, marginBottom: 20 }}>🎉🎂🎊</div>
-              <h1 style={{ fontFamily: '"Dancing Script",cursive', fontSize: 'clamp(3rem, 8vw, 6rem)', background: 'linear-gradient(135deg,#ffb3d9,#da70d6,#9370db)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', filter: 'drop-shadow(0 0 30px rgba(255,105,180,0.6))', lineHeight: 1.2 }}>
-                Wishing You a Magical {occasion},<br/>{name}!
-              </h1>
-            </motion.div>
+              Wishing you a Magical {occasion}! 🌟
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1, duration: 1 }}
+              style={{
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontSize: 24,
+                fontFamily: 'serif',
+                fontStyle: 'italic',
+                maxWidth: 600,
+                lineHeight: 1.6
+              }}
+            >
+              May this day be as extraordinary and beautiful as you are, {name}.
+            </motion.p>
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 2.5 }}
+              onClick={(e) => { e.stopPropagation(); setShowBigCelebration(false); }}
+              style={{
+                marginTop: 40,
+                background: 'linear-gradient(135deg,#ff69b4,#da70d6)',
+                border: 'none',
+                borderRadius: 50,
+                padding: '12px 32px',
+                color: 'white',
+                fontFamily: '"Dancing Script",cursive',
+                fontSize: 20,
+                cursor: 'pointer'
+              }}
+            >
+              Close Magic ✨
+            </motion.button>
           </motion.div>
         )}
       </AnimatePresence>
+
+      <audio ref={audioRef} src="/music/celebration.mp3" loop />
     </div>
   );
 }
