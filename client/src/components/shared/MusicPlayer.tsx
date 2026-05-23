@@ -25,6 +25,22 @@ export default function MusicPlayer({ url }: MusicPlayerProps) {
   }, []);
 
   useEffect(() => {
+    const handlePlayEvent = async () => {
+      const audio = audioRef.current;
+      if (!audio) return;
+      setHasInteracted(true);
+      try {
+        await audio.play();
+        setPlaying(true);
+      } catch (e) {
+        console.log('Autoplay blocked', e);
+      }
+    };
+    window.addEventListener('play-ambient-music', handlePlayEvent);
+    return () => window.removeEventListener('play-ambient-music', handlePlayEvent);
+  }, []);
+
+  useEffect(() => {
     const timer = setTimeout(() => setShowHint(false), 5000);
     return () => clearTimeout(timer);
   }, []);

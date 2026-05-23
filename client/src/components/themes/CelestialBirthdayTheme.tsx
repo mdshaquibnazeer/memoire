@@ -1182,7 +1182,6 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
     const [celebrationSource, setCelebrationSource] = useState<'first' | 'again'>('first');
     const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
     const [galleryPhase, setGalleryPhase] = useState<'slideshow' | 'grid'>('slideshow');
-    const audioRef = useRef<HTMLAudioElement>(null);
     const letterAudioRef = useRef<HTMLAudioElement>(null);
 
     const name = project.personOneName || 'Beautiful Soul';
@@ -1218,10 +1217,7 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
         setConfetti(true);
         setTimeout(() => setConfetti(false), 3000);
         setShowBigCelebration(true);
-        if (audioRef.current) {
-            audioRef.current.currentTime = 0;
-            audioRef.current.play().catch(e => console.error("Audio playback failed", e));
-        }
+        window.dispatchEvent(new CustomEvent('play-ambient-music'));
     };
 
     const openModal = (m: typeof activeModal) => {
@@ -1272,10 +1268,7 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
                                 transition={{ delay: 1.4 }}
                                 onClick={() => {
                                     setIntroPhase('done');
-                                    if (audioRef.current) {
-                                        audioRef.current.volume = 0.5;
-                                        audioRef.current.play().catch(e => console.error("Audio playback failed", e));
-                                    }
+                                    window.dispatchEvent(new CustomEvent('play-ambient-music'));
                                 }}
                                 style={{
                                     padding: '12px 40px',
@@ -1747,8 +1740,6 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
                     />
                 )}
             </AnimatePresence>
-
-            <audio ref={audioRef} src={bgMusicUrl} loop />
         </div>
     );
 }

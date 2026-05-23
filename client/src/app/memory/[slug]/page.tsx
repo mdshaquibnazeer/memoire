@@ -149,8 +149,8 @@ export default function MemoryPage() {
 
   return (
     <>
-      {project.backgroundMusicUrl && (
-        <MusicPlayer url={project.backgroundMusicUrl} />
+      {(project.backgroundMusicUrl || project.theme === 'CELESTIAL_BIRTHDAY') && (
+        <MusicPlayer url={project.backgroundMusicUrl || '/music/celebration.mp3'} />
       )}
       
       {project.theme === 'ROMANTIC_GLOW' && <RomanticGlowTheme project={project} />}
