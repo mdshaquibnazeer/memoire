@@ -428,11 +428,11 @@ function EnvelopeLetter({
                             <div style={{ fontFamily: '"Dancing Script","Segoe UI",cursive', position: 'relative', zIndex: 1 }}>
                                 <p style={{ fontSize: 16, color: '#6b3050', lineHeight: 1.8 }}>
                                     {visibleText}
-                                    {visibleWordCount < totalWords && (
+                                    {visibleCount < totalCount && (
                                         <motion.span animate={{ opacity: [1, 0, 1] }} transition={{ duration: 0.7, repeat: Infinity }} style={{ color: '#ff69b4', fontSize: 18, marginLeft: 2 }}>|</motion.span>
                                     )}
                                 </p>
-                                {visibleWordCount >= totalWords && (
+                                {visibleCount >= totalCount && (
                                     <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} style={{ textAlign: 'center', color: 'rgba(255,105,180,0.5)', fontSize: 12, marginTop: 16, fontFamily: 'serif' }}>
                                         ✨ Letter complete — closing soon...
                                     </motion.p>
