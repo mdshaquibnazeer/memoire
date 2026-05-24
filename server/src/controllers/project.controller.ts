@@ -51,7 +51,21 @@ export const getProjects = async (req: Request, res: Response, next: NextFunctio
       select: { allowedDemoPreviews: true }
     });
     const allowedDemos = user?.allowedDemoPreviews || ['ROMANTIC_GLOW', 'CINEMATIC_MEMORIES', 'AURORA_DREAMS', 'CELESTIAL_BIRTHDAY'];
-    const activeDemos = DEMO_PROJECTS.filter(d => allowedDemos.includes(d.theme));
+    
+    // Fetch live system showcases from database
+    const dbDemos = await prisma.project.findMany({
+      where: {
+        userId: 'system-demo',
+        theme: { in: allowedDemos as any }
+      },
+      include: {
+        _count: {
+          select: { memories: true, galleryItems: true }
+        }
+      }
+    });
+
+    const activeDemos = dbDemos.length > 0 ? dbDemos : DEMO_PROJECTS.filter(d => allowedDemos.includes(d.theme));
 
     const pageNum = parseInt(page as string);
     let allProjects = [...projects];
@@ -100,7 +114,14 @@ export const getProject = async (req: Request, res: Response, next: NextFunction
     const { id } = req.params;
 
     if (id.startsWith('demo-')) {
-      const demo = DEMO_PROJECTS.find(p => p.id === id);
+      const demo = await prisma.project.findFirst({
+        where: { id },
+        include: {
+          memories: { orderBy: { date: 'asc' } },
+          galleryItems: { orderBy: { sortOrder: 'asc' } },
+          _count: { select: { memories: true, galleryItems: true } }
+        }
+      });
       if (demo) {
         return res.json({ project: demo });
       }
@@ -204,12 +225,13 @@ export const updateProject = async (req: Request, res: Response, next: NextFunct
     const userId = (req as any).userId;
     const { id } = req.params;
 
-    if (id.startsWith('demo-')) {
+    const userRole = (req as any).userRole;
+    if (id.startsWith('demo-') && userRole !== 'ADMIN') {
       return res.status(403).json({ error: 'System showcase projects are read-only.' });
     }
 
     // Verify ownership
-    const existing = await prisma.project.findFirst({ where: { id, userId } });
+    const existing = await prisma.project.findFirst({ where: { id, userId: id.startsWith('demo-') ? 'system-demo' : userId } });
     if (!existing) {
       return res.status(404).json({ error: 'Project not found' });
     }
@@ -321,11 +343,12 @@ export const deleteProject = async (req: Request, res: Response, next: NextFunct
     const userId = (req as any).userId;
     const { id } = req.params;
 
-    if (id.startsWith('demo-')) {
+    const userRole = (req as any).userRole;
+    if (id.startsWith('demo-') && userRole !== 'ADMIN') {
       return res.status(403).json({ error: 'System showcase projects cannot be deleted.' });
     }
 
-    const existing = await prisma.project.findFirst({ where: { id, userId } });
+    const existing = await prisma.project.findFirst({ where: { id, userId: id.startsWith('demo-') ? 'system-demo' : userId } });
     if (!existing) return res.status(404).json({ error: 'Project not found' });
 
     await prisma.project.delete({ where: { id } });
@@ -345,11 +368,12 @@ export const addMemory = async (req: Request, res: Response, next: NextFunction)
     const userId = (req as any).userId;
     const { projectId } = req.params;
 
-    if (projectId.startsWith('demo-')) {
+    const userRole = (req as any).userRole;
+    if (projectId.startsWith('demo-') && userRole !== 'ADMIN') {
       return res.status(403).json({ error: 'System showcase projects are read-only.' });
     }
 
-    const project = await prisma.project.findFirst({ where: { id: projectId, userId } });
+    const project = await prisma.project.findFirst({ where: { id: projectId, userId: projectId.startsWith('demo-') ? 'system-demo' : userId } });
     if (!project) return res.status(404).json({ error: 'Project not found' });
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
@@ -392,11 +416,12 @@ export const updateMemory = async (req: Request, res: Response, next: NextFuncti
     const userId = (req as any).userId;
     const { projectId, memoryId } = req.params;
 
-    if (projectId.startsWith('demo-')) {
+    const userRole = (req as any).userRole;
+    if (projectId.startsWith('demo-') && userRole !== 'ADMIN') {
       return res.status(403).json({ error: 'System showcase projects are read-only.' });
     }
 
-    const project = await prisma.project.findFirst({ where: { id: projectId, userId } });
+    const project = await prisma.project.findFirst({ where: { id: projectId, userId: projectId.startsWith('demo-') ? 'system-demo' : userId } });
     if (!project) return res.status(404).json({ error: 'Project not found' });
 
     const memory = await prisma.memory.update({
@@ -415,11 +440,12 @@ export const deleteMemory = async (req: Request, res: Response, next: NextFuncti
     const userId = (req as any).userId;
     const { projectId, memoryId } = req.params;
 
-    if (projectId.startsWith('demo-')) {
+    const userRole = (req as any).userRole;
+    if (projectId.startsWith('demo-') && userRole !== 'ADMIN') {
       return res.status(403).json({ error: 'System showcase projects are read-only.' });
     }
 
-    const project = await prisma.project.findFirst({ where: { id: projectId, userId } });
+    const project = await prisma.project.findFirst({ where: { id: projectId, userId: projectId.startsWith('demo-') ? 'system-demo' : userId } });
     if (!project) return res.status(404).json({ error: 'Project not found' });
 
     await prisma.memory.delete({ where: { id: memoryId } });
@@ -439,11 +465,12 @@ export const addGalleryItem = async (req: Request, res: Response, next: NextFunc
     const userId = (req as any).userId;
     const { projectId } = req.params;
 
-    if (projectId.startsWith('demo-')) {
+    const userRole = (req as any).userRole;
+    if (projectId.startsWith('demo-') && userRole !== 'ADMIN') {
       return res.status(403).json({ error: 'System showcase projects are read-only.' });
     }
 
-    const project = await prisma.project.findFirst({ where: { id: projectId, userId } });
+    const project = await prisma.project.findFirst({ where: { id: projectId, userId: projectId.startsWith('demo-') ? 'system-demo' : userId } });
     if (!project) return res.status(404).json({ error: 'Project not found' });
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
@@ -476,11 +503,12 @@ export const updateGalleryItem = async (req: Request, res: Response, next: NextF
     const userId = (req as any).userId;
     const { projectId, itemId } = req.params;
 
-    if (projectId.startsWith('demo-')) {
+    const userRole = (req as any).userRole;
+    if (projectId.startsWith('demo-') && userRole !== 'ADMIN') {
       return res.status(403).json({ error: 'System showcase projects are read-only.' });
     }
 
-    const project = await prisma.project.findFirst({ where: { id: projectId, userId } });
+    const project = await prisma.project.findFirst({ where: { id: projectId, userId: projectId.startsWith('demo-') ? 'system-demo' : userId } });
     if (!project) return res.status(404).json({ error: 'Project not found' });
 
     const { caption, altText, sortOrder } = req.body;
@@ -505,11 +533,12 @@ export const deleteGalleryItem = async (req: Request, res: Response, next: NextF
     const userId = (req as any).userId;
     const { projectId, itemId } = req.params;
 
-    if (projectId.startsWith('demo-')) {
+    const userRole = (req as any).userRole;
+    if (projectId.startsWith('demo-') && userRole !== 'ADMIN') {
       return res.status(403).json({ error: 'System showcase projects are read-only.' });
     }
 
-    const project = await prisma.project.findFirst({ where: { id: projectId, userId } });
+    const project = await prisma.project.findFirst({ where: { id: projectId, userId: projectId.startsWith('demo-') ? 'system-demo' : userId } });
     if (!project) return res.status(404).json({ error: 'Project not found' });
 
     await prisma.galleryItem.delete({ where: { id: itemId } });

@@ -11,9 +11,20 @@ export const getPublicProject = async (req: Request, res: Response, next: NextFu
     const { slug } = req.params;
     const { password } = req.query;
 
-    const demo = findDemoProject(slug);
-    if (demo) {
-      return res.json({ project: demo });
+    if (slug.startsWith('demo-')) {
+      const demo = await prisma.project.findFirst({
+        where: { slug },
+        include: {
+          memories: { orderBy: { date: 'asc' } },
+          galleryItems: { orderBy: { sortOrder: 'asc' } },
+          user: {
+            select: { id: true, displayName: true, isSuspended: true, themeExpirations: true }
+          }
+        }
+      });
+      if (demo) {
+        return res.json({ project: demo });
+      }
     }
 
     const project = await prisma.project.findFirst({
@@ -90,7 +101,7 @@ export const submitPublicWish = async (req: Request, res: Response, next: NextFu
       return res.status(400).json({ error: 'Wish must be under 50 words' });
     }
 
-    if (findDemoProject(slug)) {
+    if (slug.startsWith('demo-')) {
       return res.json({ success: true, message: 'Wish submitted successfully! (Demo Mode)' });
     }
 
