@@ -62,6 +62,8 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
         passwordHash,
         displayName: displayName || username,
         emailVerifyToken,
+        isApproved: false,
+        allowedTemplates: ['SCRAPBOOK_LOVE'],
       },
       select: {
         id: true,
@@ -70,6 +72,8 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
         displayName: true,
         role: true,
         isEmailVerified: true,
+        isApproved: true,
+        allowedTemplates: true,
         createdAt: true,
       },
     });
@@ -102,6 +106,10 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
+    if (!user.isApproved) {
+      return res.status(403).json({ error: 'Your account is pending approval by an admin.' });
+    }
+
     // Update last login
     await prisma.user.update({
       where: { id: user.id },
@@ -122,6 +130,8 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         avatarUrl: user.avatarUrl,
         role: user.role,
         isEmailVerified: user.isEmailVerified,
+        isApproved: user.isApproved,
+        allowedTemplates: user.allowedTemplates,
       },
     });
   } catch (error) {
@@ -301,6 +311,8 @@ export const getMe = async (req: Request, res: Response, next: NextFunction) => 
         avatarUrl: true,
         role: true,
         isEmailVerified: true,
+        isApproved: true,
+        allowedTemplates: true,
         createdAt: true,
         _count: {
           select: { projects: true },

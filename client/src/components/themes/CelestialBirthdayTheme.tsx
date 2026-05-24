@@ -334,21 +334,21 @@ function EnvelopeLetter({
             }, 3000);
             return () => { if (autoCloseRef.current) clearTimeout(autoCloseRef.current); };
         }
-        
+
         let delay = 120;
         if (isCharAnim) {
             delay = letterCharDelay !== undefined ? Number(letterCharDelay) : 30;
         } else {
             delay = letterWordDelay !== undefined ? Number(letterWordDelay) : 120;
         }
-        
+
         const t = setTimeout(() => setVisibleCount(c => c + 1), delay);
         return () => clearTimeout(t);
     }, [phase, visibleCount, totalCount, disableWordByWord, letterWordDelay, letterCharDelay, isCharAnim]);
 
     useEffect(() => {
         if (disableLetterAutoScroll || phase !== 'reading') return;
-        
+
         const scrollSpeed = letterScrollSpeed !== undefined ? Number(letterScrollSpeed) : 25;
         if (scrollSpeed <= 0) return;
 
@@ -406,8 +406,8 @@ function EnvelopeLetter({
         }
     });
 
-    const visibleLinesToShow = typedLines.length > 15 
-        ? typedLines.slice(typedLines.length - 15) 
+    const visibleLinesToShow = typedLines.length > 15
+        ? typedLines.slice(typedLines.length - 15)
         : typedLines;
 
     return (
@@ -1389,7 +1389,7 @@ export default function CelestialBirthdayTheme({ project }: { project: Project }
                         onClick={() => setShowCakeModal(true)}
                     >
                         <BirthdayCake3D name={name} interactive={false} />
-                        
+
                         {/* Cute pink font tag */}
                         <motion.div
                             animate={{ y: [-4, 4, -4], scale: [1, 1.05, 1] }}

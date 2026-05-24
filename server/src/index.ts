@@ -13,6 +13,7 @@ import adminRoutes from './routes/admin.routes';
 import aiRoutes from './routes/ai.routes';
 import { errorHandler } from './middleware/error.middleware';
 import { notFound } from './middleware/notFound.middleware';
+import { prisma } from './config/prisma';
 
 dotenv.config();
 
@@ -103,10 +104,43 @@ app.use(errorHandler);
 // START SERVER
 // ============================================
 
-app.listen(PORT, () => {
+const runMigration = async () => {
+  try {
+    console.log('🌹 Starting auto schema migration...');
+    await prisma.$executeRawUnsafe(`
+      ALTER TABLE "User" 
+      ADD COLUMN IF NOT EXISTS "isApproved" BOOLEAN NOT NULL DEFAULT false;
+    `);
+    await prisma.$executeRawUnsafe(`
+      ALTER TABLE "User" 
+      ADD COLUMN IF NOT EXISTS "allowedTemplates" TEXT[] NOT NULL DEFAULT ARRAY['SCRAPBOOK_LOVE']::TEXT[];
+    `);
+    
+    // Promote md_shaquib_nazeer to ADMIN and isApproved: true
+    await prisma.$executeRawUnsafe(`
+      UPDATE "User"
+      SET "role" = 'ADMIN', "isApproved" = true, "allowedTemplates" = ARRAY['ROMANTIC_GLOW', 'CINEMATIC_MEMORIES', 'SCRAPBOOK_LOVE', 'AURORA_DREAMS', 'CELESTIAL_BIRTHDAY']::TEXT[]
+      WHERE "username" = 'md_shaquib_nazeer';
+    `);
+
+    // Approve testuser2
+    await prisma.$executeRawUnsafe(`
+      UPDATE "User"
+      SET "isApproved" = true
+      WHERE "username" = 'testuser2';
+    `);
+
+    console.log('🌹 Auto schema migration completed successfully!');
+  } catch (error) {
+    console.error('🌹 Auto schema migration failed:', error);
+  }
+};
+
+app.listen(PORT, async () => {
   console.log(`\n🌹 Mémoire Server running on port ${PORT}`);
   console.log(`   Environment: ${process.env.NODE_ENV}`);
   console.log(`   Health check: http://localhost:${PORT}/health\n`);
+  await runMigration();
 });
 
 export default app;

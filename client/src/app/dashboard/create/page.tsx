@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { ChevronRight, ChevronLeft, Sparkles } from 'lucide-react';
 import { projectsAPI, aiAPI } from '@/lib/api';
+import { useAuth } from '@/hooks/useAuth';
 
 const THEMES = [
   {
@@ -66,10 +66,25 @@ interface CreateForm {
 }
 
 export default function CreateProjectPage() {
+  const { user } = useAuth();
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const [selectedTheme, setSelectedTheme] = useState('ROMANTIC_GLOW');
+  const [selectedTheme, setSelectedTheme] = useState('SCRAPBOOK_LOVE');
   const [loading, setLoading] = useState(false);
+
+  const isAuthorized = (themeId: string) => {
+    if (!user) return false;
+    if (user.role === 'ADMIN') return true;
+    return user.allowedTemplates?.includes(themeId);
+  };
+
+  const handleThemeSelect = (themeId: string) => {
+    if (isAuthorized(themeId)) {
+      setSelectedTheme(themeId);
+    } else {
+      toast.error('Contact admin to authorise you for this template.');
+    }
+  };
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm<CreateForm>();
   const watchedNames = watch(['personOneName', 'personTwoName', 'occasion']);
@@ -121,43 +136,52 @@ export default function CreateProjectPage() {
             <motion.div key="step0" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}>
               <h2 className="font-serif text-2xl text-rose-cream mb-6">Choose your aesthetic world</h2>
               <div className="grid gap-4">
-                {THEMES.map((theme) => (
-                  <button
-                    key={theme.id}
-                    type="button"
-                    onClick={() => setSelectedTheme(theme.id)}
-                    className={`text-left p-6 rounded-2xl border transition-all duration-300 ${
-                      selectedTheme === theme.id
-                        ? 'border-opacity-100'
-                        : 'border-white/10 hover:border-white/20'
-                    }`}
-                    style={{
-                      background: selectedTheme === theme.id
-                        ? `linear-gradient(135deg, ${theme.accent}15, rgba(26,10,46,0.8))`
-                        : 'rgba(255,255,255,0.03)',
-                      borderColor: selectedTheme === theme.id ? theme.accent : undefined,
-                      boxShadow: selectedTheme === theme.id ? `0 0 30px ${theme.accent}20` : undefined,
-                    }}
-                  >
-                    <div className="flex items-center gap-5">
-                      <span className="text-4xl">{theme.preview}</span>
-                      <div>
-                        <h3 className="font-serif text-xl font-semibold mb-1" style={{
-                          color: selectedTheme === theme.id ? theme.accent : '#f0e6d3',
-                        }}>
-                          {theme.name}
-                        </h3>
-                        <p className="text-rose-cream/40 font-sans text-sm">{theme.desc}</p>
-                      </div>
-                      {selectedTheme === theme.id && (
-                        <div className="ml-auto w-6 h-6 rounded-full flex items-center justify-center"
-                          style={{ background: theme.accent }}>
-                          <span className="text-noir-midnight text-xs font-bold">✓</span>
+                {THEMES.map((theme) => {
+                  const authorized = isAuthorized(theme.id);
+                  return (
+                    <button
+                      key={theme.id}
+                      type="button"
+                      onClick={() => handleThemeSelect(theme.id)}
+                      className={`text-left p-6 rounded-2xl border transition-all duration-300 ${
+                        selectedTheme === theme.id
+                          ? 'border-opacity-100'
+                          : 'border-white/10 hover:border-white/20'
+                      }`}
+                      style={{
+                        background: selectedTheme === theme.id
+                          ? `linear-gradient(135deg, ${theme.accent}15, rgba(26,10,46,0.8))`
+                          : 'rgba(255,255,255,0.03)',
+                        borderColor: selectedTheme === theme.id ? theme.accent : undefined,
+                        boxShadow: selectedTheme === theme.id ? `0 0 30px ${theme.accent}20` : undefined,
+                        opacity: authorized ? 1 : 0.65,
+                      }}
+                    >
+                      <div className="flex items-center gap-5 w-full">
+                        <span className="text-4xl">{theme.preview}</span>
+                        <div className="flex-1">
+                          <h3 className="font-serif text-xl font-semibold mb-1" style={{
+                            color: selectedTheme === theme.id ? theme.accent : '#f0e6d3',
+                          }}>
+                            {theme.name}
+                          </h3>
+                          <p className="text-rose-cream/40 font-sans text-sm">{theme.desc}</p>
                         </div>
-                      )}
-                    </div>
-                  </button>
-                ))}
+                        {selectedTheme === theme.id && (
+                          <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
+                            style={{ background: theme.accent }}>
+                            <span className="text-noir-midnight text-xs font-bold">✓</span>
+                          </div>
+                        )}
+                        {!authorized && selectedTheme !== theme.id && (
+                          <span className="text-xs font-sans px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20 flex items-center gap-1 flex-shrink-0">
+                            🔒 Locked
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </motion.div>
           )}

@@ -3,14 +3,15 @@ import { prisma } from '../config/prisma';
 
 export const getStats = async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    const [userCount, projectCount, publishedCount, mediaCount] = await Promise.all([
+    const [userCount, projectCount, publishedCount, mediaCount, pendingApprovalCount] = await Promise.all([
       prisma.user.count(),
       prisma.project.count(),
       prisma.project.count({ where: { status: 'PUBLISHED' } }),
       prisma.mediaUpload.count(),
+      prisma.user.count({ where: { isApproved: false } }),
     ]);
 
-    res.json({ userCount, projectCount, publishedCount, mediaCount });
+    res.json({ userCount, projectCount, publishedCount, mediaCount, pendingApprovalCount });
   } catch (error) {
     next(error);
   }
@@ -28,7 +29,7 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction) 
         orderBy: { createdAt: 'desc' },
         select: {
           id: true, email: true, username: true, displayName: true,
-          role: true, isEmailVerified: true, createdAt: true, lastLoginAt: true,
+          role: true, isEmailVerified: true, isApproved: true, allowedTemplates: true, createdAt: true, lastLoginAt: true,
           _count: { select: { projects: true } },
         },
       }),
@@ -84,6 +85,33 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
     const { id } = req.params;
     await prisma.user.delete({ where: { id } });
     res.json({ message: 'User deleted by admin' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const approveUser = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    await prisma.user.update({
+      where: { id },
+      data: { isApproved: true },
+    });
+    res.json({ message: 'User approved successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateUserTemplates = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const { allowedTemplates } = req.body;
+    await prisma.user.update({
+      where: { id },
+      data: { allowedTemplates },
+    });
+    res.json({ message: 'User template authorization updated' });
   } catch (error) {
     next(error);
   }

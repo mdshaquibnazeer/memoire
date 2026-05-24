@@ -11,6 +11,8 @@ interface User {
   avatarUrl: string | null;
   role: string;
   isEmailVerified: boolean;
+  isApproved: boolean;
+  allowedTemplates: string[];
 }
 
 interface AuthContextType {

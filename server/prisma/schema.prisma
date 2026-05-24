@@ -53,6 +53,8 @@ model User {
   avatarUrl         String?
   role              UserRole  @default(USER)
   isEmailVerified   Boolean   @default(false)
+  isApproved        Boolean   @default(false)
+  allowedTemplates  String[]
   emailVerifyToken  String?
   resetPasswordToken String?
   resetPasswordExpiry DateTime?

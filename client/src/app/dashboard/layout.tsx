@@ -5,16 +5,9 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, FolderOpen, Plus, Settings, LogOut, Heart } from 'lucide-react';
+import { LayoutDashboard, FolderOpen, Plus, Settings, LogOut, Heart, Shield } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { AuthProvider } from '@/hooks/useAuth';
-
-const navItems = [
-  { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/dashboard/projects', icon: FolderOpen, label: 'My Projects' },
-  { href: '/dashboard/create', icon: Plus, label: 'New Memory' },
-  { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
-];
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const { user, loading, logout } = useAuth();
@@ -73,7 +66,13 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
         {/* Navigation */}
         <nav className="flex-1 px-4 space-y-1">
-          {navItems.map((item) => {
+          {[
+            { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+            { href: '/dashboard/projects', icon: FolderOpen, label: 'My Projects' },
+            { href: '/dashboard/create', icon: Plus, label: 'New Memory' },
+            ...(user.role === 'ADMIN' ? [{ href: '/dashboard/admin', icon: Shield, label: 'Admin Corner' }] : []),
+            { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
+          ].map((item) => {
             const active = pathname === item.href;
             return (
               <Link

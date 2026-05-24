@@ -174,3 +174,30 @@ export const aiAPI = {
     details?: string;
   }) => api.post('/ai/generate-message', data),
 };
+
+// ============================================
+// ADMIN API
+// ============================================
+
+export const adminAPI = {
+  getStats: () =>
+    api.get('/admin/stats'),
+  
+  listUsers: (params?: { page?: number; limit?: number }) =>
+    api.get('/admin/users', { params }),
+  
+  approveUser: (id: string) =>
+    api.post(`/admin/users/${id}/approve`),
+  
+  updateUserTemplates: (id: string, allowedTemplates: string[]) =>
+    api.post(`/admin/users/${id}/templates`, { allowedTemplates }),
+  
+  deleteUser: (id: string) =>
+    api.delete(`/admin/users/${id}`),
+  
+  getProjects: (params?: { page?: number; limit?: number }) =>
+    api.get('/admin/projects', { params }),
+  
+  deleteProject: (id: string) =>
+    api.delete(`/admin/projects/${id}`),
+};
