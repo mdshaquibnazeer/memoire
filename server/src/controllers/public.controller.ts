@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/prisma';
+import { findDemoProject } from '../utils/demos';
 
 // ============================================
 // GET PUBLIC PROJECT BY SLUG
@@ -9,6 +10,11 @@ export const getPublicProject = async (req: Request, res: Response, next: NextFu
   try {
     const { slug } = req.params;
     const { password } = req.query;
+
+    const demo = findDemoProject(slug);
+    if (demo) {
+      return res.json({ project: demo });
+    }
 
     const project = await prisma.project.findFirst({
       where: {
@@ -79,9 +85,13 @@ export const submitPublicWish = async (req: Request, res: Response, next: NextFu
       return res.status(400).json({ error: 'Wish is required' });
     }
 
-    const wordCount = wish.split(/\s+/).filter(Boolean).length;
+        const wordCount = wish.split(/\s+/).filter(Boolean).length;
     if (wordCount > 50) {
       return res.status(400).json({ error: 'Wish must be under 50 words' });
+    }
+
+    if (findDemoProject(slug)) {
+      return res.json({ success: true, message: 'Wish submitted successfully! (Demo Mode)' });
     }
 
     const project = await prisma.project.findFirst({

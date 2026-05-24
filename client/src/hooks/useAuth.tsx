@@ -13,6 +13,7 @@ interface User {
   isEmailVerified: boolean;
   isApproved: boolean;
   allowedTemplates: string[];
+  allowedDemoPreviews?: string[];
 }
 
 interface AuthContextType {

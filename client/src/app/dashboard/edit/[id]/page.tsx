@@ -26,6 +26,12 @@ export default function EditProjectPage() {
   const [form, setForm] = useState<any>({});
 
   useEffect(() => {
+    if (id && (id as string).startsWith('demo-')) {
+      toast.error('System showcase demos are read-only.');
+      router.push('/dashboard');
+      return;
+    }
+
     projectsAPI.get(id as string).then(({ data }) => {
       setProject(data.project);
       setForm({

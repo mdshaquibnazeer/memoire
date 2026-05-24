@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { 
   Users, FolderHeart, Globe, Image, UserCheck, 
   Trash2, ShieldCheck, KeyRound, Search, BookOpen, 
-  X, Check, AlertCircle, Lock, Unlock, Settings, Clock, Ban, AlertTriangle 
+  X, Check, AlertCircle, Lock, Unlock, Settings, Clock, Ban, AlertTriangle, Eye 
 } from 'lucide-react';
 import { adminAPI } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
@@ -30,6 +30,7 @@ interface User {
   isApproved: boolean;
   isSuspended: boolean;
   allowedTemplates: string[];
+  allowedDemoPreviews?: string[];
   themeExpirations: any;
   userLimits: any;
   createdAt: string;
@@ -77,6 +78,7 @@ export default function AdminCornerPage() {
   // Modal State
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [allowedTemplatesState, setAllowedTemplatesState] = useState<string[]>([]);
+  const [allowedDemoPreviewsState, setAllowedDemoPreviewsState] = useState<string[]>([]);
   const [themeExpirationsState, setThemeExpirationsState] = useState<any>({});
   const [userLimitsState, setUserLimitsState] = useState<any>({ maxProjects: 3, maxMemoriesPerProject: 10, maxGalleryItemsPerProject: 20 });
   const [savingTemplates, setSavingTemplates] = useState(false);
@@ -199,6 +201,7 @@ export default function AdminCornerPage() {
   const openTemplateModal = (user: User) => {
     setSelectedUser(user);
     setAllowedTemplatesState(user.allowedTemplates || []);
+    setAllowedDemoPreviewsState(user.allowedDemoPreviews || ['ROMANTIC_GLOW', 'CINEMATIC_MEMORIES', 'AURORA_DREAMS', 'CELESTIAL_BIRTHDAY']);
     setThemeExpirationsState(user.themeExpirations || {});
     setUserLimitsState(user.userLimits || { maxProjects: 3, maxMemoriesPerProject: 10, maxGalleryItemsPerProject: 20 });
   };
@@ -206,6 +209,7 @@ export default function AdminCornerPage() {
   const closeTemplateModal = () => {
     setSelectedUser(null);
     setAllowedTemplatesState([]);
+    setAllowedDemoPreviewsState([]);
     setThemeExpirationsState({});
     setUserLimitsState({ maxProjects: 3, maxMemoriesPerProject: 10, maxGalleryItemsPerProject: 20 });
   };
@@ -218,12 +222,21 @@ export default function AdminCornerPage() {
     );
   };
 
+  const toggleDemoPreviewPermission = (templateId: string) => {
+    setAllowedDemoPreviewsState(prev => 
+      prev.includes(templateId)
+        ? prev.filter(id => id !== templateId)
+        : [...prev, templateId]
+    );
+  };
+
   const saveTemplatePermissions = async () => {
     if (!selectedUser) return;
     setSavingTemplates(true);
     try {
       await adminAPI.updateUserAccess(selectedUser.id, {
         allowedTemplates: allowedTemplatesState,
+        allowedDemoPreviews: allowedDemoPreviewsState,
         themeExpirations: themeExpirationsState,
         userLimits: userLimitsState,
       });
@@ -231,6 +244,7 @@ export default function AdminCornerPage() {
       setUsers(prev => prev.map(u => u.id === selectedUser.id ? { 
         ...u, 
         allowedTemplates: allowedTemplatesState,
+        allowedDemoPreviews: allowedDemoPreviewsState,
         themeExpirations: themeExpirationsState,
         userLimits: userLimitsState
       } : u));
@@ -776,6 +790,51 @@ export default function AdminCornerPage() {
                             />
                           </div>
                         )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Showcase Demo Previews Checkboxes List */}
+                <div className="space-y-3 border-t border-white/10 pt-6">
+                  <h4 className="font-serif text-base text-rose-cream font-semibold mb-2 flex items-center gap-2">
+                    <Eye size={16} className="text-rose-blush" /> Showcase Demo Previews
+                  </h4>
+                  <p className="text-rose-cream/40 font-sans text-xs mb-3">
+                    Select which premium theme showcase demo cards are visible on this user's dashboard.
+                  </p>
+                  {ALL_TEMPLATES.filter(t => t.id !== 'SCRAPBOOK_LOVE').map(template => {
+                    const allowedPreview = allowedDemoPreviewsState.includes(template.id);
+                    return (
+                      <div 
+                        key={`demo-${template.id}`}
+                        onClick={() => toggleDemoPreviewPermission(template.id)}
+                        className={`p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${
+                          allowedPreview 
+                            ? 'border-rose-blush/30 bg-rose-blush/5' 
+                            : 'border-white/5 bg-white/5 hover:bg-white/[0.08]'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">{template.emoji}</span>
+                            <div>
+                              <span className="font-serif text-base text-rose-cream font-medium">Showcase: {template.name}</span>
+                              <span className="block text-[10px] text-rose-cream/30 font-sans mt-0.5">Demo Card on Dashboard</span>
+                            </div>
+                          </div>
+                          
+                          {/* Check Box Visual */}
+                          <div 
+                            className={`w-6 h-6 rounded-full border flex items-center justify-center transition-all ${
+                              allowedPreview 
+                                ? 'bg-rose-blush border-rose-blush' 
+                                : 'border-white/20'
+                            }`}
+                          >
+                            {allowedPreview && <Check size={12} className="text-noir-midnight stroke-[3px]" />}
+                          </div>
+                        </div>
                       </div>
                     );
                   })}

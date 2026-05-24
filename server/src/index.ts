@@ -121,6 +121,10 @@ const runMigration = async () => {
     `);
     await prisma.$executeRawUnsafe(`
       ALTER TABLE "User" 
+      ADD COLUMN IF NOT EXISTS "allowedDemoPreviews" TEXT[] NOT NULL DEFAULT ARRAY['ROMANTIC_GLOW', 'CINEMATIC_MEMORIES', 'AURORA_DREAMS', 'CELESTIAL_BIRTHDAY']::TEXT[];
+    `);
+    await prisma.$executeRawUnsafe(`
+      ALTER TABLE "User" 
       ADD COLUMN IF NOT EXISTS "themeExpirations" JSONB NULL;
     `);
     await prisma.$executeRawUnsafe(`

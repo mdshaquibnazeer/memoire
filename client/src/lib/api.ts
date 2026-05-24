@@ -195,7 +195,7 @@ export const adminAPI = {
   suspendUser: (id: string, isSuspended: boolean) =>
     api.post(`/admin/users/${id}/suspend`, { isSuspended }),
   
-  updateUserAccess: (id: string, payload: { allowedTemplates?: string[]; themeExpirations?: any; userLimits?: any }) =>
+  updateUserAccess: (id: string, payload: { allowedTemplates?: string[]; allowedDemoPreviews?: string[]; themeExpirations?: any; userLimits?: any }) =>
     api.post(`/admin/users/${id}/access`, payload),
   
   deleteUser: (id: string) =>

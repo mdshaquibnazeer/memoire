@@ -30,7 +30,7 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction) 
         select: {
           id: true, email: true, username: true, displayName: true,
           role: true, isEmailVerified: true, isApproved: true, isSuspended: true,
-          allowedTemplates: true, themeExpirations: true, userLimits: true,
+          allowedTemplates: true, allowedDemoPreviews: true, themeExpirations: true, userLimits: true,
           createdAt: true, lastLoginAt: true,
           _count: { select: { projects: true } },
         },
@@ -136,11 +136,12 @@ export const suspendUser = async (req: Request, res: Response, next: NextFunctio
 export const updateUserAccess = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-    const { allowedTemplates, themeExpirations, userLimits } = req.body;
+    const { allowedTemplates, allowedDemoPreviews, themeExpirations, userLimits } = req.body;
     await prisma.user.update({
       where: { id },
       data: {
         ...(allowedTemplates && { allowedTemplates }),
+        ...(allowedDemoPreviews && { allowedDemoPreviews }),
         ...(themeExpirations !== undefined && { themeExpirations }),
         ...(userLimits !== undefined && { userLimits }),
       },

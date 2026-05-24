@@ -74,6 +74,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
         isEmailVerified: true,
         isApproved: true,
         allowedTemplates: true,
+        allowedDemoPreviews: true,
         createdAt: true,
       },
     });
@@ -136,6 +137,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         isEmailVerified: user.isEmailVerified,
         isApproved: user.isApproved,
         allowedTemplates: user.allowedTemplates,
+        allowedDemoPreviews: (user as any).allowedDemoPreviews,
       },
     });
   } catch (error) {
@@ -317,6 +319,7 @@ export const getMe = async (req: Request, res: Response, next: NextFunction) => 
         isEmailVerified: true,
         isApproved: true,
         allowedTemplates: true,
+        allowedDemoPreviews: true,
         createdAt: true,
         _count: {
           select: { projects: true },

@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Plus, Eye, Edit, Trash2, Globe, Lock, Calendar, Search, Filter } from 'lucide-react';
+import { Plus, Eye, Edit, Trash2, Globe, Lock, Calendar, Search, Filter, Sparkles } from 'lucide-react';
 import { projectsAPI } from '@/lib/api';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 interface Project {
@@ -135,15 +136,29 @@ function ProjectCard({ project, index, onDelete }: {
   index: number;
   onDelete: (id: string, title: string) => void;
 }) {
+  const { user } = useAuth();
   const color = themeColors[project.theme] || '#e8c4b8';
   const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const isDemo = project.id.startsWith('demo-');
+  const isAuthorized = user?.role === 'ADMIN' || user?.allowedTemplates?.includes(project.theme);
+
+  const handleEditClick = (e: React.MouseEvent) => {
+    if (isDemo) {
+      e.preventDefault();
+      if (isAuthorized) {
+        toast.info("This is a read-only showcase demo. Click 'Use Theme' or 'New Memory' to create your own memory using this template!");
+      } else {
+        toast.error("Contact admin to authorise you for this premium template.");
+      }
+    }
+  };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="glass-card overflow-hidden group"
+      className={`glass-card overflow-hidden group relative ${isDemo ? 'border border-rose-blush/30' : ''}`}
     >
       {/* Cover */}
       <div className="h-40 relative overflow-hidden"
@@ -156,27 +171,43 @@ function ProjectCard({ project, index, onDelete }: {
         <div className="absolute inset-0 cinematic-overlay opacity-60" />
         
         {/* Theme badge */}
-        <div className="absolute top-3 left-3">
-          <span className="text-xs font-sans px-3 py-1 rounded-full"
+        <div className="absolute top-3 left-3 flex flex-col gap-1.5 items-start">
+          <span className="text-xs font-sans px-3 py-1 rounded-full flex items-center gap-1 font-semibold"
             style={{
-              background: 'rgba(0,0,0,0.5)',
+              background: 'rgba(0,0,0,0.65)',
               color,
               border: `1px solid ${color}40`,
               backdropFilter: 'blur(4px)',
             }}>
+            {isDemo && <Sparkles size={10} className="animate-pulse" />}
             {themeNames[project.theme]}
           </span>
+          {isDemo && (
+            <span className="text-[10px] font-sans tracking-wider px-2 py-0.5 rounded bg-rose-950/80 border border-rose-500/30 text-rose-300 font-bold uppercase">
+              SHOWCASE DEMO
+            </span>
+          )}
         </div>
 
-        {/* Status */}
+        {/* Status / Auth Badge */}
         <div className="absolute top-3 right-3">
-          <span className={`flex items-center gap-1 text-xs font-sans px-2 py-1 rounded-full ${
-            project.status === 'PUBLISHED' ? 'bg-green-500/20 text-green-300' :
-            'bg-white/10 text-white/50'
-          }`}>
-            {project.status === 'PUBLISHED' ? <Globe size={10} /> : <Lock size={10} />}
-            {project.status.charAt(0) + project.status.slice(1).toLowerCase()}
-          </span>
+          {isDemo ? (
+            <span className={`flex items-center gap-1 text-[10px] font-sans px-2.5 py-1 rounded-full font-semibold border ${
+              isAuthorized 
+                ? 'bg-green-500/20 text-green-300 border-green-500/30' 
+                : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+            }`}>
+              {isAuthorized ? '✓ Ready to Use' : '🔒 Locked (Request Access)'}
+            </span>
+          ) : (
+            <span className={`flex items-center gap-1 text-xs font-sans px-2 py-1 rounded-full ${
+              project.status === 'PUBLISHED' ? 'bg-green-500/20 text-green-300' :
+              'bg-white/10 text-white/50'
+            }`}>
+              {project.status === 'PUBLISHED' ? <Globe size={10} /> : <Lock size={10} />}
+              {project.status.charAt(0) + project.status.slice(1).toLowerCase()}
+            </span>
+          )}
         </div>
       </div>
 
@@ -193,28 +224,59 @@ function ProjectCard({ project, index, onDelete }: {
 
         {/* Actions */}
         <div className="flex items-center gap-2 mt-5">
-          {project.status === 'PUBLISHED' && (
-            <a
-              href={`${APP_URL}/memory/${project.slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-xs font-sans px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-rose-cream/60 hover:text-rose-cream transition-all"
-            >
-              <Eye size={12} /> View
-            </a>
+          {isDemo ? (
+            <>
+              <a
+                href={`/memory/${project.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-xs font-sans px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-rose-cream/60 hover:text-rose-cream transition-all border border-white/5"
+              >
+                <Eye size={12} /> View Demo
+              </a>
+              {isAuthorized ? (
+                <Link
+                  href={`/dashboard/create?theme=${project.theme}`}
+                  className="flex items-center gap-1.5 text-xs font-sans px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 transition-all border border-rose-500/30 font-semibold"
+                >
+                  <Sparkles size={12} /> Use Theme
+                </Link>
+              ) : (
+                <button
+                  onClick={() => toast.error("Contact admin to authorise you for this premium template.")}
+                  className="flex items-center gap-1.5 text-xs font-sans px-3 py-1.5 rounded-lg bg-white/5 opacity-50 cursor-not-allowed text-rose-cream/40 border border-white/5"
+                >
+                  🔒 Locked
+                </button>
+              )}
+            </>
+          ) : (
+            <>
+              {project.status === 'PUBLISHED' && (
+                <a
+                  href={`${APP_URL}/memory/${project.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-xs font-sans px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-rose-cream/60 hover:text-rose-cream transition-all"
+                >
+                  <Eye size={12} /> View
+                </a>
+              )}
+              <Link
+                href={`/dashboard/edit/${project.id}`}
+                onClick={handleEditClick}
+                className="flex items-center gap-1.5 text-xs font-sans px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-rose-cream/60 hover:text-rose-cream transition-all"
+              >
+                <Edit size={12} /> Edit
+              </Link>
+              <button
+                onClick={() => onDelete(project.id, project.title)}
+                className="flex items-center gap-1.5 text-xs font-sans px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400/60 hover:text-red-400 transition-all ml-auto"
+              >
+                <Trash2 size={12} />
+              </button>
+            </>
           )}
-          <Link
-            href={`/dashboard/edit/${project.id}`}
-            className="flex items-center gap-1.5 text-xs font-sans px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-rose-cream/60 hover:text-rose-cream transition-all"
-          >
-            <Edit size={12} /> Edit
-          </Link>
-          <button
-            onClick={() => onDelete(project.id, project.title)}
-            className="flex items-center gap-1.5 text-xs font-sans px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400/60 hover:text-red-400 transition-all ml-auto"
-          >
-            <Trash2 size={12} />
-          </button>
         </div>
       </div>
     </motion.div>

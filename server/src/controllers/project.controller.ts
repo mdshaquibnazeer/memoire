@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/prisma';
 import { generateSlug } from '../utils/slug';
+import { DEMO_PROJECTS } from '../utils/demos';
 
 // ============================================
 // LIST USER PROJECTS
@@ -45,13 +46,43 @@ export const getProjects = async (req: Request, res: Response, next: NextFunctio
       prisma.project.count({ where }),
     ]);
 
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { allowedDemoPreviews: true }
+    });
+    const allowedDemos = user?.allowedDemoPreviews || ['ROMANTIC_GLOW', 'CINEMATIC_MEMORIES', 'AURORA_DREAMS', 'CELESTIAL_BIRTHDAY'];
+    const activeDemos = DEMO_PROJECTS.filter(d => allowedDemos.includes(d.theme));
+
+    const pageNum = parseInt(page as string);
+    let allProjects = [...projects];
+    if (pageNum === 1) {
+      const safeDemos = activeDemos.map(d => ({
+        id: d.id,
+        slug: d.slug,
+        title: d.title,
+        subtitle: d.subtitle,
+        theme: d.theme as any,
+        status: d.status as any,
+        coverImageUrl: d.coverImageUrl,
+        personOneName: d.personOneName,
+        personTwoName: d.personTwoName,
+        occasion: d.occasion,
+        viewCount: d.viewCount,
+        publishedAt: d.publishedAt ? new Date(d.publishedAt) : null,
+        createdAt: new Date(d.createdAt),
+        updatedAt: new Date(d.updatedAt),
+        _count: d._count
+      }));
+      allProjects = [...safeDemos, ...allProjects];
+    }
+
     res.json({
-      projects,
+      projects: allProjects,
       pagination: {
-        page: parseInt(page as string),
+        page: pageNum,
         limit: parseInt(limit as string),
-        total,
-        pages: Math.ceil(total / parseInt(limit as string)),
+        total: total + activeDemos.length,
+        pages: Math.ceil((total + activeDemos.length) / parseInt(limit as string)),
       },
     });
   } catch (error) {
@@ -67,6 +98,13 @@ export const getProject = async (req: Request, res: Response, next: NextFunction
   try {
     const userId = (req as any).userId;
     const { id } = req.params;
+
+    if (id.startsWith('demo-')) {
+      const demo = DEMO_PROJECTS.find(p => p.id === id);
+      if (demo) {
+        return res.json({ project: demo });
+      }
+    }
 
     const project = await prisma.project.findFirst({
       where: { id, userId },
@@ -165,6 +203,10 @@ export const updateProject = async (req: Request, res: Response, next: NextFunct
   try {
     const userId = (req as any).userId;
     const { id } = req.params;
+
+    if (id.startsWith('demo-')) {
+      return res.status(403).json({ error: 'System showcase projects are read-only.' });
+    }
 
     // Verify ownership
     const existing = await prisma.project.findFirst({ where: { id, userId } });
@@ -279,6 +321,10 @@ export const deleteProject = async (req: Request, res: Response, next: NextFunct
     const userId = (req as any).userId;
     const { id } = req.params;
 
+    if (id.startsWith('demo-')) {
+      return res.status(403).json({ error: 'System showcase projects cannot be deleted.' });
+    }
+
     const existing = await prisma.project.findFirst({ where: { id, userId } });
     if (!existing) return res.status(404).json({ error: 'Project not found' });
 
@@ -298,6 +344,10 @@ export const addMemory = async (req: Request, res: Response, next: NextFunction)
   try {
     const userId = (req as any).userId;
     const { projectId } = req.params;
+
+    if (projectId.startsWith('demo-')) {
+      return res.status(403).json({ error: 'System showcase projects are read-only.' });
+    }
 
     const project = await prisma.project.findFirst({ where: { id: projectId, userId } });
     if (!project) return res.status(404).json({ error: 'Project not found' });
@@ -342,6 +392,10 @@ export const updateMemory = async (req: Request, res: Response, next: NextFuncti
     const userId = (req as any).userId;
     const { projectId, memoryId } = req.params;
 
+    if (projectId.startsWith('demo-')) {
+      return res.status(403).json({ error: 'System showcase projects are read-only.' });
+    }
+
     const project = await prisma.project.findFirst({ where: { id: projectId, userId } });
     if (!project) return res.status(404).json({ error: 'Project not found' });
 
@@ -360,6 +414,10 @@ export const deleteMemory = async (req: Request, res: Response, next: NextFuncti
   try {
     const userId = (req as any).userId;
     const { projectId, memoryId } = req.params;
+
+    if (projectId.startsWith('demo-')) {
+      return res.status(403).json({ error: 'System showcase projects are read-only.' });
+    }
 
     const project = await prisma.project.findFirst({ where: { id: projectId, userId } });
     if (!project) return res.status(404).json({ error: 'Project not found' });
@@ -380,6 +438,10 @@ export const addGalleryItem = async (req: Request, res: Response, next: NextFunc
   try {
     const userId = (req as any).userId;
     const { projectId } = req.params;
+
+    if (projectId.startsWith('demo-')) {
+      return res.status(403).json({ error: 'System showcase projects are read-only.' });
+    }
 
     const project = await prisma.project.findFirst({ where: { id: projectId, userId } });
     if (!project) return res.status(404).json({ error: 'Project not found' });
@@ -414,6 +476,10 @@ export const updateGalleryItem = async (req: Request, res: Response, next: NextF
     const userId = (req as any).userId;
     const { projectId, itemId } = req.params;
 
+    if (projectId.startsWith('demo-')) {
+      return res.status(403).json({ error: 'System showcase projects are read-only.' });
+    }
+
     const project = await prisma.project.findFirst({ where: { id: projectId, userId } });
     if (!project) return res.status(404).json({ error: 'Project not found' });
 
@@ -438,6 +504,10 @@ export const deleteGalleryItem = async (req: Request, res: Response, next: NextF
   try {
     const userId = (req as any).userId;
     const { projectId, itemId } = req.params;
+
+    if (projectId.startsWith('demo-')) {
+      return res.status(403).json({ error: 'System showcase projects are read-only.' });
+    }
 
     const project = await prisma.project.findFirst({ where: { id: projectId, userId } });
     if (!project) return res.status(404).json({ error: 'Project not found' });
