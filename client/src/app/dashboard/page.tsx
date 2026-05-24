@@ -274,6 +274,14 @@ function ProjectCard({ project, index, onDelete }: {
               >
                 <Eye size={12} /> View Demo
               </a>
+              {user?.role === 'ADMIN' && (
+                <Link
+                  href={`/dashboard/edit/${project.id}`}
+                  className="flex items-center gap-1.5 text-xs font-sans px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 transition-all border border-rose-500/30 font-semibold"
+                >
+                  <Edit size={12} /> Edit Demo
+                </Link>
+              )}
               {isAuthorized ? (
                 <Link
                   href={`/dashboard/create?theme=${project.theme}`}

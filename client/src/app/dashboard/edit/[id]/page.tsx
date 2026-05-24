@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { projectsAPI, aiAPI } from '@/lib/api';
 import MediaUploader from '@/components/shared/MediaUploader';
+import { useAuth } from '@/hooks/useAuth';
 
 type Tab = 'content' | 'gallery' | 'memories' | 'music' | 'settings' | 'wishes';
 
@@ -25,11 +26,17 @@ export default function EditProjectPage() {
   // Form state
   const [form, setForm] = useState<any>({});
 
+  const { user } = useAuth();
+
   useEffect(() => {
-    if (id && (id as string).startsWith('demo-')) {
+    if (id && (id as string).startsWith('demo-') && user?.role !== 'ADMIN') {
       toast.error('System showcase demos are read-only.');
       router.push('/dashboard');
       return;
+    }
+
+    if (id && (id as string).startsWith('demo-') && user?.role === 'ADMIN') {
+      toast.info('Admin Mode: Editing system showcase demo.');
     }
 
     projectsAPI.get(id as string).then(({ data }) => {
