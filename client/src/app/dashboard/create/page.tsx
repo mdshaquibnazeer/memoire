@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { ChevronRight, ChevronLeft, Sparkles } from 'lucide-react';
 import { projectsAPI, aiAPI } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 
