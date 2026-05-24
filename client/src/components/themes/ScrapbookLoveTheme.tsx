@@ -262,8 +262,12 @@ function ScrapbookGalleryItem({ item, index }: { item: GalleryItem; index: numbe
     <ScrapbookReveal delay={(index % 6) * 0.08}>
       <div className={`bg-white p-3 pb-10 shadow-lg ${rot} hover:rotate-0 hover:scale-105 transition-all duration-300 cursor-pointer`}
         style={{ boxShadow: '3px 3px 15px rgba(180,140,80,0.2)' }}>
-        <div className="relative aspect-square overflow-hidden">
-          <Image src={item.mediaUrl} alt={item.caption || ''} fill className="object-cover" />
+        <div className="relative aspect-square overflow-hidden bg-[#fdf6ec]">
+          {item.mediaType === 'VIDEO' ? (
+            <video src={item.mediaUrl} className="object-cover w-full h-full" muted loop playsInline />
+          ) : (
+            <Image src={item.mediaUrl} alt={item.caption || ''} fill className="object-cover" />
+          )}
         </div>
         {item.caption && (
           <p className="text-center font-script text-sm mt-3" style={{ color: '#9a6b4b' }}>

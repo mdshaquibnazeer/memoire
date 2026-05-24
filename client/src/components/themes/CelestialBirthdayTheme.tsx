@@ -308,10 +308,14 @@ function EnvelopeLetter({
 
     useEffect(() => {
         if (letterMusicUrl && localAudioRef.current) {
+            window.dispatchEvent(new CustomEvent('temp-pause-music'));
             localAudioRef.current.volume = 0.4;
             localAudioRef.current.play().catch(() => { });
         }
-        return () => { if (localAudioRef.current) { localAudioRef.current.pause(); } };
+        return () => { 
+            if (localAudioRef.current) { localAudioRef.current.pause(); } 
+            window.dispatchEvent(new CustomEvent('temp-resume-music'));
+        };
     }, [letterMusicUrl]);
 
     useEffect(() => {
@@ -499,7 +503,7 @@ function PolaroidGallery({ items, onClose, initialPhase = 'slideshow' }: {
 }) {
     const [phase, setPhase] = useState<'slideshow' | 'grid'>(items.length > 0 ? initialPhase : 'grid');
     const [slideIndex, setSlideIndex] = useState(0);
-    const [lightbox, setLightbox] = useState<string | null>(null);
+    const [lightbox, setLightbox] = useState<GalleryItem | null>(null);
     const rotations = [-6, 4, -3, 7, -5, 3, -8, 5, -2, 6, -4, 8];
 
     // Auto-advance slideshow
@@ -522,7 +526,11 @@ function PolaroidGallery({ items, onClose, initialPhase = 'slideshow' }: {
                         style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 10, background: 'radial-gradient(ellipse at 50% 50%, rgba(218,112,214,0.2) 0%, rgba(8,0,18,0.98) 70%)' }}>
                         <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}
                             style={{ position: 'relative', padding: '14px 14px 44px', background: '#fffaf9', borderRadius: 4, boxShadow: '0 20px 80px rgba(0,0,0,0.6), 0 0 60px rgba(255,105,180,0.2)', maxWidth: '80vw', maxHeight: '70vh' }}>
-                            <img src={items[slideIndex].mediaUrl} alt={items[slideIndex].caption || ''} style={{ maxWidth: '70vw', maxHeight: '55vh', objectFit: 'contain', display: 'block', borderRadius: 2 }} />
+                            {items[slideIndex].mediaType === 'VIDEO' ? (
+                                <video src={items[slideIndex].mediaUrl} autoPlay muted loop playsInline style={{ maxWidth: '70vw', maxHeight: '55vh', objectFit: 'contain', display: 'block', borderRadius: 2 }} />
+                            ) : (
+                                <img src={items[slideIndex].mediaUrl} alt={items[slideIndex].caption || ''} style={{ maxWidth: '70vw', maxHeight: '55vh', objectFit: 'contain', display: 'block', borderRadius: 2 }} />
+                            )}
                             <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', width: 60, height: 18, background: 'rgba(255,182,213,0.6)', borderRadius: 2 }} />
                             {items[slideIndex].caption && (
                                 <p style={{ textAlign: 'center', marginTop: 8, fontFamily: '"Dancing Script",cursive', fontSize: 16, color: '#8b4070' }}>{items[slideIndex].caption}</p>
@@ -579,15 +587,19 @@ function PolaroidGallery({ items, onClose, initialPhase = 'slideshow' }: {
                                         cursor: 'pointer', borderRadius: 4,
                                         transformOrigin: 'center center',
                                     }}
-                                    onClick={() => setLightbox(item.mediaUrl)}
+                                    onClick={() => setLightbox(item)}
                                 >
-                                    <div style={{ width: '100%', aspectRatio: '1/1', overflow: 'hidden', background: '#f5e6ee' }}>
-                                        <img
-                                            src={item.mediaUrl}
-                                            alt={item.caption || ''}
-                                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                                            onError={e => { (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23f5dde8' width='200' height='200'/%3E%3Ctext y='110' x='100' text-anchor='middle' font-size='40'%3E📸%3C/text%3E%3C/svg%3E"; }}
-                                        />
+                                    <div style={{ width: '100%', aspectRatio: '1/1', overflow: 'hidden', background: '#f5e6ee', pointerEvents: 'none' }}>
+                                        {item.mediaType === 'VIDEO' ? (
+                                            <video src={item.mediaUrl} muted loop playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                                        ) : (
+                                            <img
+                                                src={item.mediaUrl}
+                                                alt={item.caption || ''}
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                                onError={e => { (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23f5dde8' width='200' height='200'/%3E%3Ctext y='110' x='100' text-anchor='middle' font-size='40'%3E📸%3C/text%3E%3C/svg%3E"; }}
+                                            />
+                                        )}
                                     </div>
                                     {item.caption && (
                                         <p style={{ textAlign: 'center', marginTop: 10, fontFamily: '"Dancing Script", cursive', fontSize: 13, color: '#8b4070', lineHeight: 1.4 }}>
@@ -626,12 +638,21 @@ function PolaroidGallery({ items, onClose, initialPhase = 'slideshow' }: {
                         onClick={() => setLightbox(null)}
                         style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
                     >
-                        <motion.img
-                            initial={{ scale: 0.8 }} animate={{ scale: 1 }}
-                            src={lightbox} alt=""
-                            style={{ maxWidth: '90vw', maxHeight: '85vh', objectFit: 'contain', borderRadius: 8, boxShadow: '0 20px 60px rgba(255,105,180,0.3)' }}
-                            onClick={e => e.stopPropagation()}
-                        />
+                        <div className="flex items-center justify-center w-full h-full relative" onClick={e => e.stopPropagation()}>
+                            {lightbox.mediaType === 'VIDEO' ? (
+                                <motion.video
+                                    initial={{ scale: 0.8 }} animate={{ scale: 1 }}
+                                    src={lightbox.mediaUrl} controls autoPlay playsInline
+                                    style={{ maxWidth: '90vw', maxHeight: '85vh', objectFit: 'contain', borderRadius: 8, boxShadow: '0 20px 60px rgba(255,105,180,0.3)', outline: 'none' }}
+                                />
+                            ) : (
+                                <motion.img
+                                    initial={{ scale: 0.8 }} animate={{ scale: 1 }}
+                                    src={lightbox.mediaUrl} alt=""
+                                    style={{ maxWidth: '90vw', maxHeight: '85vh', objectFit: 'contain', borderRadius: 8, boxShadow: '0 20px 60px rgba(255,105,180,0.3)' }}
+                                />
+                            )}
+                        </div>
                         <button onClick={() => setLightbox(null)} style={{ position: 'fixed', top: 24, right: 24, background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', width: 40, height: 40, borderRadius: '50%', cursor: 'pointer', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
                     </motion.div>
                 )}

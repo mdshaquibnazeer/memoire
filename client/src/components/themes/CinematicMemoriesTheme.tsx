@@ -253,9 +253,14 @@ function CinematicGalleryItem({ item, index }: { item: GalleryItem; index: numbe
       transition={{ duration: 0.8, delay: (index % 8) * 0.05 }}
       className="relative aspect-square overflow-hidden group cursor-pointer"
     >
-      <Image src={item.mediaUrl} alt={item.caption || ''} fill
-        className="object-cover saturate-0 group-hover:saturate-100 scale-105 group-hover:scale-100 transition-all duration-700" />
-      <div className="absolute inset-0 bg-black/30 group-hover:bg-black/0 transition-colors duration-500" />
+      {item.mediaType === 'VIDEO' ? (
+        <video src={item.mediaUrl} muted loop playsInline
+          className="object-cover w-full h-full saturate-0 group-hover:saturate-100 scale-105 group-hover:scale-100 transition-all duration-700 pointer-events-none" />
+      ) : (
+        <Image src={item.mediaUrl} alt={item.caption || ''} fill
+          className="object-cover saturate-0 group-hover:saturate-100 scale-105 group-hover:scale-100 transition-all duration-700" />
+      )}
+      <div className="absolute inset-0 bg-black/30 group-hover:bg-black/0 transition-colors duration-500 pointer-events-none" />
     </motion.div>
   );
 }

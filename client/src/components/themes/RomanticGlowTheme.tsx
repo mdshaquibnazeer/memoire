@@ -318,35 +318,39 @@ function TimelineItem({ memory, index }: { memory: Memory; index: number }) {
 
 // ── MASONRY GALLERY ──
 function MasonryGallery({ items }: { items: GalleryItem[] }) {
-  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [lightboxMedia, setLightboxMedia] = useState<GalleryItem | null>(null);
 
   return (
     <>
       <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 space-y-4">
         {items.map((item, i) => (
-          <GalleryItemCard key={item.id} item={item} index={i} onClick={() => setLightboxSrc(item.mediaUrl)} />
+          <GalleryItemCard key={item.id} item={item} index={i} onClick={() => setLightboxMedia(item)} />
         ))}
       </div>
 
       {/* Lightbox */}
-      {lightboxSrc && (
+      {lightboxMedia && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={() => setLightboxSrc(null)}
+          onClick={() => setLightboxMedia(null)}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 cursor-pointer p-6"
         >
           <motion.div
             initial={{ scale: 0.85 }}
             animate={{ scale: 1 }}
-            className="relative max-w-5xl max-h-[90vh] w-full"
+            className="relative max-w-5xl max-h-[90vh] w-full flex items-center justify-center"
             onClick={e => e.stopPropagation()}
           >
-            <Image src={lightboxSrc} alt="" width={1200} height={800}
-              className="object-contain w-full h-full max-h-[85vh] rounded-xl" />
+            {lightboxMedia.mediaType === 'VIDEO' ? (
+              <video src={lightboxMedia.mediaUrl} controls autoPlay className="object-contain w-full h-full max-h-[85vh] rounded-xl outline-none" />
+            ) : (
+              <Image src={lightboxMedia.mediaUrl} alt="" width={1200} height={800}
+                className="object-contain w-full h-full max-h-[85vh] rounded-xl" />
+            )}
             <button
-              onClick={() => setLightboxSrc(null)}
+              onClick={() => setLightboxMedia(null)}
               className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors flex items-center justify-center"
             >
               ×
@@ -371,15 +375,24 @@ function GalleryItemCard({ item, index, onClick }: { item: GalleryItem; index: n
       className="break-inside-avoid mb-4 group relative cursor-pointer overflow-hidden rounded-xl"
       onClick={onClick}
     >
-      <div className="relative overflow-hidden rounded-xl">
-        <Image
-          src={item.mediaUrl}
-          alt={item.caption || ''}
-          width={600}
-          height={400}
-          className="w-full object-cover group-hover:scale-110 transition-transform duration-700"
-          style={{ aspectRatio: index % 3 === 0 ? '4/5' : index % 3 === 1 ? '1/1' : '4/3' }}
-        />
+      <div className="relative overflow-hidden rounded-xl bg-black/20">
+        {item.mediaType === 'VIDEO' ? (
+          <video
+            src={item.mediaUrl}
+            className="w-full object-cover group-hover:scale-110 transition-transform duration-700 pointer-events-none"
+            style={{ aspectRatio: index % 3 === 0 ? '4/5' : index % 3 === 1 ? '1/1' : '4/3' }}
+            muted loop playsInline
+          />
+        ) : (
+          <Image
+            src={item.mediaUrl}
+            alt={item.caption || ''}
+            width={600}
+            height={400}
+            className="w-full object-cover group-hover:scale-110 transition-transform duration-700"
+            style={{ aspectRatio: index % 3 === 0 ? '4/5' : index % 3 === 1 ? '1/1' : '4/3' }}
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         {item.caption && (
           <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">

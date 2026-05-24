@@ -25,6 +25,8 @@ export default function MusicPlayer({ url }: MusicPlayerProps) {
   }, []);
 
   useEffect(() => {
+    let wasPlayingBeforeTempPause = false;
+
     const handlePlayEvent = async () => {
       const audio = audioRef.current;
       if (!audio) return;
@@ -36,8 +38,36 @@ export default function MusicPlayer({ url }: MusicPlayerProps) {
         console.log('Autoplay blocked', e);
       }
     };
+
+    const handleTempPause = () => {
+      const audio = audioRef.current;
+      if (!audio) return;
+      wasPlayingBeforeTempPause = !audio.paused;
+      if (!audio.paused) {
+        audio.pause();
+        setPlaying(false);
+      }
+    };
+
+    const handleTempResume = async () => {
+      if (wasPlayingBeforeTempPause) {
+        const audio = audioRef.current;
+        if (!audio) return;
+        try {
+          await audio.play();
+          setPlaying(true);
+        } catch (e) {}
+      }
+    };
+
     window.addEventListener('play-ambient-music', handlePlayEvent);
-    return () => window.removeEventListener('play-ambient-music', handlePlayEvent);
+    window.addEventListener('temp-pause-music', handleTempPause);
+    window.addEventListener('temp-resume-music', handleTempResume);
+    return () => {
+      window.removeEventListener('play-ambient-music', handlePlayEvent);
+      window.removeEventListener('temp-pause-music', handleTempPause);
+      window.removeEventListener('temp-resume-music', handleTempResume);
+    };
   }, []);
 
   useEffect(() => {

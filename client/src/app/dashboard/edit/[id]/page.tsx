@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import {
   Save, Globe, Eye, Lock, Unlock, Music, Image, Clock,
-  Plus, Trash2, Sparkles, Calendar, ExternalLink, Copy,
+  Plus, Trash2, Sparkles, Calendar, ExternalLink, Copy, Film
 } from 'lucide-react';
 import { projectsAPI, aiAPI } from '@/lib/api';
 import MediaUploader from '@/components/shared/MediaUploader';
@@ -927,14 +927,23 @@ function GalleryEditor({ projectId, initialItems }: { projectId: string; initial
   return (
     <div>
       <h3 className="font-serif text-xl text-rose-cream mb-5">Gallery</h3>
-      <MediaUploader projectId={projectId} accept="image" maxFiles={20} label="Upload gallery photos" onUpload={onUpload} />
+      <MediaUploader projectId={projectId} accept="all" maxFiles={20} label="Upload gallery photos & videos" onUpload={onUpload} />
 
       {items.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
           {items.map((item) => (
             <div key={item.id} className="relative group rounded-xl overflow-hidden glass-card p-2">
-              <div className="aspect-square rounded-lg overflow-hidden">
-                <img src={item.mediaUrl} alt={item.caption || ''} className="w-full h-full object-cover" />
+              <div className="aspect-square rounded-lg overflow-hidden bg-black/5 relative">
+                {item.mediaType === 'VIDEO' ? (
+                  <>
+                    <video src={item.mediaUrl} className="w-full h-full object-cover" muted playsInline />
+                    <div className="absolute top-2 left-2 bg-black/50 rounded-md p-1">
+                      <Film size={14} className="text-white" />
+                    </div>
+                  </>
+                ) : (
+                  <img src={item.mediaUrl} alt={item.caption || ''} className="w-full h-full object-cover" />
+                )}
               </div>
               {/* Caption editing */}
               <div className="mt-2">
