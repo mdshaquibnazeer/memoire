@@ -34,10 +34,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-noir-midnight flex items-center justify-center px-6 relative overflow-hidden">
+    <div className="min-h-screen bg-noir-midnight flex items-center justify-center px-4 sm:px-6 py-8 relative overflow-hidden">
       {/* Background */}
-      <div className="absolute inset-0">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-8"
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(600px,120vw)] h-[min(600px,120vw)] rounded-full opacity-8"
           style={{ background: 'radial-gradient(circle, rgba(232, 196, 184, 0.08) 0%, transparent 70%)' }} />
       </div>
 
@@ -48,15 +48,15 @@ export default function LoginPage() {
         className="w-full max-w-md relative z-10"
       >
         {/* Logo */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-8 sm:mb-10">
           <Link href="/">
-            <span className="font-serif text-4xl text-gradient">Mémoire</span>
+            <span className="font-serif text-3xl sm:text-4xl text-gradient">Mémoire</span>
           </Link>
           <p className="font-script text-rose-deep mt-2">welcome back</p>
         </div>
 
-        <div className="glass-card p-8">
-          <h1 className="font-serif text-2xl text-rose-cream mb-8">Sign in to your account</h1>
+        <div className="glass-card p-6 sm:p-8">
+          <h1 className="font-serif text-xl sm:text-2xl text-rose-cream mb-6 sm:mb-8">Sign in to your account</h1>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div>

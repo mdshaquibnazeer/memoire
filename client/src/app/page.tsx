@@ -71,26 +71,33 @@ export default function HomePage() {
       <FloatingParticles />
 
       {/* NAV */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-5">
+      <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 py-4 sm:py-5"
+        style={{
+          background: 'rgba(13, 6, 20, 0.75)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          borderBottom: '1px solid rgba(232, 196, 184, 0.05)',
+        }}
+      >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <span className="font-serif text-2xl text-gradient">Mémoire</span>
+            <span className="font-serif text-xl sm:text-2xl text-gradient">Mémoire</span>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
-            className="flex items-center gap-4"
+            className="flex items-center gap-2 sm:gap-4"
           >
-            <Link href="/login" className="btn-ghost text-sm">
+            <Link href="/login" className="btn-ghost text-xs sm:text-sm">
               Sign In
             </Link>
-            <Link href="/register" className="btn-romantic text-sm">
+            <Link href="/register" className="btn-romantic text-xs sm:text-sm">
               <span>Begin Your Story</span>
             </Link>
           </motion.div>
@@ -98,28 +105,28 @@ export default function HomePage() {
       </nav>
 
       {/* HERO */}
-      <section ref={heroRef} className="relative pt-32 pb-16 flex flex-col items-center justify-center">
+      <section ref={heroRef} className="relative pt-24 sm:pt-28 md:pt-32 pb-12 sm:pb-16 flex flex-col items-center justify-center">
         {/* Background glow */}
-        <div className="absolute inset-0">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full opacity-10"
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(800px,150vw)] h-[min(800px,150vw)] rounded-full opacity-10"
             style={{ background: 'radial-gradient(circle, #e8c4b8 0%, transparent 70%)' }} />
-          <div className="absolute top-1/4 right-1/4 w-[400px] h-[400px] rounded-full opacity-5"
+          <div className="absolute top-1/4 right-1/4 w-[min(400px,80vw)] h-[min(400px,80vw)] rounded-full opacity-5"
             style={{ background: 'radial-gradient(circle, #d4af7a 0%, transparent 70%)' }} />
         </div>
 
-        <motion.div style={{ y, opacity }} className="relative z-10 text-center px-6 max-w-5xl mx-auto">
+        <motion.div style={{ y, opacity }} className="relative z-10 text-center px-5 sm:px-6 max-w-5xl mx-auto">
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="font-script text-2xl text-rose-deep mb-6 tracking-widest"
+            className="font-script text-lg sm:text-xl md:text-2xl text-rose-deep mb-4 sm:mb-6 tracking-widest"
           >
             for the moments that matter most
           </motion.p>
 
           <CinematicText
             text="Where Memories Become Art"
-            className="font-serif text-6xl md:text-8xl font-bold leading-tight mb-8"
+            className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold leading-tight mb-6 sm:mb-8"
             delay={0.7}
           />
 
@@ -127,7 +134,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.2 }}
-            className="text-xl md:text-2xl text-rose-cream/60 font-sans font-light mb-12 max-w-2xl mx-auto leading-relaxed"
+            className="text-base sm:text-lg md:text-xl lg:text-2xl text-rose-cream/60 font-sans font-light mb-8 sm:mb-12 max-w-2xl mx-auto leading-relaxed"
           >
             Craft cinematic, emotionally resonant websites for anniversaries, weddings,
             birthdays, and love stories that deserve more than a photo album.
@@ -137,12 +144,12 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.5 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
+            className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center"
           >
-            <Link href="/register" className="btn-romantic text-lg px-10 py-4">
+            <Link href="/register" className="btn-romantic text-base sm:text-lg px-8 sm:px-10 py-3 sm:py-4">
               <span>Create Your Memory</span>
             </Link>
-            <Link href="/demo" className="btn-ghost text-lg px-10 py-4">
+            <Link href="/demo" className="btn-ghost text-base sm:text-lg px-8 sm:px-10 py-3 sm:py-4">
               See a Demo
             </Link>
           </motion.div>
@@ -151,7 +158,7 @@ export default function HomePage() {
       </section>
 
       {/* THEMES SECTION */}
-      <section className="py-12 px-6 relative">
+      <section className="py-8 sm:py-12 px-4 sm:px-6 relative">
         <div className="max-w-7xl mx-auto">
           <SectionHeader
             eyebrow="Three Worlds"
@@ -159,7 +166,7 @@ export default function HomePage() {
             subtitle="Each theme is a complete visual universe with unique animations, typography, and emotional resonance."
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mt-10 sm:mt-16">
             {themes.map((theme, i) => (
               <ThemeCard key={theme.id} theme={theme} index={i} />
             ))}
@@ -168,7 +175,7 @@ export default function HomePage() {
       </section>
 
       {/* FEATURES */}
-      <section className="py-32 px-6">
+      <section className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
           <SectionHeader
             eyebrow="Everything You Need"
@@ -176,7 +183,7 @@ export default function HomePage() {
             subtitle="Every feature crafted to help you tell the story only you can tell."
           />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mt-10 sm:mt-16">
             {features.map((f, i) => (
               <FeatureCard key={f.title} feature={f} index={i} />
             ))}
@@ -185,16 +192,16 @@ export default function HomePage() {
       </section>
 
       {/* SOCIAL PROOF */}
-      <section className="py-32 px-6">
+      <section className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
           <RevealSection>
-            <div className="glass-card p-12 text-center relative overflow-hidden">
+            <div className="glass-card p-8 sm:p-10 lg:p-12 text-center relative overflow-hidden">
               <div className="absolute inset-0 opacity-5"
                 style={{ background: 'radial-gradient(circle at center, #e8c4b8 0%, transparent 70%)' }} />
-              <p className="font-script text-3xl text-rose-blush mb-6 relative z-10">
+              <p className="font-script text-xl sm:text-2xl lg:text-3xl text-rose-blush mb-4 sm:mb-6 relative z-10">
                 "She cried before she even finished reading the first line."
               </p>
-              <p className="text-rose-cream/50 font-sans text-sm tracking-widest uppercase relative z-10">
+              <p className="text-rose-cream/50 font-sans text-xs sm:text-sm tracking-widest uppercase relative z-10">
                 — Marco, on their 10th anniversary
               </p>
             </div>
@@ -203,17 +210,17 @@ export default function HomePage() {
       </section>
 
       {/* CTA */}
-      <section className="py-32 px-6">
+      <section className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto text-center">
           <RevealSection>
-            <p className="font-script text-3xl text-rose-deep mb-4">ready to begin?</p>
-            <h2 className="font-serif text-5xl md:text-6xl font-bold mb-8">
+            <p className="font-script text-xl sm:text-2xl lg:text-3xl text-rose-deep mb-3 sm:mb-4">ready to begin?</p>
+            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 sm:mb-8">
               <span className="text-gradient">Your Story Awaits</span>
             </h2>
-            <p className="text-rose-cream/50 text-xl mb-12 font-sans">
+            <p className="text-rose-cream/50 text-base sm:text-lg lg:text-xl mb-8 sm:mb-12 font-sans">
               Free to start. No credit card. Just your memories and a few minutes.
             </p>
-            <Link href="/register" className="btn-romantic text-xl px-14 py-5">
+            <Link href="/register" className="btn-romantic text-base sm:text-lg lg:text-xl px-8 sm:px-10 lg:px-14 py-3 sm:py-4 lg:py-5">
               <span>Begin Creating →</span>
             </Link>
           </RevealSection>
@@ -221,13 +228,13 @@ export default function HomePage() {
       </section>
 
       {/* FOOTER */}
-      <footer className="py-12 px-6 border-t border-white/5">
+      <footer className="py-8 sm:py-12 px-4 sm:px-6 border-t border-white/5">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <span className="font-serif text-xl text-gradient">Mémoire</span>
-          <p className="text-rose-cream/30 text-sm font-sans">
+          <p className="text-rose-cream/30 text-xs sm:text-sm font-sans">
             © 2025 Mémoire. Made with love, for love.
           </p>
-          <div className="flex gap-6 text-rose-cream/40 text-sm font-sans">
+          <div className="flex gap-6 text-rose-cream/40 text-xs sm:text-sm font-sans">
             <Link href="/privacy" className="hover:text-rose-blush transition-colors">Privacy</Link>
             <Link href="/terms" className="hover:text-rose-blush transition-colors">Terms</Link>
           </div>
@@ -251,11 +258,11 @@ function SectionHeader({ eyebrow, title, subtitle }: { eyebrow: string; title: s
       initial={{ opacity: 0, y: 40 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.8, ease: 'easeOut' }}
-      className="text-center"
+      className="text-center px-2"
     >
-      <p className="font-script text-xl text-rose-deep mb-4 tracking-wide">{eyebrow}</p>
-      <h2 className="font-serif text-5xl md:text-6xl font-bold text-rose-cream mb-6">{title}</h2>
-      <p className="text-rose-cream/50 text-xl max-w-2xl mx-auto font-sans">{subtitle}</p>
+      <p className="font-script text-lg sm:text-xl text-rose-deep mb-3 sm:mb-4 tracking-wide">{eyebrow}</p>
+      <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-rose-cream mb-4 sm:mb-6">{title}</h2>
+      <p className="text-rose-cream/50 text-base sm:text-lg lg:text-xl max-w-2xl mx-auto font-sans">{subtitle}</p>
     </motion.div>
   );
 }
@@ -270,7 +277,7 @@ function ThemeCard({ theme, index }: { theme: typeof themes[0]; index: number })
       initial={{ opacity: 0, y: 60 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.7, delay: index * 0.15, ease: 'easeOut' }}
-      className="group glass-card-hover p-8 cursor-pointer"
+      className="group glass-card-hover p-5 sm:p-6 lg:p-8 cursor-pointer"
     >
       <div className="text-5xl mb-6">{theme.preview}</div>
       <h3 className="font-serif text-2xl font-semibold mb-3" style={{ color: theme.accent }}>

@@ -20,10 +20,10 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="max-w-2xl space-y-8">
+    <div className="max-w-2xl space-y-6 sm:space-y-8">
       <div>
-        <h1 className="font-serif text-4xl font-bold text-rose-cream">Settings</h1>
-        <p className="text-rose-cream/40 font-sans mt-2">
+        <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-rose-cream">Settings</h1>
+        <p className="text-rose-cream/40 font-sans mt-1 sm:mt-2 text-sm sm:text-base">
           Manage your account and preferences.
         </p>
       </div>

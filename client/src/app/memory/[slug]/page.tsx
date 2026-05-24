@@ -86,12 +86,12 @@ export default function MemoryPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-noir-midnight flex items-center justify-center">
+      <div className="min-h-screen bg-noir-midnight flex items-center justify-center px-4">
         <div className="text-center">
           <motion.div
             animate={{ opacity: [0.3, 1, 0.3] }}
             transition={{ duration: 2, repeat: Infinity }}
-            className="font-serif text-4xl text-gradient mb-3"
+            className="font-serif text-3xl sm:text-4xl text-gradient mb-3"
           >
             Mémoire
           </motion.div>
@@ -103,16 +103,16 @@ export default function MemoryPage() {
 
   if (requiresPassword) {
     return (
-      <div className="min-h-screen bg-noir-midnight flex items-center justify-center px-6">
+      <div className="min-h-screen bg-noir-midnight flex items-center justify-center px-4 sm:px-6">
         <FloatingParticles />
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="glass-card p-10 max-w-sm w-full text-center relative z-10"
+          className="glass-card p-6 sm:p-8 lg:p-10 max-w-sm w-full text-center relative z-10"
         >
           <div className="text-4xl mb-4">🔒</div>
-          <h2 className="font-serif text-2xl text-rose-cream mb-2">Private Memory</h2>
-          <p className="text-rose-cream/40 font-sans text-sm mb-6">
+          <h2 className="font-serif text-xl sm:text-2xl text-rose-cream mb-2">Private Memory</h2>
+          <p className="text-rose-cream/40 font-sans text-sm mb-5 sm:mb-6">
             This memory is password protected.
           </p>
           <input

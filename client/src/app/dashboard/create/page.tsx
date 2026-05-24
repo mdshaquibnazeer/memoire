@@ -109,23 +109,23 @@ export default function CreateProjectPage() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
-        <p className="font-script text-xl text-rose-deep mb-1">new creation</p>
-        <h1 className="font-serif text-4xl font-bold text-rose-cream">Tell Your Story</h1>
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8 sm:mb-10">
+        <p className="font-script text-lg sm:text-xl text-rose-deep mb-1">new creation</p>
+        <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-rose-cream">Tell Your Story</h1>
       </motion.div>
 
       {/* Step indicators */}
-      <div className="flex items-center gap-3 mb-10">
+      <div className="flex items-center gap-2 sm:gap-3 mb-8 sm:mb-10 overflow-x-auto pb-2">
         {steps.map((s, i) => (
-          <div key={s} className="flex items-center gap-3">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-sans transition-all duration-300 ${
+          <div key={s} className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-sans transition-all duration-300 flex-shrink-0 ${
               i === step ? 'text-noir-midnight font-bold' : i < step ? 'bg-white/10 text-rose-cream/60' : 'bg-white/5 text-rose-cream/30'
             }`}
               style={i === step ? { background: 'linear-gradient(135deg, #e8c4b8, #c4a882)' } : {}}>
               {i < step ? '✓' : i + 1}
             </div>
-            <span className={`font-sans text-sm ${i === step ? 'text-rose-cream' : 'text-rose-cream/30'}`}>{s}</span>
-            {i < steps.length - 1 && <div className="w-8 h-px bg-white/10" />}
+            <span className={`font-sans text-xs sm:text-sm hidden sm:inline ${i === step ? 'text-rose-cream' : 'text-rose-cream/30'}`}>{s}</span>
+            {i < steps.length - 1 && <div className="w-4 sm:w-8 h-px bg-white/10" />}
           </div>
         ))}
       </div>
@@ -212,7 +212,7 @@ export default function CreateProjectPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-rose-cream/60 text-sm font-sans mb-2">Name 1</label>
                   <input {...register('personOneName')} placeholder="Emma" className="input-romantic" />
@@ -289,7 +289,7 @@ export default function CreateProjectPage() {
         </AnimatePresence>
 
         {/* Navigation */}
-        <div className="flex items-center justify-between mt-10">
+        <div className="flex items-center justify-between mt-8 sm:mt-10">
           {step > 0 ? (
             <button type="button" onClick={() => setStep(s => s - 1)} className="btn-ghost flex items-center gap-2">
               <ChevronLeft size={18} /> Back

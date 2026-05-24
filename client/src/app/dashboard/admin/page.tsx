@@ -270,19 +270,19 @@ export default function AdminCornerPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       {/* Title */}
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between">
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <p className="font-script text-xl text-rose-deep mb-1">administrative console</p>
-          <h1 className="font-serif text-4xl font-bold text-rose-cream flex items-center gap-3">
-            <ShieldCheck className="text-rose-blush" size={32} /> Admin Corner
+          <p className="font-script text-lg sm:text-xl text-rose-deep mb-1">administrative console</p>
+          <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-rose-cream flex items-center gap-2 sm:gap-3">
+            <ShieldCheck className="text-rose-blush" size={24} /> Admin Corner
           </h1>
         </div>
-        <div className="flex gap-2 bg-white/5 p-1 rounded-xl border border-white/5">
+        <div className="flex gap-2 bg-white/5 p-1 rounded-xl border border-white/5 self-start sm:self-auto">
           {(['dashboard', 'users', 'projects'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-lg text-sm font-sans capitalize transition-all duration-200 ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-sans capitalize transition-all duration-200 ${
                 activeTab === tab 
                   ? 'text-noir-midnight font-bold' 
                   : 'text-rose-cream/60 hover:text-rose-cream'
@@ -306,7 +306,7 @@ export default function AdminCornerPage() {
             className="space-y-8"
           >
             {/* Overview Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
               {[
                 { label: 'Total Accounts', value: stats?.userCount ?? 0, icon: Users, delay: 0 },
                 { label: 'Total Projects', value: stats?.projectCount ?? 0, icon: FolderHeart, delay: 0.05 },
@@ -325,7 +325,7 @@ export default function AdminCornerPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: item.delay }}
-                  className={`glass-card p-5 relative overflow-hidden flex flex-col justify-between min-h-[120px] ${
+                  className={`glass-card p-4 sm:p-5 relative overflow-hidden flex flex-col justify-between min-h-[100px] sm:min-h-[120px] ${
                     item.alert ? 'border-rose-wine/40 bg-rose-wine/5' : ''
                   }`}
                 >
@@ -433,7 +433,7 @@ export default function AdminCornerPage() {
             {/* Users table/list */}
             <div className="glass-card overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
+                <table className="w-full text-left border-collapse min-w-[700px]">
                   <thead>
                     <tr className="border-b border-white/5 text-rose-cream/40 font-sans text-xs uppercase tracking-wider">
                       <th className="p-4 pl-6">User details</th>
@@ -587,7 +587,7 @@ export default function AdminCornerPage() {
             {/* Projects list */}
             <div className="glass-card overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
+                <table className="w-full text-left border-collapse min-w-[700px]">
                   <thead>
                     <tr className="border-b border-white/5 text-rose-cream/40 font-sans text-xs uppercase tracking-wider">
                       <th className="p-4 pl-6">Project details</th>
@@ -696,7 +696,7 @@ export default function AdminCornerPage() {
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="relative w-full max-w-lg p-8 rounded-3xl border border-white/10 bg-noir-deep shadow-2xl overflow-hidden"
+              className="relative w-full max-w-lg mx-4 p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-white/10 bg-noir-deep shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto"
               style={{
                 background: 'linear-gradient(135deg, rgba(36,15,66,0.98), rgba(15,5,30,0.98))',
                 backdropFilter: 'blur(30px)'

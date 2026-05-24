@@ -41,13 +41,30 @@
     @apply border-[hsl(var(--border))];
   }
 
+  html {
+    overflow-x: hidden;
+  }
+
   body {
     @apply bg-noir-midnight text-rose-cream;
     font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: 18px;
+    font-size: 16px;
     line-height: 1.7;
+    overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  @media (min-width: 640px) {
+    body {
+      font-size: 17px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    body {
+      font-size: 18px;
+    }
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -99,7 +116,7 @@
 
   /* Romantic Button */
   .btn-romantic {
-    @apply relative overflow-hidden px-8 py-3 rounded-full font-serif text-noir-midnight font-semibold transition-all duration-300;
+    @apply relative overflow-hidden px-6 py-2.5 sm:px-8 sm:py-3 rounded-full font-serif text-noir-midnight font-semibold transition-all duration-300 text-sm sm:text-base;
     background: linear-gradient(135deg, #e8c4b8, #c4a882);
     box-shadow: 0 0 30px rgba(232, 196, 184, 0.3);
   }
@@ -129,7 +146,7 @@
 
   /* Ghost Button */
   .btn-ghost {
-    @apply px-6 py-2.5 rounded-full border font-serif transition-all duration-300;
+    @apply px-4 py-2 sm:px-6 sm:py-2.5 rounded-full border font-serif transition-all duration-300 text-sm sm:text-base;
     border-color: rgba(232, 196, 184, 0.3);
     color: #e8c4b8;
   }
@@ -182,10 +199,22 @@
 
   /* Input Styles */
   .input-romantic {
-    @apply w-full px-4 py-3 rounded-xl font-sans text-rose-cream transition-all duration-300 outline-none;
+    @apply w-full px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl font-sans text-rose-cream transition-all duration-300 outline-none;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(232, 196, 184, 0.15);
     font-size: 16px;
+  }
+
+  /* Scrollbar thin utility */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(232, 196, 184, 0.15);
+    border-radius: 2px;
   }
 
   .input-romantic:focus {

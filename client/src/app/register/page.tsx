@@ -42,9 +42,9 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-noir-midnight flex items-center justify-center px-6 py-12 relative overflow-hidden">
-      <div className="absolute inset-0">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full"
+    <div className="min-h-screen bg-noir-midnight flex items-center justify-center px-4 sm:px-6 py-8 relative overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(600px,120vw)] h-[min(600px,120vw)] rounded-full"
           style={{ background: 'radial-gradient(circle, rgba(212, 175, 122, 0.06) 0%, transparent 70%)' }} />
       </div>
 
@@ -54,13 +54,13 @@ export default function RegisterPage() {
         transition={{ duration: 0.8 }}
         className="w-full max-w-md relative z-10"
       >
-        <div className="text-center mb-10">
-          <Link href="/"><span className="font-serif text-4xl text-gradient">Mémoire</span></Link>
+        <div className="text-center mb-8 sm:mb-10">
+          <Link href="/"><span className="font-serif text-3xl sm:text-4xl text-gradient">Mémoire</span></Link>
           <p className="font-script text-rose-deep mt-2">begin your story</p>
         </div>
 
-        <div className="glass-card p-8">
-          <h1 className="font-serif text-2xl text-rose-cream mb-8">Create your account</h1>
+        <div className="glass-card p-6 sm:p-8">
+          <h1 className="font-serif text-xl sm:text-2xl text-rose-cream mb-6 sm:mb-8">Create your account</h1>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>

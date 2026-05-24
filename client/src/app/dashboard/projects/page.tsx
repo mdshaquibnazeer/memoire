@@ -73,14 +73,14 @@ export default function ProjectsPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif text-4xl font-bold text-rose-cream">My Memories</h1>
-          <p className="text-rose-cream/40 font-sans mt-2">
+          <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-rose-cream">My Memories</h1>
+          <p className="text-rose-cream/40 font-sans mt-1 sm:mt-2 text-sm sm:text-base">
             A collection of your beautiful stories.
           </p>
         </div>
-        <Link href="/dashboard/create" className="btn-romantic">
+        <Link href="/dashboard/create" className="btn-romantic self-start sm:self-auto">
           <Plus size={18} className="mr-2" />
           <span>New Memory</span>
         </Link>

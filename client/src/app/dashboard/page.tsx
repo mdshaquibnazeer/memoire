@@ -71,13 +71,13 @@ export default function DashboardPage() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-10"
+        className="mb-8 sm:mb-10"
       >
-        <p className="font-script text-xl text-rose-deep mb-1">welcome back</p>
-        <h1 className="font-serif text-4xl font-bold text-rose-cream">
+        <p className="font-script text-lg sm:text-xl text-rose-deep mb-1">welcome back</p>
+        <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-rose-cream">
           {user?.displayName || user?.username}
         </h1>
-        <p className="text-rose-cream/40 font-sans mt-2">
+        <p className="text-rose-cream/40 font-sans mt-2 text-sm sm:text-base">
           {projects.length === 0
             ? 'Your stories are waiting to be told.'
             : `${projects.length} memor${projects.length === 1 ? 'y' : 'ies'} crafted`}
@@ -85,7 +85,7 @@ export default function DashboardPage() {
       </motion.div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-8 sm:mb-10">
         {[
           { label: 'Total Memories', value: projects.length },
           { label: 'Published', value: projects.filter(p => p.status === 'PUBLISHED').length },
@@ -96,17 +96,17 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="glass-card p-5 text-center"
+            className="glass-card p-4 sm:p-5 text-center"
           >
-            <p className="font-serif text-3xl font-bold text-gradient">{stat.value}</p>
-            <p className="text-rose-cream/40 font-sans text-sm mt-1">{stat.label}</p>
+            <p className="font-serif text-2xl sm:text-3xl font-bold text-gradient">{stat.value}</p>
+            <p className="text-rose-cream/40 font-sans text-xs sm:text-sm mt-1">{stat.label}</p>
           </motion.div>
         ))}
       </div>
 
       {/* Projects Grid */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="font-serif text-2xl text-rose-cream">Recent Memories</h2>
+      <div className="flex items-center justify-between mb-5 sm:mb-6">
+        <h2 className="font-serif text-xl sm:text-2xl text-rose-cream">Recent Memories</h2>
         <Link href="/dashboard/projects" className="btn-ghost text-sm">View All</Link>
       </div>
 
@@ -233,7 +233,7 @@ function ProjectCard({ project, index, onDelete }: {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-2 mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div className="flex items-center gap-2 mt-4 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
           {project.status === 'PUBLISHED' && (
             <a
               href={`${APP_URL}/memory/${project.slug}`}

@@ -30,7 +30,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-noir-midnight flex items-center justify-center px-6 relative overflow-hidden">
+    <div className="min-h-screen bg-noir-midnight flex items-center justify-center px-4 sm:px-6 py-8 relative overflow-hidden">
       {/* Animated Floating Orbs */}
       <motion.div 
         animate={{ y: [0, -20, 0], opacity: [0.3, 0.5, 0.3] }}
@@ -49,12 +49,12 @@ export default function ForgotPasswordPage() {
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="w-full max-w-md relative z-10"
       >
-        <div className="text-center mb-10">
-          <Link href="/"><span className="font-serif text-5xl text-gradient tracking-tight">Mémoire</span></Link>
-          <p className="font-script text-rose-deep mt-3 text-xl">reclaim your memories</p>
+        <div className="text-center mb-8 sm:mb-10">
+          <Link href="/"><span className="font-serif text-3xl sm:text-4xl lg:text-5xl text-gradient tracking-tight">Mémoire</span></Link>
+          <p className="font-script text-rose-deep mt-2 sm:mt-3 text-lg sm:text-xl">reclaim your memories</p>
         </div>
 
-        <div className="glass-card p-10 relative shadow-2xl shadow-rose-deep/5 border border-rose-cream/10">
+        <div className="glass-card p-6 sm:p-8 lg:p-10 relative shadow-2xl shadow-rose-deep/5 border border-rose-cream/10">
           {isSubmitted ? (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
               <div className="w-16 h-16 bg-rose-cream/10 rounded-full flex items-center justify-center mx-auto mb-6">

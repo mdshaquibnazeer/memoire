@@ -42,7 +42,7 @@ function ResetPasswordForm() {
   if (!token) return null;
 
   return (
-    <div className="min-h-screen bg-noir-midnight flex items-center justify-center px-6 relative overflow-hidden">
+    <div className="min-h-screen bg-noir-midnight flex items-center justify-center px-4 sm:px-6 py-8 relative overflow-hidden">
       {/* Animated Floating Orbs */}
       <motion.div 
         animate={{ scale: [1, 1.1, 1], opacity: [0.2, 0.4, 0.2] }}
@@ -56,13 +56,13 @@ function ResetPasswordForm() {
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="w-full max-w-md relative z-10"
       >
-        <div className="text-center mb-10">
-          <Link href="/"><span className="font-serif text-5xl text-gradient tracking-tight">Mémoire</span></Link>
-          <p className="font-script text-[#c4a882] mt-3 text-xl">a fresh start</p>
+        <div className="text-center mb-8 sm:mb-10">
+          <Link href="/"><span className="font-serif text-3xl sm:text-4xl lg:text-5xl text-gradient tracking-tight">Mémoire</span></Link>
+          <p className="font-script text-[#c4a882] mt-2 sm:mt-3 text-lg sm:text-xl">a fresh start</p>
         </div>
 
-        <div className="glass-card p-10 relative shadow-2xl shadow-[#c4a882]/5 border border-rose-cream/10">
-          <h1 className="font-serif text-2xl text-rose-cream mb-8">Set New Password</h1>
+        <div className="glass-card p-6 sm:p-8 lg:p-10 relative shadow-2xl shadow-[#c4a882]/5 border border-rose-cream/10">
+          <h1 className="font-serif text-xl sm:text-2xl text-rose-cream mb-6 sm:mb-8">Set New Password</h1>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>
