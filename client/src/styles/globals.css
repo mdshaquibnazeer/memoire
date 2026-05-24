@@ -29,20 +29,26 @@
 
     /* Mémoire Design Tokens */
     --noir-midnight: #0d0614;
+    --noir-midnight-rgb: 13, 6, 20;
     --noir-deep: #1a0a2e;
+    --noir-deep-rgb: 26, 10, 46;
     --noir-purple: #2d1650;
     --rose-cream: #f0e6d3;
     --rose-blush: #e8c4b8;
+    --rose-blush-rgb: 232, 196, 184;
     --rose-deep: #c4a882;
     --gold-soft: #d4af7a;
   }
 
   html.light {
     --noir-midnight: #FDFBF7;
+    --noir-midnight-rgb: 253, 251, 247;
     --noir-deep: #F6F1EA;
+    --noir-deep-rgb: 246, 241, 234;
     --noir-purple: #ECDAD0;
     --rose-cream: #1B0F0C;
     --rose-blush: #B86B5A;
+    --rose-blush-rgb: 184, 107, 90;
     --rose-deep: #8C473A;
     --gold-soft: #A67332;
   }

@@ -11,20 +11,20 @@ module.exports = {
       colors: {
         // Romantic Glow Palette
         rose: {
-          cream: '#f0e6d3',
-          blush: '#e8c4b8',
+          cream: 'var(--rose-cream)',
+          blush: 'var(--rose-blush)',
           petal: '#d4a0a0',
-          deep: '#c4a882',
+          deep: 'var(--rose-deep)',
           wine: '#8b4a6b',
         },
         noir: {
-          midnight: '#0d0614',
-          deep: '#1a0a2e',
-          purple: '#2d1650',
+          midnight: 'var(--noir-midnight)',
+          deep: 'var(--noir-deep)',
+          purple: 'var(--noir-purple)',
           mist: '#3d2465',
         },
         gold: {
-          soft: '#d4af7a',
+          soft: 'var(--gold-soft)',
           warm: '#c9a55a',
           rose: '#b8956a',
         },

@@ -127,8 +127,8 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4"
         style={{
-          background: 'rgba(13, 6, 20, 0.92)',
-          borderBottom: '1px solid rgba(232, 196, 184, 0.08)',
+          background: 'rgba(var(--noir-midnight-rgb), 0.92)',
+          borderBottom: '1px solid rgba(var(--rose-blush-rgb), 0.08)',
           backdropFilter: 'blur(20px)',
         }}
       >
@@ -162,8 +162,8 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               className="lg:hidden fixed top-0 left-0 bottom-0 z-50 w-[280px] max-w-[85vw] flex flex-col"
               style={{
-                background: 'rgba(26, 10, 46, 0.98)',
-                borderRight: '1px solid rgba(232, 196, 184, 0.08)',
+                background: 'rgba(var(--noir-deep-rgb), 0.98)',
+                borderRight: '1px solid rgba(var(--rose-blush-rgb), 0.08)',
                 backdropFilter: 'blur(20px)',
               }}
             >
@@ -180,8 +180,8 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         transition={{ duration: 0.6, ease: 'easeOut' }}
         className="hidden lg:flex w-64 fixed top-0 left-0 bottom-0 z-40 flex-col"
         style={{
-          background: 'rgba(26, 10, 46, 0.95)',
-          borderRight: '1px solid rgba(232, 196, 184, 0.08)',
+          background: 'rgba(var(--noir-deep-rgb), 0.95)',
+          borderRight: '1px solid rgba(var(--rose-blush-rgb), 0.08)',
           backdropFilter: 'blur(20px)',
         }}
       >

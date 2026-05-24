@@ -76,10 +76,10 @@ export default function HomePage() {
       {/* NAV */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 py-4 sm:py-5"
         style={{
-          background: 'rgba(13, 6, 20, 0.75)',
+          background: 'rgba(var(--noir-midnight-rgb), 0.75)',
           backdropFilter: 'blur(12px)',
           WebkitBackdropFilter: 'blur(12px)',
-          borderBottom: '1px solid rgba(232, 196, 184, 0.05)',
+          borderBottom: '1px solid rgba(var(--rose-blush-rgb), 0.05)',
         }}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
