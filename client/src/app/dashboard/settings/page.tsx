@@ -5,10 +5,15 @@ import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { User, Mail, Shield, Bell } from 'lucide-react';
+import { authAPI } from '@/lib/api';
 
 export default function SettingsPage() {
   const { user } = useAuth();
   const [isUpdating, setIsUpdating] = useState(false);
+
+  // Password state
+  const [pwdForm, setPwdForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [pwdChanging, setPwdChanging] = useState(false);
 
   const handleUpdate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,6 +22,32 @@ export default function SettingsPage() {
       toast.success('Settings updated successfully');
       setIsUpdating(false);
     }, 1000);
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (pwdForm.newPassword !== pwdForm.confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+    if (pwdForm.newPassword.length < 6) {
+      toast.error('New password must be at least 6 characters');
+      return;
+    }
+    
+    setPwdChanging(true);
+    try {
+      await authAPI.changePassword({
+        currentPassword: pwdForm.currentPassword,
+        newPassword: pwdForm.newPassword,
+      });
+      toast.success('Password updated successfully ✨');
+      setPwdForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Failed to update password');
+    } finally {
+      setPwdChanging(false);
+    }
   };
 
   return (
@@ -89,10 +120,51 @@ export default function SettingsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="glass-card p-6 opacity-50">
+        <div className="glass-card p-6">
           <Shield size={24} className="text-rose-deep mb-4" />
-          <h4 className="font-serif text-lg text-rose-cream mb-2">Security</h4>
-          <p className="text-sm text-rose-cream/40 font-sans">Password and 2FA settings coming soon.</p>
+          <h4 className="font-serif text-lg text-rose-cream mb-2">Change Password</h4>
+          <form onSubmit={handlePasswordChange} className="space-y-4">
+            <div>
+              <label className="block text-xs font-sans text-rose-cream/60 mb-1">Current Password</label>
+              <input
+                type="password"
+                value={pwdForm.currentPassword}
+                onChange={e => setPwdForm(p => ({ ...p, currentPassword: e.target.value }))}
+                className="input-romantic text-xs"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-sans text-rose-cream/60 mb-1">New Password</label>
+              <input
+                type="password"
+                value={pwdForm.newPassword}
+                onChange={e => setPwdForm(p => ({ ...p, newPassword: e.target.value }))}
+                className="input-romantic text-xs"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-sans text-rose-cream/60 mb-1">Confirm New Password</label>
+              <input
+                type="password"
+                value={pwdForm.confirmPassword}
+                onChange={e => setPwdForm(p => ({ ...p, confirmPassword: e.target.value }))}
+                className="input-romantic text-xs"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={pwdChanging}
+              className="btn-romantic w-full text-xs py-2 disabled:opacity-50"
+            >
+              <span>{pwdChanging ? 'Updating...' : 'Update Password'}</span>
+            </button>
+          </form>
         </div>
         <div className="glass-card p-6 opacity-50">
           <Bell size={24} className="text-rose-deep mb-4" />

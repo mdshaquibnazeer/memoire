@@ -37,6 +37,16 @@
     --gold-soft: #d4af7a;
   }
 
+  html.light {
+    --noir-midnight: #FDFBF7;
+    --noir-deep: #F6F1EA;
+    --noir-purple: #ECDAD0;
+    --rose-cream: #1B0F0C;
+    --rose-blush: #B86B5A;
+    --rose-deep: #8C473A;
+    --gold-soft: #A67332;
+  }
+
   * {
     @apply border-[hsl(var(--border))];
   }
@@ -101,6 +111,19 @@
     backdrop-filter: blur(12px);
     border: 1px solid rgba(232, 196, 184, 0.1);
     border-radius: 20px;
+  }
+
+  html.light .glass-card {
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(184, 107, 90, 0.12);
+  }
+
+  html.light ::-webkit-scrollbar-thumb {
+    background: rgba(184, 107, 90, 0.25);
+  }
+
+  html.light ::-webkit-scrollbar-track {
+    background: #FAF6F0;
   }
 
   .glass-card-hover {
@@ -203,6 +226,22 @@
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(232, 196, 184, 0.15);
     font-size: 16px;
+  }
+
+  html.light .input-romantic {
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(184, 107, 90, 0.2);
+    color: #1b0f0c;
+  }
+
+  html.light .input-romantic:focus {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(184, 107, 90, 0.5);
+    box-shadow: 0 0 20px rgba(184, 107, 90, 0.1);
+  }
+
+  html.light .input-romantic::placeholder {
+    color: rgba(27, 15, 12, 0.4);
   }
 
   /* Scrollbar thin utility */

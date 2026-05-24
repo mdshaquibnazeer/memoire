@@ -27,6 +27,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function() {
+            try {
+              var theme = localStorage.getItem('theme') || 'dark';
+              if (theme === 'light') {
+                document.documentElement.classList.add('light');
+              } else {
+                document.documentElement.classList.remove('light');
+              }
+            } catch (e) {}
+          })();
+        `}} />
       </head>
       <body className="bg-noir-midnight text-rose-cream antialiased" suppressHydrationWarning>
         <AuthProvider>

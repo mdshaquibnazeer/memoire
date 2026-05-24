@@ -5,15 +5,17 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutDashboard, FolderOpen, Plus, Settings, LogOut, Heart, Shield, Menu, X } from 'lucide-react';
+import { LayoutDashboard, FolderOpen, Plus, Settings, LogOut, Heart, Shield, Menu, X, Sun, Moon } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { AuthProvider } from '@/hooks/useAuth';
+import { useTheme } from '@/hooks/useTheme';
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -91,7 +93,24 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       </nav>
 
       {/* Bottom */}
-      <div className="p-3 sm:p-4 border-t border-white/5">
+      <div className="p-3 sm:p-4 border-t border-white/5 space-y-1.5">
+        <button
+          onClick={toggleTheme}
+          className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-rose-cream/40 hover:text-rose-cream hover:bg-white/5 transition-all duration-200 font-sans text-sm"
+        >
+          {theme === 'dark' ? (
+            <>
+              <Sun size={18} className="text-amber-300 animate-pulse" />
+              <span>Light Theme</span>
+            </>
+          ) : (
+            <>
+              <Moon size={18} className="text-rose-blush" />
+              <span>Dark Theme</span>
+            </>
+          )}
+        </button>
+
         <button
           onClick={async () => { await logout(); router.push('/'); }}
           className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-rose-cream/40 hover:text-rose-cream hover:bg-white/5 transition-all duration-200 font-sans text-sm"

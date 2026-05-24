@@ -5,6 +5,8 @@ import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import Link from 'next/link';
 import FloatingParticles from '@/components/animations/FloatingParticles';
 import CinematicText from '@/components/animations/CinematicText';
+import { Sun, Moon } from 'lucide-react';
+import { useTheme } from '@/hooks/useTheme';
 
 const themes = [
   {
@@ -65,6 +67,7 @@ export default function HomePage() {
   const { scrollYProgress } = useScroll({ target: heroRef });
   const y = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <main className="min-h-screen bg-noir-midnight overflow-hidden">
@@ -94,6 +97,14 @@ export default function HomePage() {
             transition={{ delay: 0.3 }}
             className="flex items-center gap-2 sm:gap-4"
           >
+            <button
+              onClick={toggleTheme}
+              className="p-2 sm:p-2.5 rounded-full border border-rose-blush/20 hover:border-rose-blush/40 transition-colors text-rose-cream/60 hover:text-rose-cream"
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? <Sun size={15} className="text-amber-300" /> : <Moon size={15} className="text-rose-blush" />}
+            </button>
+
             <Link href="/login" className="btn-ghost text-xs sm:text-sm">
               Sign In
             </Link>
