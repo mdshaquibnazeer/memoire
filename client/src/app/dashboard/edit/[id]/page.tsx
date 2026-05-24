@@ -827,14 +827,14 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function MemoriesEditor({ projectId, initialMemories }: { projectId: string; initialMemories: any[] }) {
   const [memories, setMemories] = useState(initialMemories);
   const [adding, setAdding] = useState(false);
-  const [form, setForm] = useState({ title: '', description: '', date: '', location: '', emoji: '' });
+  const [form, setForm] = useState({ title: '', description: '', date: '', location: '', emoji: '', imageUrl: '' });
 
   const addMemory = async () => {
     if (!form.title || !form.date) { toast.error('Title and date are required'); return; }
     try {
       const { data } = await projectsAPI.addMemory(projectId, form);
       setMemories(prev => [...prev, data.memory]);
-      setForm({ title: '', description: '', date: '', location: '', emoji: '' });
+      setForm({ title: '', description: '', date: '', location: '', emoji: '', imageUrl: '' });
       setAdding(false);
       toast.success('Memory added ✨');
     } catch { toast.error('Failed to add memory'); }
@@ -858,7 +858,7 @@ function MemoriesEditor({ projectId, initialMemories }: { projectId: string; ini
       </div>
 
       {adding && (
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-6 space-y-3">
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-6 space-y-4">
           <h4 className="font-serif text-lg text-rose-cream">New Memory</h4>
           <input placeholder="Memory title *" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} className="input-romantic" />
           <textarea placeholder="Description..." value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} className="input-romantic resize-none" />
@@ -867,6 +867,34 @@ function MemoriesEditor({ projectId, initialMemories }: { projectId: string; ini
             <input placeholder="📍 Location" value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))} className="input-romantic" />
             <input placeholder="Emoji" value={form.emoji} onChange={e => setForm(f => ({ ...f, emoji: e.target.value }))} className="input-romantic" maxLength={2} />
           </div>
+          
+          <div className="space-y-1.5 p-3 rounded-xl bg-white/5 border border-white/5">
+            <p className="text-rose-cream/50 text-xs font-sans font-semibold">Memory Image (Optional)</p>
+            {form.imageUrl ? (
+              <div className="flex items-center gap-3">
+                <img src={form.imageUrl} className="w-12 h-12 object-cover rounded-lg border border-white/10" alt="Upload thumbnail" />
+                <span className="text-xs text-green-400 font-sans font-semibold flex items-center gap-1">
+                  ✓ Uploaded
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setForm(f => ({ ...f, imageUrl: '' }))}
+                  className="text-xs text-red-400 hover:text-red-300 font-sans ml-auto"
+                >
+                  Remove
+                </button>
+              </div>
+            ) : (
+              <MediaUploader
+                projectId={projectId}
+                accept="image"
+                maxFiles={1}
+                label="Choose a memory photo"
+                onUpload={({ url }) => setForm(f => ({ ...f, imageUrl: url }))}
+              />
+            )}
+          </div>
+
           <div className="flex gap-3">
             <button onClick={addMemory} className="btn-romantic text-sm"><span>Add Memory</span></button>
             <button onClick={() => setAdding(false)} className="btn-ghost text-sm">Cancel</button>
@@ -885,15 +913,25 @@ function MemoriesEditor({ projectId, initialMemories }: { projectId: string; ini
         <div key={memory.id} className="glass-card p-5 flex items-start gap-4 group">
           <div className="text-2xl mt-0.5">{memory.emoji || '💭'}</div>
           <div className="flex-1">
-            <p className="font-serif text-rose-cream">{memory.title}</p>
-            {memory.description && <p className="text-rose-cream/40 text-sm font-sans mt-1">{memory.description}</p>}
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="font-serif text-rose-cream">{memory.title}</p>
+                {memory.description && <p className="text-rose-cream/40 text-sm font-sans mt-1">{memory.description}</p>}
+              </div>
+              {memory.imageUrl && (
+                <div className="flex flex-col items-center gap-1 flex-shrink-0">
+                  <img src={memory.imageUrl} className="w-16 h-16 object-cover rounded-lg border border-white/10" alt="Memory thumbnail" />
+                  <span className="text-[10px] text-green-400 font-sans uppercase tracking-wider font-bold">Uploaded</span>
+                </div>
+              )}
+            </div>
             <p className="text-rose-cream/20 text-xs font-sans mt-2">
               {new Date(memory.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
               {memory.location && ` · 📍 ${memory.location}`}
             </p>
           </div>
           <button onClick={() => deleteMemory(memory.id)}
-            className="text-red-400/30 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100">
+            className="text-red-400/30 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 ml-auto">
             <Trash2 size={16} />
           </button>
         </div>
@@ -908,6 +946,8 @@ function GalleryEditor({ projectId, initialItems }: { projectId: string; initial
   const [items, setItems] = useState(initialItems);
   const [editingCaption, setEditingCaption] = useState<string | null>(null);
   const [captionText, setCaptionText] = useState('');
+  const [pastedUrl, setPastedUrl] = useState('');
+  const [addingUrl, setAddingUrl] = useState(false);
 
   const onUpload = async ({ url, mediaType }: { url: string; mediaType: string }) => {
     try {
@@ -937,10 +977,59 @@ function GalleryEditor({ projectId, initialItems }: { projectId: string; initial
     } catch { toast.error('Failed to save caption'); }
   };
 
+  const handleAddUrl = async () => {
+    if (!pastedUrl.trim()) return;
+    const url = pastedUrl.trim();
+    if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('/')) {
+      toast.error('Please enter a valid URL');
+      return;
+    }
+    
+    setAddingUrl(true);
+    try {
+      const isVideo = url.match(/\.(mp4|webm|ogg|mov|avi)($|\?)/i) || url.includes('/video/upload/') || url.includes('/video/');
+      const mediaType = isVideo ? 'VIDEO' : 'IMAGE';
+
+      const { data } = await projectsAPI.addGalleryItem(projectId, {
+        mediaUrl: url,
+        mediaType,
+        sortOrder: items.length,
+      });
+      setItems(prev => [...prev, data.item]);
+      setPastedUrl('');
+      toast.success('URL added to gallery 🌟');
+    } catch {
+      toast.error('Failed to add URL');
+    } finally {
+      setAddingUrl(false);
+    }
+  };
+
   return (
     <div>
       <h3 className="font-serif text-xl text-rose-cream mb-5">Gallery</h3>
       <MediaUploader projectId={projectId} accept="all" maxFiles={20} label="Upload gallery photos & videos" onUpload={onUpload} />
+
+      <div className="mt-4 p-4 glass-card border border-white/5 space-y-3">
+        <p className="text-rose-cream font-serif text-sm">Paste Existing Image or Video URL</p>
+        <p className="text-rose-cream/30 text-xs font-sans">Stop duplication! Paste your existing Cloudinary or web URLs directly here.</p>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={pastedUrl}
+            onChange={e => setPastedUrl(e.target.value)}
+            placeholder="Paste your image or video URL here (https://...)"
+            className="input-romantic text-xs flex-1"
+          />
+          <button
+            onClick={handleAddUrl}
+            disabled={addingUrl || !pastedUrl.trim()}
+            className="btn-romantic text-xs px-4 py-2 flex-shrink-0 disabled:opacity-50"
+          >
+            {addingUrl ? 'Adding...' : 'Add URL'}
+          </button>
+        </div>
+      </div>
 
       {items.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
