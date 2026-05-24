@@ -29,7 +29,9 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction) 
         orderBy: { createdAt: 'desc' },
         select: {
           id: true, email: true, username: true, displayName: true,
-          role: true, isEmailVerified: true, isApproved: true, allowedTemplates: true, createdAt: true, lastLoginAt: true,
+          role: true, isEmailVerified: true, isApproved: true, isSuspended: true,
+          allowedTemplates: true, themeExpirations: true, userLimits: true,
+          createdAt: true, lastLoginAt: true,
           _count: { select: { projects: true } },
         },
       }),
@@ -112,6 +114,52 @@ export const updateUserTemplates = async (req: Request, res: Response, next: Nex
       data: { allowedTemplates },
     });
     res.json({ message: 'User template authorization updated' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const suspendUser = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const { isSuspended } = req.body;
+    await prisma.user.update({
+      where: { id },
+      data: { isSuspended },
+    });
+    res.json({ message: isSuspended ? 'User suspended successfully' : 'User unsuspended successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateUserAccess = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const { allowedTemplates, themeExpirations, userLimits } = req.body;
+    await prisma.user.update({
+      where: { id },
+      data: {
+        ...(allowedTemplates && { allowedTemplates }),
+        ...(themeExpirations !== undefined && { themeExpirations }),
+        ...(userLimits !== undefined && { userLimits }),
+      },
+    });
+    res.json({ message: 'User access rules updated successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const toggleProjectStatus = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    await prisma.project.update({
+      where: { id },
+      data: { status },
+    });
+    res.json({ message: `Project status changed to ${status}` });
   } catch (error) {
     next(error);
   }

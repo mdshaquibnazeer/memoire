@@ -110,6 +110,10 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
       return res.status(403).json({ error: 'Your account is pending approval by an admin.' });
     }
 
+    if (user.isSuspended) {
+      return res.status(403).json({ error: 'Your account has been suspended by an administrator.' });
+    }
+
     // Update last login
     await prisma.user.update({
       where: { id: user.id },

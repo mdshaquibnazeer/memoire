@@ -107,6 +107,34 @@ export const createProject = async (req: Request, res: Response, next: NextFunct
       startDate,
     } = req.body;
 
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    if (user.isSuspended) {
+      return res.status(403).json({ error: 'Your account is suspended.' });
+    }
+
+    // Check project limit
+    const activeProjectsCount = await prisma.project.count({ where: { userId } });
+    const limits = (user.userLimits as any) || { maxProjects: 3, maxMemoriesPerProject: 10, maxGalleryItemsPerProject: 20 };
+    if (activeProjectsCount >= limits.maxProjects && user.role !== 'ADMIN') {
+      return res.status(400).json({ error: `You have reached the maximum allowed limit of ${limits.maxProjects} projects. Contact admin to upgrade.` });
+    }
+
+    // Check theme permission
+    const requestedTheme = theme || 'ROMANTIC_GLOW';
+    const isThemeAllowed = user.allowedTemplates.includes(requestedTheme);
+    if (!isThemeAllowed && user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'You are not authorized to use this theme. Contact admin.' });
+    }
+
+    // Check theme expiration
+    const expirations = (user.themeExpirations as any) || {};
+    const expiry = expirations[requestedTheme];
+    if (expiry && new Date(expiry) < new Date() && user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Your authorization for this theme has expired. Contact admin to renew.' });
+    }
+
     const slug = await generateSlug(title, userId);
 
     const project = await prisma.project.create({
@@ -150,6 +178,28 @@ export const updateProject = async (req: Request, res: Response, next: NextFunct
       heroConfig, endingConfig, seoTitle, seoDescription,
       isPasswordProtected, accessPassword,
     } = req.body;
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    if (user.isSuspended) {
+      return res.status(403).json({ error: 'Your account is suspended.' });
+    }
+
+    if (theme && theme !== existing.theme && user.role !== 'ADMIN') {
+      // Check theme permission
+      const isThemeAllowed = user.allowedTemplates.includes(theme);
+      if (!isThemeAllowed) {
+        return res.status(403).json({ error: 'You are not authorized to use this theme. Contact admin.' });
+      }
+
+      // Check theme expiration
+      const expirations = (user.themeExpirations as any) || {};
+      const expiry = expirations[theme];
+      if (expiry && new Date(expiry) < new Date()) {
+        return res.status(403).json({ error: 'Your authorization for this theme has expired. Contact admin to renew.' });
+      }
+    }
 
     const mergedHeroConfig = heroConfig !== undefined ? {
       ...((existing.heroConfig as any) || {}),
@@ -252,6 +302,19 @@ export const addMemory = async (req: Request, res: Response, next: NextFunction)
     const project = await prisma.project.findFirst({ where: { id: projectId, userId } });
     if (!project) return res.status(404).json({ error: 'Project not found' });
 
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    if (user.isSuspended) {
+      return res.status(403).json({ error: 'Your account is suspended.' });
+    }
+
+    const limits = (user.userLimits as any) || { maxProjects: 3, maxMemoriesPerProject: 10, maxGalleryItemsPerProject: 20 };
+    const memoryCount = await prisma.memory.count({ where: { projectId } });
+    if (memoryCount >= limits.maxMemoriesPerProject && user.role !== 'ADMIN') {
+      return res.status(400).json({ error: `You have reached the maximum allowed limit of ${limits.maxMemoriesPerProject} memories per project.` });
+    }
+
     const { title, description, date, imageUrl, videoUrl, location, emoji, sortOrder } = req.body;
 
     const memory = await prisma.memory.create({
@@ -320,6 +383,19 @@ export const addGalleryItem = async (req: Request, res: Response, next: NextFunc
 
     const project = await prisma.project.findFirst({ where: { id: projectId, userId } });
     if (!project) return res.status(404).json({ error: 'Project not found' });
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    if (user.isSuspended) {
+      return res.status(403).json({ error: 'Your account is suspended.' });
+    }
+
+    const limits = (user.userLimits as any) || { maxProjects: 3, maxMemoriesPerProject: 10, maxGalleryItemsPerProject: 20 };
+    const galleryCount = await prisma.galleryItem.count({ where: { projectId } });
+    if (galleryCount >= limits.maxGalleryItemsPerProject && user.role !== 'ADMIN') {
+      return res.status(400).json({ error: `You have reached the maximum allowed limit of ${limits.maxGalleryItemsPerProject} gallery items per project.` });
+    }
 
     const { mediaUrl, mediaType, caption, altText, width, height, sortOrder } = req.body;
 

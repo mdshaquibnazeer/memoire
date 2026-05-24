@@ -136,12 +136,36 @@ export default function MemoryPage() {
   }
 
   if (error || !project) {
+    const isExpired = error?.toLowerCase().includes('expired');
+    const isOffline = error?.toLowerCase().includes('offline') || error?.toLowerCase().includes('suspended');
+
     return (
-      <div className="min-h-screen bg-noir-midnight flex items-center justify-center px-6">
-        <div className="text-center">
-          <div className="text-5xl mb-4">🥀</div>
-          <h2 className="font-serif text-3xl text-rose-cream mb-3">Memory Not Found</h2>
-          <p className="text-rose-cream/40 font-sans">{error || 'This memory does not exist or is not published.'}</p>
+      <div className="min-h-screen bg-noir-midnight flex items-center justify-center px-6 relative overflow-hidden">
+        <FloatingParticles />
+        <div className="text-center relative z-10 max-w-md mx-auto p-8 rounded-3xl border border-white/5 bg-noir-deep/40 backdrop-blur-xl">
+          {isExpired ? (
+            <>
+              <div className="text-6xl mb-5 animate-pulse">⏳</div>
+              <h2 className="font-serif text-3xl text-rose-cream mb-3 font-semibold">Memory Expired</h2>
+              <p className="text-rose-cream/60 font-sans text-sm leading-relaxed">
+                This beautiful memory has reached its template expiration period. Contact the memory author or administrator to renew.
+              </p>
+            </>
+          ) : isOffline ? (
+            <>
+              <div className="text-6xl mb-5 animate-pulse">🛡️</div>
+              <h2 className="font-serif text-3xl text-rose-cream mb-3 font-semibold">Temporarily Offline</h2>
+              <p className="text-rose-cream/60 font-sans text-sm leading-relaxed">
+                This page has been temporarily taken offline by the platform administrator.
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="text-5xl mb-4">🥀</div>
+              <h2 className="font-serif text-3xl text-rose-cream mb-3 font-semibold">Memory Not Found</h2>
+              <p className="text-rose-cream/40 font-sans">{error || 'This memory does not exist or is not published.'}</p>
+            </>
+          )}
         </div>
       </div>
     );

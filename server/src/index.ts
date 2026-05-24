@@ -115,6 +115,18 @@ const runMigration = async () => {
       ALTER TABLE "User" 
       ADD COLUMN IF NOT EXISTS "allowedTemplates" TEXT[] NOT NULL DEFAULT ARRAY['SCRAPBOOK_LOVE']::TEXT[];
     `);
+    await prisma.$executeRawUnsafe(`
+      ALTER TABLE "User" 
+      ADD COLUMN IF NOT EXISTS "isSuspended" BOOLEAN NOT NULL DEFAULT false;
+    `);
+    await prisma.$executeRawUnsafe(`
+      ALTER TABLE "User" 
+      ADD COLUMN IF NOT EXISTS "themeExpirations" JSONB NULL;
+    `);
+    await prisma.$executeRawUnsafe(`
+      ALTER TABLE "User" 
+      ADD COLUMN IF NOT EXISTS "userLimits" JSONB NULL;
+    `);
     
     // Promote md_shaquib_nazeer to ADMIN and isApproved: true
     await prisma.$executeRawUnsafe(`

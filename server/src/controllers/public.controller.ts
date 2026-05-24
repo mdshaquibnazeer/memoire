@@ -22,13 +22,23 @@ export const getPublicProject = async (req: Request, res: Response, next: NextFu
         memories: { orderBy: { date: 'asc' } },
         galleryItems: { orderBy: { sortOrder: 'asc' } },
         user: {
-          select: { displayName: true },
+          select: { id: true, displayName: true, isSuspended: true, themeExpirations: true },
         },
       },
     });
 
     if (!project) {
       return res.status(404).json({ error: 'Memory not found or not yet published' });
+    }
+
+    if (project.user.isSuspended) {
+      return res.status(403).json({ error: 'This memory has been temporarily offline' });
+    }
+
+    const expirations = (project.user.themeExpirations as any) || {};
+    const expiry = expirations[project.theme];
+    if (expiry && new Date(expiry) < new Date()) {
+      return res.status(403).json({ error: 'This memory theme authorization has expired.' });
     }
 
     // Password check
@@ -82,10 +92,23 @@ export const submitPublicWish = async (req: Request, res: Response, next: NextFu
           { status: 'SCHEDULED', scheduledFor: { lte: new Date() } },
         ],
       },
+      include: {
+        user: { select: { isSuspended: true, themeExpirations: true } }
+      }
     });
 
     if (!project) {
       return res.status(404).json({ error: 'Memory not found or not yet published' });
+    }
+
+    if (project.user.isSuspended) {
+      return res.status(403).json({ error: 'This memory has been temporarily offline' });
+    }
+
+    const expirations = (project.user.themeExpirations as any) || {};
+    const expiry = expirations[project.theme];
+    if (expiry && new Date(expiry) < new Date()) {
+      return res.status(403).json({ error: 'This memory theme authorization has expired.' });
     }
 
     // Append to wishes inside heroConfig JSON

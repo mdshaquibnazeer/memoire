@@ -192,11 +192,20 @@ export const adminAPI = {
   updateUserTemplates: (id: string, allowedTemplates: string[]) =>
     api.post(`/admin/users/${id}/templates`, { allowedTemplates }),
   
+  suspendUser: (id: string, isSuspended: boolean) =>
+    api.post(`/admin/users/${id}/suspend`, { isSuspended }),
+  
+  updateUserAccess: (id: string, payload: { allowedTemplates?: string[]; themeExpirations?: any; userLimits?: any }) =>
+    api.post(`/admin/users/${id}/access`, payload),
+  
   deleteUser: (id: string) =>
     api.delete(`/admin/users/${id}`),
   
   getProjects: (params?: { page?: number; limit?: number }) =>
     api.get('/admin/projects', { params }),
+  
+  toggleProjectStatus: (id: string, status: string) =>
+    api.post(`/admin/projects/${id}/status`, { status }),
   
   deleteProject: (id: string) =>
     api.delete(`/admin/projects/${id}`),

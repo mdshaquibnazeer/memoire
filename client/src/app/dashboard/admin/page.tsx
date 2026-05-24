@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { 
   Users, FolderHeart, Globe, Image, UserCheck, 
   Trash2, ShieldCheck, KeyRound, Search, BookOpen, 
-  X, Check, AlertCircle 
+  X, Check, AlertCircle, Lock, Unlock, Settings, Clock, Ban, AlertTriangle 
 } from 'lucide-react';
 import { adminAPI } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
@@ -28,7 +28,10 @@ interface User {
   role: string;
   isEmailVerified: boolean;
   isApproved: boolean;
+  isSuspended: boolean;
   allowedTemplates: string[];
+  themeExpirations: any;
+  userLimits: any;
   createdAt: string;
   lastLoginAt: string | null;
   _count: { projects: number };
@@ -74,6 +77,8 @@ export default function AdminCornerPage() {
   // Modal State
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [allowedTemplatesState, setAllowedTemplatesState] = useState<string[]>([]);
+  const [themeExpirationsState, setThemeExpirationsState] = useState<any>({});
+  const [userLimitsState, setUserLimitsState] = useState<any>({ maxProjects: 3, maxMemoriesPerProject: 10, maxGalleryItemsPerProject: 20 });
   const [savingTemplates, setSavingTemplates] = useState(false);
 
   // Check admin role
@@ -170,14 +175,39 @@ export default function AdminCornerPage() {
     }
   };
 
+  const handleToggleSuspendUser = async (userId: string, isSuspended: boolean, name: string) => {
+    try {
+      await adminAPI.suspendUser(userId, !isSuspended);
+      toast.success(isSuspended ? `User ${name} unsuspended!` : `User ${name} suspended!`);
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, isSuspended: !isSuspended } : u));
+    } catch {
+      toast.error('Failed to change suspension status');
+    }
+  };
+
+  const handleToggleProjectStatus = async (projectId: string, currentStatus: string, title: string) => {
+    const nextStatus = currentStatus === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED';
+    try {
+      await adminAPI.toggleProjectStatus(projectId, nextStatus);
+      toast.success(`Project "${title}" status set to ${nextStatus}`);
+      setProjects(prev => prev.map(p => p.id === projectId ? { ...p, status: nextStatus } : p));
+    } catch {
+      toast.error('Failed to update project status');
+    }
+  };
+
   const openTemplateModal = (user: User) => {
     setSelectedUser(user);
     setAllowedTemplatesState(user.allowedTemplates || []);
+    setThemeExpirationsState(user.themeExpirations || {});
+    setUserLimitsState(user.userLimits || { maxProjects: 3, maxMemoriesPerProject: 10, maxGalleryItemsPerProject: 20 });
   };
 
   const closeTemplateModal = () => {
     setSelectedUser(null);
     setAllowedTemplatesState([]);
+    setThemeExpirationsState({});
+    setUserLimitsState({ maxProjects: 3, maxMemoriesPerProject: 10, maxGalleryItemsPerProject: 20 });
   };
 
   const toggleTemplatePermission = (templateId: string) => {
@@ -192,12 +222,21 @@ export default function AdminCornerPage() {
     if (!selectedUser) return;
     setSavingTemplates(true);
     try {
-      await adminAPI.updateUserTemplates(selectedUser.id, allowedTemplatesState);
-      toast.success(`Theme authorization updated for ${selectedUser.displayName || selectedUser.username}`);
-      setUsers(prev => prev.map(u => u.id === selectedUser.id ? { ...u, allowedTemplates: allowedTemplatesState } : u));
+      await adminAPI.updateUserAccess(selectedUser.id, {
+        allowedTemplates: allowedTemplatesState,
+        themeExpirations: themeExpirationsState,
+        userLimits: userLimitsState,
+      });
+      toast.success(`Access configurations updated for ${selectedUser.displayName || selectedUser.username}`);
+      setUsers(prev => prev.map(u => u.id === selectedUser.id ? { 
+        ...u, 
+        allowedTemplates: allowedTemplatesState,
+        themeExpirations: themeExpirationsState,
+        userLimits: userLimitsState
+      } : u));
       closeTemplateModal();
     } catch {
-      toast.error('Failed to update template authorization');
+      toast.error('Failed to update access configurations');
     } finally {
       setSavingTemplates(false);
     }
@@ -426,15 +465,22 @@ export default function AdminCornerPage() {
                             <p className="text-xs text-rose-cream/40 mt-0.5">@{user.username} · {user.email}</p>
                           </td>
                           <td className="p-4">
-                            {user.isApproved ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-300 border border-green-500/15">
-                                Approved
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-300 border border-amber-500/15 animate-pulse">
-                                Pending Approval
-                              </span>
-                            )}
+                            <div className="flex flex-col gap-1.5 items-start">
+                              {user.isApproved ? (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-300 border border-green-500/15">
+                                  Approved
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-300 border border-amber-500/15 animate-pulse">
+                                  Pending Approval
+                                </span>
+                              )}
+                              {user.isSuspended && (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-500/15 text-red-300 border border-red-500/20">
+                                  Suspended
+                                </span>
+                              )}
+                            </div>
                           </td>
                           <td className="p-4">
                             <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${
@@ -475,7 +521,18 @@ export default function AdminCornerPage() {
                                     title="Unlock Templates"
                                     className="flex items-center gap-1.5 text-xs font-sans px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-rose-cream/60 hover:text-rose-cream transition-all border border-white/5"
                                   >
-                                    <KeyRound size={12} /> Templates
+                                    <Settings size={12} /> Access Config
+                                  </button>
+                                  <button
+                                    onClick={() => handleToggleSuspendUser(user.id, user.isSuspended, user.displayName || user.username)}
+                                    title={user.isSuspended ? "Unsuspend Account" : "Suspend Account"}
+                                    className={`flex items-center gap-1.5 text-xs font-sans px-3 py-1.5 rounded-lg border transition-all ${
+                                      user.isSuspended 
+                                        ? 'bg-amber-500/15 text-amber-300 border-amber-500/20 hover:bg-amber-500/25' 
+                                        : 'bg-red-500/10 text-red-400 border-red-500/15 hover:bg-red-500/20'
+                                    }`}
+                                  >
+                                    <Ban size={12} /> {user.isSuspended ? "Unban" : "Ban"}
                                   </button>
                                   {!user.isApproved && (
                                     <button
@@ -582,12 +639,23 @@ export default function AdminCornerPage() {
                           <td className="p-4 font-serif text-rose-cream">{project.viewCount}</td>
                           <td className="p-4 pr-6 text-right">
                             <div className="flex gap-2 justify-end">
+                              <button
+                                onClick={() => handleToggleProjectStatus(project.id, project.status, project.title)}
+                                className={`flex items-center gap-1.5 text-xs font-sans px-3 py-1.5 rounded-lg border transition-all ${
+                                  project.status === 'PUBLISHED' 
+                                    ? 'bg-amber-500/10 text-amber-300 border-amber-500/15 hover:bg-amber-500/20'
+                                    : 'bg-green-500/10 text-green-300 border-green-500/15 hover:bg-green-500/20'
+                                }`}
+                              >
+                                {project.status === 'PUBLISHED' ? <Lock size={12} /> : <Unlock size={12} />}
+                                {project.status === 'PUBLISHED' ? "Draft" : "Publish"}
+                              </button>
                               {project.status === 'PUBLISHED' && (
                                 <a
                                   href={`/memory/${project.slug}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="flex items-center gap-1 text-xs font-sans px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-rose-cream/60 hover:text-rose-cream transition-all border border-white/5"
+                                  className="flex items-center gap-1.5 text-xs font-sans px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-rose-cream/60 hover:text-rose-cream transition-all border border-white/5"
                                 >
                                   View
                                 </a>
@@ -642,51 +710,113 @@ export default function AdminCornerPage() {
               </button>
 
               <div className="mb-6">
-                <p className="font-script text-lg text-rose-deep mb-1">access configuration</p>
-                <h3 className="font-serif text-2xl text-rose-cream font-bold">Theme Authorizations</h3>
+                <p className="font-script text-lg text-rose-deep mb-1">access & configuration</p>
+                <h3 className="font-serif text-2xl text-rose-cream font-bold">Access Settings</h3>
                 <p className="text-rose-cream/40 font-sans text-sm mt-1">
-                  Manage templates that <span className="text-rose-cream">@{selectedUser.username}</span> is allowed to use.
+                  Manage theme authorizations, calendars and project resource quotas for <span className="text-rose-cream">@{selectedUser.username}</span>.
                 </p>
               </div>
 
-              {/* Theme Checkboxes List */}
-              <div className="space-y-3 mb-8">
-                {ALL_TEMPLATES.map(template => {
-                  const allowed = allowedTemplatesState.includes(template.id);
-                  const isScrapbook = template.id === 'SCRAPBOOK_LOVE';
-                  return (
-                    <div 
-                      key={template.id}
-                      onClick={() => !isScrapbook && toggleTemplatePermission(template.id)}
-                      className={`flex items-center justify-between p-4 rounded-2xl border transition-all duration-300 ${
-                        allowed 
-                          ? 'border-rose-blush/30 bg-rose-blush/5' 
-                          : 'border-white/5 bg-white/5 hover:bg-white/[0.08]'
-                      } ${isScrapbook ? 'opacity-80 cursor-not-allowed' : 'cursor-pointer'}`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{template.emoji}</span>
-                        <div>
-                          <span className="font-serif text-base text-rose-cream font-medium">{template.name}</span>
-                          {isScrapbook && (
-                            <span className="block text-[10px] text-rose-cream/30 font-sans mt-0.5">Baseline (Default Allowed)</span>
-                          )}
-                        </div>
-                      </div>
-                      
-                      {/* Check Box Visual */}
+              {/* Scrollable Container */}
+              <div className="max-h-[60vh] overflow-y-auto pr-2 space-y-6 scrollbar-thin mb-8">
+                {/* Theme Checkboxes List */}
+                <div className="space-y-3">
+                  <h4 className="font-serif text-base text-rose-cream font-semibold mb-2">Theme Access & Expirations</h4>
+                  {ALL_TEMPLATES.map(template => {
+                    const allowed = allowedTemplatesState.includes(template.id);
+                    const isScrapbook = template.id === 'SCRAPBOOK_LOVE';
+                    const expiry = themeExpirationsState[template.id] || '';
+                    return (
                       <div 
-                        className={`w-6 h-6 rounded-full border flex items-center justify-center transition-all ${
+                        key={template.id}
+                        onClick={() => !isScrapbook && toggleTemplatePermission(template.id)}
+                        className={`p-4 rounded-2xl border transition-all duration-300 ${
                           allowed 
-                            ? 'bg-rose-blush border-rose-blush' 
-                            : 'border-white/20'
-                        }`}
+                            ? 'border-rose-blush/30 bg-rose-blush/5' 
+                            : 'border-white/5 bg-white/5 hover:bg-white/[0.08]'
+                        } ${isScrapbook ? 'opacity-80 cursor-not-allowed' : 'cursor-pointer'}`}
                       >
-                        {allowed && <Check size={12} className="text-noir-midnight stroke-[3px]" />}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">{template.emoji}</span>
+                            <div>
+                              <span className="font-serif text-base text-rose-cream font-medium">{template.name}</span>
+                              {isScrapbook && (
+                                <span className="block text-[10px] text-rose-cream/30 font-sans mt-0.5">Baseline (Default Allowed)</span>
+                              )}
+                            </div>
+                          </div>
+                          
+                          {/* Check Box Visual */}
+                          <div 
+                            className={`w-6 h-6 rounded-full border flex items-center justify-center transition-all ${
+                              allowed 
+                                ? 'bg-rose-blush border-rose-blush' 
+                                : 'border-white/20'
+                            }`}
+                          >
+                            {allowed && <Check size={12} className="text-noir-midnight stroke-[3px]" />}
+                          </div>
+                        </div>
+
+                        {allowed && !isScrapbook && (
+                          <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between gap-4" onClick={(e) => e.stopPropagation()}>
+                            <span className="text-xs text-rose-cream/40 flex items-center gap-1"><Clock size={12}/> Expires:</span>
+                            <input 
+                              type="datetime-local" 
+                              value={expiry ? new Date(new Date(expiry).getTime() - new Date().getTimezoneOffset()*60000).toISOString().slice(0, 16) : ''}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setThemeExpirationsState((prev: any) => ({
+                                  ...prev,
+                                  [template.id]: val ? new Date(val).toISOString() : null
+                                }));
+                              }}
+                              className="bg-white/5 border border-white/10 rounded-lg px-2.5 py-1 text-xs text-rose-cream font-sans focus:outline-none focus:border-rose-blush/40"
+                            />
+                          </div>
+                        )}
                       </div>
+                    );
+                  })}
+                </div>
+
+                {/* Quotas Section */}
+                <div className="border-t border-white/10 pt-6">
+                  <h4 className="font-serif text-base text-rose-cream font-semibold mb-4 flex items-center gap-2">
+                    <Settings size={16} className="text-rose-blush" /> System & Resource Quotas
+                  </h4>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs text-rose-cream/40 mb-1.5 uppercase font-sans tracking-wide">Max Projects</label>
+                      <input 
+                        type="number"
+                        value={userLimitsState.maxProjects ?? 3}
+                        onChange={(e) => setUserLimitsState((prev: any) => ({ ...prev, maxProjects: parseInt(e.target.value) || 0 }))}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-rose-cream font-serif focus:outline-none focus:border-rose-blush/40"
+                      />
                     </div>
-                  );
-                })}
+                    <div>
+                      <label className="block text-xs text-rose-cream/40 mb-1.5 uppercase font-sans tracking-wide">Max Memories</label>
+                      <input 
+                        type="number"
+                        value={userLimitsState.maxMemoriesPerProject ?? 10}
+                        onChange={(e) => setUserLimitsState((prev: any) => ({ ...prev, maxMemoriesPerProject: parseInt(e.target.value) || 0 }))}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-rose-cream font-serif focus:outline-none focus:border-rose-blush/40"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-rose-cream/40 mb-1.5 uppercase font-sans tracking-wide">Max Gallery</label>
+                      <input 
+                        type="number"
+                        value={userLimitsState.maxGalleryItemsPerProject ?? 20}
+                        onChange={(e) => setUserLimitsState((prev: any) => ({ ...prev, maxGalleryItemsPerProject: parseInt(e.target.value) || 0 }))}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-rose-cream font-serif focus:outline-none focus:border-rose-blush/40"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Action Buttons */}

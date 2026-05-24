@@ -54,7 +54,10 @@ model User {
   role              UserRole  @default(USER)
   isEmailVerified   Boolean   @default(false)
   isApproved        Boolean   @default(false)
+  isSuspended       Boolean   @default(false)
   allowedTemplates  String[]
+  themeExpirations  Json?
+  userLimits        Json?
   emailVerifyToken  String?
   resetPasswordToken String?
   resetPasswordExpiry DateTime?
