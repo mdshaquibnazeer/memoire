@@ -823,7 +823,23 @@ export default function EditProjectPage() {
               </Field>
             </Section>
 
-            <Section title="🔒 Passcode Screen Customization">
+            <Section title="🔒 Passcode & Smartphone Unlock Settings">
+              <div className="flex items-center justify-between p-3.5 glass-card mb-4 border border-rose-500/20">
+                <div>
+                  <p className="text-rose-cream font-serif text-sm font-bold">Enable Smartphone PIN Unlock Screen</p>
+                  <p className="text-rose-cream/40 text-xs font-sans mt-0.5">
+                    Turn this ON or OFF to control whether the smartphone PIN screen appears when opening the memory.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => update('enablePhoneUnlock', form.enablePhoneUnlock !== false ? false : true)}
+                  className={`w-12 h-6 rounded-full transition-all duration-300 relative ${form.enablePhoneUnlock !== false ? 'bg-rose-blush' : 'bg-white/10'}`}
+                >
+                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${form.enablePhoneUnlock !== false ? 'left-7' : 'left-1'}`} />
+                </button>
+              </div>
+
               <div className="flex items-center justify-between p-3 glass-card mb-3">
                 <div>
                   <p className="text-rose-cream font-serif text-sm">Show Passcode Greeting Card</p>
@@ -899,32 +915,52 @@ export default function EditProjectPage() {
             </Section>
 
             <Section title="🎊 Grand Finale Celebration Popup">
-              <Field label="Celebrate Text / Main Message">
-                <input
-                  value={form.celebrateText}
-                  onChange={e => update('celebrateText', e.target.value)}
-                  placeholder="Happy Birthday, My Love! 🎂"
-                  className="input-romantic"
-                />
-              </Field>
-              <Field label="Grand Finale Popup Background Image">
-                <input
-                  value={form.finaleBackgroundUrl}
-                  onChange={e => update('finaleBackgroundUrl', e.target.value)}
-                  placeholder="https://... or /images/..."
-                  className="input-romantic mb-3"
-                />
-                <MediaUploader
-                  projectId={id as string}
-                  accept="image"
-                  maxFiles={1}
-                  label="Upload celebration background image"
-                  onUpload={({ url }) => update('finaleBackgroundUrl', url)}
-                />
-                <p className="text-[11px] text-rose-cream/40 mt-1 font-sans">
-                  Optional custom background image for the Grand Finale celebration modal.
-                </p>
-              </Field>
+              <div className="flex items-center justify-between p-3.5 glass-card mb-4 border border-rose-500/20">
+                <div>
+                  <p className="text-rose-cream font-serif text-sm font-bold">Enable Grand Finale Celebration</p>
+                  <p className="text-rose-cream/40 text-xs font-sans mt-0.5">
+                    Turn ON/OFF to control whether the celebration button and grand finale popup appear on your memory page.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => update('enableGrandFinale', form.enableGrandFinale !== false ? false : true)}
+                  className={`w-12 h-6 rounded-full transition-all duration-300 relative ${form.enableGrandFinale !== false ? 'bg-rose-blush' : 'bg-white/10'}`}
+                >
+                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${form.enableGrandFinale !== false ? 'left-7' : 'left-1'}`} />
+                </button>
+              </div>
+
+              {form.enableGrandFinale !== false && (
+                <>
+                  <Field label="Celebrate Text / Main Message">
+                    <input
+                      value={form.celebrateText}
+                      onChange={e => update('celebrateText', e.target.value)}
+                      placeholder="Happy Birthday, My Love! 🎂"
+                      className="input-romantic"
+                    />
+                  </Field>
+                  <Field label="Grand Finale Popup Background Image">
+                    <input
+                      value={form.finaleBackgroundUrl}
+                      onChange={e => update('finaleBackgroundUrl', e.target.value)}
+                      placeholder="https://... or /images/..."
+                      className="input-romantic mb-3"
+                    />
+                    <MediaUploader
+                      projectId={id as string}
+                      accept="image"
+                      maxFiles={1}
+                      label="Upload celebration background image"
+                      onUpload={({ url }) => update('finaleBackgroundUrl', url)}
+                    />
+                    <p className="text-[11px] text-rose-cream/40 mt-1 font-sans">
+                      Optional custom background image for the Grand Finale celebration modal.
+                    </p>
+                  </Field>
+                </>
+              )}
             </Section>
 
             {project?.theme !== 'VELVET_ROMANCE' && project?.theme !== 'SWEET_DIARY' && (

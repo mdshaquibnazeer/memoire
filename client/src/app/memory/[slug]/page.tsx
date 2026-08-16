@@ -246,7 +246,7 @@ export default function MemoryPage() {
       {project.theme === 'SCRAPBOOK_LOVE' && <ScrapbookLoveTheme project={project} />}
       {project.theme === 'AURORA_DREAMS' && <AuroraDreamsTheme project={project} />}
       {project.theme === 'CELESTIAL_BIRTHDAY' && <CelestialBirthdayTheme project={project} />}
-      {project.theme === 'SWEET_DIARY' && <SweetDiaryTheme project={project} />}
+      {project.theme === 'SWEET_DIARY' && <SweetDiaryTheme project={project} initialUnlocked={!!password} />}
       {project.theme === 'VELVET_ROMANCE' && <VelvetRomanceTheme project={project} />}
     </>
   );

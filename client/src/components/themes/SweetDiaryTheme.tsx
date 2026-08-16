@@ -1784,10 +1784,11 @@ function GrandFinaleOverlay({
 // ─────────────────────────────────────────────
 type ModalType = 'award' | 'memories' | 'letter' | 'jar' | 'music' | 'vows' | 'video' | 'wish' | 'cake' | 'heroNote' | 'endingNote' | 'filmstrip' | 'dates' | 'finale' | null;
 
-export default function SweetDiaryTheme({ project }: { project: Project }) {
+export default function SweetDiaryTheme({ project, initialUnlocked = false }: { project: Project; initialUnlocked?: boolean }) {
   const cfg = project.heroConfig || {};
+  const isPhoneUnlockEnabled = cfg.enablePhoneUnlock !== false;
   const passcode = project.isPasswordProtected && project.accessPassword ? project.accessPassword : (cfg.passcode || '1234');
-  const [unlocked, setUnlocked] = useState(false);
+  const [unlocked, setUnlocked] = useState(initialUnlocked || !isPhoneUnlockEnabled);
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [selectedGalleryPhoto, setSelectedGalleryPhoto] = useState<GalleryItem | null>(null);
   const [selectedPromise, setSelectedPromise] = useState<any | null>(null);
@@ -2302,7 +2303,7 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
             onClose={() => setActiveModal(null)}
           />
         )}
-        {activeModal === 'finale' && (
+        {activeModal === 'finale' && cfg.enableGrandFinale !== false && (
           <GrandFinaleOverlay
             name={project.personTwoName || 'You'}
             celebrateText={cfg.celebrateText}
