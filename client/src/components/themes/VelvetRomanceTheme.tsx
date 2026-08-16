@@ -25,6 +25,7 @@ interface GalleryItem {
 }
 
 interface Project {
+  id: string;
   title: string;
   slug: string;
   subtitle: string | null;
@@ -260,62 +261,6 @@ function FallingRosePetals() {
 }
 
 // ─────────────────────────────────────────────
-// PROMISE CARD (Flip and pulse)
-// ─────────────────────────────────────────────
-function PromiseCard({ emoji, text, secretNote, cardStyle, onFlip }: { emoji: string; text: string; secretNote: string; cardStyle: string; onFlip: () => void }) {
-  const [flipped, setFlipped] = useState(false);
-
-  const toggle = () => {
-    if (!flipped) onFlip();
-    setFlipped(!flipped);
-  };
-
-  const isGold = cardStyle === 'gold';
-
-  return (
-    <div className="w-full h-44 perspective cursor-pointer" onClick={toggle}>
-      <motion.div
-        className="w-full h-full relative preserve-3d transition-transform duration-700"
-        style={{ transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)' }}
-        whileHover={{ scale: 1.03 }}
-        whileTap={{ scale: 0.97 }}
-      >
-        {/* Front side */}
-        <div
-          className="absolute inset-0 backface-hidden rounded-2xl p-4 flex flex-col items-center justify-center text-center border"
-          style={{
-            background: 'linear-gradient(135deg, rgba(30,0,18,0.85) 0%, rgba(15,0,8,0.9) 100%)',
-            backdropFilter: 'blur(12px)',
-            borderColor: isGold ? '#f5c842' : '#ff1744',
-            boxShadow: isGold ? '0 8px 24px rgba(245,200,66,0.15)' : '0 8px 24px rgba(255,23,68,0.15)',
-          }}
-        >
-          <span className="text-4xl mb-3 drop-shadow">{emoji}</span>
-          <p className="text-sm font-semibold leading-snug tracking-wide" style={{ color: '#f5ead8', fontFamily: 'Be Vietnam Pro, sans-serif' }}>
-            {text || 'A beautiful vow to hold forever.'}
-          </p>
-        </div>
-
-        {/* Back side */}
-        <div
-          className="absolute inset-0 backface-hidden rounded-2xl p-4 flex flex-col items-center justify-center text-center border rotate-y-180"
-          style={{
-            background: 'linear-gradient(135deg, #3d001d 0%, #1c000e 100%)',
-            borderColor: '#f5c842',
-            boxShadow: 'inset 0 0 25px rgba(245,200,66,0.25)',
-          }}
-        >
-          <span className="text-[10px] font-bold uppercase tracking-widest text-[#f5c842] mb-2" style={{ fontFamily: 'Plus Jakarta Sans' }}>Seal of My Heart</span>
-          <p className="text-xs leading-relaxed italic text-white font-medium" style={{ fontFamily: 'Be Vietnam Pro' }}>
-            "{secretNote || 'I promise to cherish this vow with all my soul.'}"
-          </p>
-        </div>
-      </motion.div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────
 // CRYSTAL PROGRESS HEART
 // ─────────────────────────────────────────────
 function ProgressHeart({ current, total }: { current: number; total: number }) {
@@ -538,6 +483,79 @@ function StatCounter({ label, value }: { label: string; value: number }) {
 }
 
 // ─────────────────────────────────────────────
+// FULLSCREEN VOW PROMISE CARD MODAL
+// ─────────────────────────────────────────────
+function FullscreenPromiseModal({ emoji, text, secretNote, onClose }: { emoji: string; text: string; secretNote: string; onClose: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-6 bg-black/95 backdrop-blur-md"
+    >
+      <motion.div
+        initial={{ scale: 0.85, rotate: -2 }}
+        animate={{ scale: 1, rotate: 0 }}
+        exit={{ scale: 0.85, opacity: 0 }}
+        className="w-full max-w-sm rounded-3xl p-8 text-center border-2"
+        style={{
+          background: 'linear-gradient(135deg, #1c000e 0%, #3d001d 100%)',
+          borderColor: '#f5c842',
+          boxShadow: '0 25px 60px rgba(245,200,66,0.3)',
+        }}
+      >
+        <span className="text-6xl block mb-6 animate-bounce">
+          {emoji}
+        </span>
+        <h3 className="text-lg font-bold text-yellow-500 font-serif mb-3" style={{ fontFamily: 'Playfair Display' }}>My Vow</h3>
+        <p className="text-md font-semibold text-rose-cream leading-snug mb-6" style={{ fontFamily: 'Be Vietnam Pro' }}>
+          "{text}"
+        </p>
+        <div className="p-4 rounded-2xl bg-black/40 border border-white/5 shadow-inner mb-6">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-[#f5c842] block mb-2">Secret Message</span>
+          <p className="text-sm italic text-white/90 leading-relaxed">
+            {secretNote || 'I promise to cherish this vow with all my soul.'}
+          </p>
+        </div>
+        <button
+          onClick={onClose}
+          className="px-6 py-2.5 rounded-full text-xs uppercase tracking-widest font-bold text-[#1c000e] hover:bg-[#f5c842]/80 transition-all cursor-pointer shadow-md"
+          style={{
+            background: '#f5c842',
+          }}
+        >
+          Close Vow 💍
+        </button>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// SECRET VIDEO PLAYER MODAL
+// ─────────────────────────────────────────────
+function SecretVideoModal({ url, onClose }: { url: string; onClose: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md"
+    >
+      <div className="relative max-w-3xl w-full max-h-[80vh] flex flex-col items-center">
+        <button onClick={onClose} className="absolute -top-12 right-0 text-white/70 hover:text-white text-3xl font-bold p-2">✕</button>
+        <div className="w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black">
+          <video src={url} controls autoPlay className="w-full h-auto max-h-[65vh]" />
+        </div>
+        <p className="text-white/60 text-xs mt-3 italic" style={{ fontFamily: 'Be Vietnam Pro' }}>
+          Your custom personalized video file 🎬
+        </p>
+      </div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // SECRET ENVELOPE MODAL (Interactive Open Letter)
 // ─────────────────────────────────────────────
 function EnvelopeLetterModal({
@@ -545,47 +563,34 @@ function EnvelopeLetterModal({
   signature,
   musicUrl,
   onClose,
-  disableLetterAutoScroll = false,
-  disableWordByWord = false,
-  letterScrollSpeed = 25,
-  letterWordDelay = 120,
-  letterAnimType = 'word',
-  letterCharDelay = 30,
+  welcomePopupText,
+  envelopeStyle = 'gold',
+  envelopeOpenEffect = 'shimmer',
 }: {
   message: string;
   signature?: string;
   musicUrl?: string;
   onClose: () => void;
-  disableLetterAutoScroll?: boolean;
-  disableWordByWord?: boolean;
-  letterScrollSpeed?: number;
-  letterWordDelay?: number;
-  letterAnimType?: 'word' | 'char';
-  letterCharDelay?: number;
+  welcomePopupText?: string;
+  envelopeStyle?: string;
+  envelopeOpenEffect?: string;
 }) {
   const [phase, setPhase] = useState<'closed' | 'opening' | 'open' | 'reading'>('closed');
   const [sealCrumble, setSealCrumble] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(disableWordByWord ? 99999 : 0);
-  const letterScrollRef = useRef<HTMLDivElement>(null);
-  const localAudioRef = useRef<HTMLAudioElement>(null);
+  const [visibleCount, setVisibleCount] = useState(0);
+  const localAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const fullText = message || '';
   const words = fullText.split(/\s+/).filter(Boolean);
-  const totalWords = words.length;
-  const totalChars = fullText.length;
-  const isCharAnim = letterAnimType === 'char';
-  const totalCount = isCharAnim ? totalChars : totalWords;
+  const totalCount = words.length;
 
-  // Manage letter ambient loops
   useEffect(() => {
     if (musicUrl && localAudioRef.current) {
       localAudioRef.current.volume = 0.4;
       localAudioRef.current.play().catch(() => {});
     }
     return () => {
-      if (localAudioRef.current) {
-        localAudioRef.current.pause();
-      }
+      localAudioRef.current?.pause();
     };
   }, [musicUrl]);
 
@@ -602,56 +607,16 @@ function EnvelopeLetterModal({
     }, 600);
   };
 
-  // Word-by-word / character-by-character typewriter draw
   useEffect(() => {
     if (phase !== 'reading') return;
-    if (disableWordByWord) {
-      setVisibleCount(totalCount);
-      return;
-    }
     if (visibleCount >= totalCount) return;
-
-    let delay = 120;
-    if (isCharAnim) {
-      delay = letterCharDelay !== undefined ? Number(letterCharDelay) : 30;
-    } else {
-      delay = letterWordDelay !== undefined ? Number(letterWordDelay) : 120;
-    }
-
     const timer = setTimeout(() => {
       setVisibleCount(c => c + 1);
-    }, delay);
+    }, 120);
     return () => clearTimeout(timer);
-  }, [phase, visibleCount, totalCount, disableWordByWord, letterWordDelay, letterCharDelay, isCharAnim]);
+  }, [phase, visibleCount, totalCount]);
 
-  // Auto scroll
-  useEffect(() => {
-    if (disableLetterAutoScroll || phase !== 'reading') return;
-    const scrollSpeed = letterScrollSpeed !== undefined ? Number(letterScrollSpeed) : 25;
-    if (scrollSpeed <= 0) return;
-
-    let lastTime = performance.now();
-    let frameId: number;
-    const el = letterScrollRef.current;
-
-    const scroll = (now: number) => {
-      if (el) {
-        const delta = (now - lastTime) / 1000;
-        if (el.scrollTop + el.clientHeight < el.scrollHeight) {
-          el.scrollTop += scrollSpeed * delta;
-        }
-      }
-      lastTime = now;
-      frameId = requestAnimationFrame(scroll);
-    };
-
-    frameId = requestAnimationFrame(scroll);
-    return () => cancelAnimationFrame(frameId);
-  }, [phase, disableLetterAutoScroll, letterScrollSpeed]);
-
-  const visibleText = isCharAnim
-    ? fullText.slice(0, visibleCount)
-    : words.slice(0, visibleCount).join(' ');
+  const visibleText = words.slice(0, visibleCount).join(' ');
 
   return (
     <motion.div
@@ -664,7 +629,7 @@ function EnvelopeLetterModal({
 
       <div className="relative flex flex-col items-center max-w-sm w-full" style={{ perspective: 1200 }}>
         
-        {/* Envelope display during closed/opening phase */}
+        {/* Envelope view */}
         <AnimatePresence>
           {phase !== 'reading' && (
             <motion.div
@@ -694,7 +659,6 @@ function EnvelopeLetterModal({
                   zIndex: 10,
                 }}
               >
-                {/* Flap Front */}
                 <div
                   className="absolute inset-0 backface-hidden rounded-t-3xl border-b border-[#f5c842]/20"
                   style={{
@@ -702,7 +666,6 @@ function EnvelopeLetterModal({
                     clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
                   }}
                 />
-                {/* Flap Back */}
                 <div
                   className="absolute inset-0 backface-hidden rounded-t-3xl rotate-y-180"
                   style={{
@@ -733,12 +696,11 @@ function EnvelopeLetterModal({
           )}
         </AnimatePresence>
 
-        {/* Scroll/Paper displaying letter text */}
+        {/* Scroll Paper */}
         <AnimatePresence>
           {phase === 'reading' && (
             <motion.div
               key="letter"
-              ref={letterScrollRef}
               initial={{ opacity: 0, y: 50, scale: 0.93 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 30 }}
@@ -749,7 +711,6 @@ function EnvelopeLetterModal({
                 boxShadow: '0 25px 80px rgba(0,0,0,0.8), inset 0 0 25px rgba(245,200,66,0.1)',
               }}
             >
-              {/* Paper Lines */}
               <div className="absolute inset-0 pointer-events-none opacity-5">
                 {Array.from({ length: 30 }).map((_, i) => (
                   <div key={i} className="w-full h-px bg-white" style={{ marginTop: '28px' }} />
@@ -769,8 +730,7 @@ function EnvelopeLetterModal({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.5 }}
-                    className="text-right text-[#f5c842] font-serif italic mt-6 text-md"
-                    style={{ fontFamily: 'Playfair Display' }}
+                    className="text-right text-[#f5c842] font-serif italic mt-6 text-md font-bold"
                   >
                     — With Love, {signature} ✒️
                   </motion.p>
@@ -803,6 +763,98 @@ function EnvelopeLetterModal({
 }
 
 // ─────────────────────────────────────────────
+// CUTE PANDA SELFIE THANK YOU
+// ─────────────────────────────────────────────
+function PandaSelfieWidget({ projectSlug }: { projectSlug: string }) {
+  const [showPanda, setShowPanda] = useState(true);
+  const [state, setState] = useState<'invite' | 'uploading' | 'completed'>('invite');
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    setState('uploading');
+    try {
+      const file = e.target.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch(`/api/public/memory/${projectSlug}/selfie`, {
+        method: 'POST',
+        body: formData,
+      });
+      if (res.ok) {
+        setState('completed');
+      } else {
+        setState('invite');
+      }
+    } catch {
+      setState('invite');
+    }
+  };
+
+  if (!showPanda) return null;
+
+  return (
+    <div className="mt-12 p-6 rounded-3xl border border-yellow-500/10 text-center relative z-30 mx-auto max-w-sm"
+      style={{ background: 'rgba(26,0,16,0.7)', backdropFilter: 'blur(12px)', boxShadow: '0 12px 30px rgba(0,0,0,0.4)' }}>
+      <div className="relative inline-block mb-3">
+        <motion.div
+          animate={{ rotate: [0, -5, 5, 0] }}
+          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          className="text-6xl select-none"
+        >
+          🐼
+        </motion.div>
+      </div>
+
+      {state === 'invite' && (
+        <>
+          <p className="text-sm font-semibold text-[#f5c842] mb-2" style={{ fontFamily: 'Playfair Display' }}>Send a Selfie to Thank Them? 💕</p>
+          <p className="text-xs text-white/60 mb-4" style={{ fontFamily: 'Be Vietnam Pro' }}>Snap or upload a selfie to thank them for creating this memory page! It's fully optional, but very cute! 😊</p>
+          <div className="flex justify-center gap-3">
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="px-5 py-2.5 bg-[#f5c842] hover:bg-[#f5c842]/80 text-[#1c000e] rounded-full text-xs font-bold uppercase tracking-wider cursor-pointer"
+              style={{ fontFamily: 'Plus Jakarta Sans' }}
+            >
+              Take/Upload Selfie 📸
+            </button>
+            <button
+              onClick={() => setShowPanda(false)}
+              className="px-4 py-2 text-xs text-white/40 hover:text-white/70"
+            >
+              No, Thanks
+            </button>
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            capture="user"
+            onChange={handleUpload}
+            className="hidden"
+          />
+        </>
+      )}
+
+      {state === 'uploading' && (
+        <div>
+          <div className="w-8 h-8 rounded-full border-4 border-yellow-500/20 border-t-yellow-500 animate-spin mx-auto mb-3" />
+          <p className="text-xs text-[#f5c842] font-bold">Uploading selfie... 🐼</p>
+        </div>
+      )}
+
+      {state === 'completed' && (
+        <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }}>
+          <p className="text-sm font-semibold text-green-400 mb-2">Selfie sent successfully! 🎉</p>
+          <p className="text-xs text-white/50">Your selfie has been shared to their dashboard. Thank you for making their day! ❤️</p>
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // MAIN THEME COMPONENT
 // ─────────────────────────────────────────────
 export default function VelvetRomanceTheme({ project }: { project: Project }) {
@@ -810,6 +862,9 @@ export default function VelvetRomanceTheme({ project }: { project: Project }) {
   const ending = project.endingConfig || {};
 
   const [showLetterModal, setShowLetterModal] = useState(false);
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [activePromise, setActivePromise] = useState<any | null>(null);
+
   const [flippedCount, setFlippedCount] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
   const [activePhoto, setActivePhoto] = useState<{ url: string; caption?: string } | null>(null);
@@ -827,7 +882,13 @@ export default function VelvetRomanceTheme({ project }: { project: Project }) {
   };
 
   return (
-    <div className="min-h-screen text-white relative" style={{ background: 'linear-gradient(180deg, #16000c 0%, #2e0018 50%, #0c0006 100%)', overflowX: 'hidden' }}>
+    <div
+      className="min-h-screen text-white relative"
+      style={{
+        background: cfg.wallpaperUrl ? `url(${cfg.wallpaperUrl}) center/cover no-repeat` : 'linear-gradient(180deg, #16000c 0%, #2e0018 50%, #0c0006 100%)',
+        overflowX: 'hidden',
+      }}
+    >
       {/* Styles */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Be+Vietnam+Pro:ital,wght@0,400;0,600;1,400&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap');
@@ -844,7 +905,7 @@ export default function VelvetRomanceTheme({ project }: { project: Project }) {
       {showConfetti && <PromiseConfetti />}
       {ending.finaleStyle === 'all' && <Fireworks />}
 
-      {/* Background Music widget player */}
+      {/* Background Music player widget */}
       <FloatingMusicWidget musicUrl={project.backgroundMusicUrl || undefined} />
 
       {/* Main Love Scroll View */}
@@ -870,7 +931,7 @@ export default function VelvetRomanceTheme({ project }: { project: Project }) {
             {project.title}
           </h1>
           {project.subtitle && (
-            <p className="text-white/60 text-sm mt-1" style={{ fontFamily: 'Be Vietnam Pro' }}>
+            <p className="text-white/60 text-sm mt-1" style={{ fontFamily: 'Be Vietnam Pro, sans-serif' }}>
               {project.subtitle}
             </p>
           )}
@@ -913,6 +974,35 @@ export default function VelvetRomanceTheme({ project }: { project: Project }) {
           </div>
         )}
 
+        {/* SECTION 2.5: SECRET PERSONALIZED VIDEO FILE (UPLOADED VIDEO) */}
+        {cfg.secretVideoUrl && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-2xl">🎬</span>
+              <span className="font-bold text-sm tracking-wider uppercase text-yellow-500" style={{ fontFamily: 'Plus Jakarta Sans' }}>
+                Secret Personalized File
+              </span>
+            </div>
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowVideoModal(true)}
+              className="w-full aspect-[16/9] rounded-3xl relative flex flex-col items-center justify-center cursor-pointer border border-[#f5c842]/30 overflow-hidden"
+              style={{
+                background: 'linear-gradient(145deg, #1c000e 0%, #3d001d 100%)',
+                boxShadow: '0 12px 35px rgba(0,0,0,0.5), inset 0 0 15px rgba(245,200,66,0.1)',
+              }}
+            >
+              <div className="w-14 h-14 rounded-full bg-[#f5c842] flex items-center justify-center text-[#1c000e] text-2xl z-10 shadow-lg animate-pulse">
+                ▶
+              </div>
+              <p className="text-[10px] uppercase tracking-widest font-bold mt-4 text-[#f5c842]/80 select-none z-10" style={{ fontFamily: 'Plus Jakarta Sans' }}>
+                Play Special Video 🍿
+              </p>
+            </motion.div>
+          </div>
+        )}
+
         {/* SECTION 3: STORY TIMELINE */}
         {project.memories.length > 0 && (
           <div className="space-y-6">
@@ -939,7 +1029,7 @@ export default function VelvetRomanceTheme({ project }: { project: Project }) {
                       <span className="text-xs text-white/40">{new Date(m.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}</span>
                     </div>
                     {m.description && (
-                      <p className="text-xs text-white/60 leading-relaxed" style={{ fontFamily: 'Be Vietnam Pro' }}>
+                      <p className="text-xs text-white/60 leading-relaxed" style={{ fontFamily: 'Be Vietnam Pro, sans-serif' }}>
                         {m.description}
                       </p>
                     )}
@@ -975,14 +1065,22 @@ export default function VelvetRomanceTheme({ project }: { project: Project }) {
 
             <div className="grid grid-cols-2 gap-3 mt-4">
               {cfg.promises.map((p: any, idx: number) => (
-                <PromiseCard
+                <div
                   key={idx}
-                  emoji={p.emoji}
-                  text={p.text}
-                  secretNote={p.secretNote}
-                  cardStyle={cfg.promiseCardStyle}
-                  onFlip={handleCardFlip}
-                />
+                  onClick={() => {
+                    handleCardFlip();
+                    setActivePromise(p);
+                  }}
+                  className="p-4 rounded-2xl text-center border cursor-pointer flex flex-col items-center justify-center min-h-[140px] transition-all hover:scale-103"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(30,0,18,0.85) 0%, rgba(15,0,8,0.9) 100%)',
+                    borderColor: cfg.promiseCardStyle === 'gold' ? '#f5c842' : '#ff1744',
+                    boxShadow: cfg.promiseCardStyle === 'gold' ? '0 8px 24px rgba(245,200,66,0.15)' : '0 8px 24px rgba(255,23,68,0.15)',
+                  }}
+                >
+                  <span className="text-3xl mb-2">{p.emoji || '💍'}</span>
+                  <p className="text-xs font-semibold text-rose-cream">{p.text}</p>
+                </div>
               ))}
             </div>
           </div>
@@ -1068,6 +1166,11 @@ export default function VelvetRomanceTheme({ project }: { project: Project }) {
           </div>
         )}
 
+        {/* Panda selfie thank you widget */}
+        {cfg.enableSelfieThankYou && (
+          <PandaSelfieWidget projectSlug={project.slug} />
+        )}
+
         {/* SECTION 7: ENDING FINALE */}
         <div className="text-center py-12 border-t border-yellow-500/10 space-y-4">
           <h2 className="text-2xl font-serif text-yellow-500" style={{ fontFamily: 'Playfair Display' }}>
@@ -1088,12 +1191,31 @@ export default function VelvetRomanceTheme({ project }: { project: Project }) {
             signature={cfg.quillSignature}
             musicUrl={cfg.letterMusicUrl || undefined}
             onClose={() => setShowLetterModal(false)}
-            disableLetterAutoScroll={cfg.disableLetterAutoScroll}
-            disableWordByWord={cfg.disableWordByWord}
-            letterScrollSpeed={cfg.letterScrollSpeed}
-            letterWordDelay={cfg.letterWordDelay}
-            letterAnimType={cfg.letterAnimType}
-            letterCharDelay={cfg.letterCharDelay}
+            welcomePopupText={cfg.welcomePopupText}
+            envelopeStyle={cfg.envelopeStyle}
+            envelopeOpenEffect={cfg.envelopeOpenEffect}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Fullscreen Vows Details Reveal Modal */}
+      <AnimatePresence>
+        {activePromise && (
+          <FullscreenPromiseModal
+            emoji={activePromise.emoji}
+            text={activePromise.text}
+            secretNote={activePromise.secretNote}
+            onClose={() => setActivePromise(null)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Fullscreen Video Player Modal */}
+      <AnimatePresence>
+        {showVideoModal && cfg.secretVideoUrl && (
+          <SecretVideoModal
+            url={cfg.secretVideoUrl}
+            onClose={() => setShowVideoModal(false)}
           />
         )}
       </AnimatePresence>

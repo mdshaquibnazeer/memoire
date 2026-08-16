@@ -1,6 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
+import { v2 as cloudinary } from 'cloudinary';
 import { prisma } from '../config/prisma';
 import { findDemoProject } from '../utils/demos';
+
+// Configure Cloudinary for public uploads
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // ============================================
 // GET PUBLIC PROJECT BY SLUG
@@ -150,6 +158,83 @@ export const submitPublicWish = async (req: Request, res: Response, next: NextFu
     });
 
     res.json({ success: true, wish: newWish });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ============================================
+// SUBMIT PUBLIC SELFIE FOR A PROJECT
+// ============================================
+
+export const submitPublicSelfie = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { slug } = req.params;
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ error: 'No file provided' });
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      return res.status(400).json({ error: 'File too large. Maximum 10MB.' });
+    }
+
+    if (!file.mimetype.startsWith('image/')) {
+      return res.status(400).json({ error: 'Only image files are allowed for thank-you selfies' });
+    }
+
+    if (slug.startsWith('demo-')) {
+      return res.json({ success: true, url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2' });
+    }
+
+    const project = await prisma.project.findFirst({
+      where: {
+        slug,
+        OR: [
+          { status: 'PUBLISHED' },
+          { status: 'SCHEDULED', scheduledFor: { lte: new Date() } },
+        ],
+      },
+    });
+
+    if (!project) {
+      return res.status(404).json({ error: 'Memory not found or not yet published' });
+    }
+
+    // Upload to Cloudinary under public selfies folder
+    const uploadResult = await new Promise<any>((resolve, reject) => {
+      cloudinary.uploader.upload_stream(
+        {
+          folder: `memoire/public-selfies/${project.id}`,
+          resource_type: 'image',
+          transformation: [
+            { quality: 'auto', fetch_format: 'auto' },
+            { width: 800, height: 800, crop: 'limit' },
+          ],
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      ).end(file.buffer);
+    });
+
+    const heroConfig = (project.heroConfig as any) || {};
+    const selfies = heroConfig.selfies || [];
+    const newSelfie = {
+      url: uploadResult.secure_url,
+      createdAt: new Date().toISOString(),
+    };
+    selfies.push(newSelfie);
+    heroConfig.selfies = selfies;
+
+    await prisma.project.update({
+      where: { id: project.id },
+      data: { heroConfig },
+    });
+
+    res.json({ success: true, url: uploadResult.secure_url });
   } catch (error) {
     next(error);
   }

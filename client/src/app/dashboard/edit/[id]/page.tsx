@@ -12,7 +12,7 @@ import { projectsAPI, aiAPI } from '@/lib/api';
 import MediaUploader from '@/components/shared/MediaUploader';
 import { useAuth } from '@/hooks/useAuth';
 
-type Tab = 'content' | 'gallery' | 'memories' | 'music' | 'settings' | 'wishes';
+type Tab = 'content' | 'gallery' | 'memories' | 'music' | 'settings' | 'wishes' | 'selfies';
 
 export default function EditProjectPage() {
   const { id } = useParams();
@@ -90,6 +90,10 @@ export default function EditProjectPage() {
         customStatValue3: data.project.heroConfig?.customStatValue3 || 0,
         loveCategories: data.project.heroConfig?.loveCategories || [],
         finaleStyle: data.project.endingConfig?.finaleStyle || 'all',
+        wallpaperUrl: data.project.heroConfig?.wallpaperUrl || '',
+        secretVideoUrl: data.project.heroConfig?.secretVideoUrl || '',
+        enableSelfieThankYou: data.project.heroConfig?.enableSelfieThankYou !== undefined ? data.project.heroConfig.enableSelfieThankYou : false,
+        selfies: data.project.heroConfig?.selfies || [],
       });
     }).catch(() => {
       toast.error('Project not found');
@@ -145,6 +149,10 @@ export default function EditProjectPage() {
           customStatLabel3: form.customStatLabel3,
           customStatValue3: Number(form.customStatValue3) || 0,
           loveCategories: form.loveCategories,
+          wallpaperUrl: form.wallpaperUrl,
+          secretVideoUrl: form.secretVideoUrl,
+          enableSelfieThankYou: form.enableSelfieThankYou,
+          selfies: form.selfies || [],
         },
         endingConfig: { 
           title: form.endingTitle, 
@@ -211,6 +219,7 @@ export default function EditProjectPage() {
     { id: 'gallery', label: 'Gallery', icon: Image },
     { id: 'music', label: 'Music', icon: Music },
     { id: 'wishes', label: 'Wishes ✨', icon: Sparkles },
+    { id: 'selfies', label: 'Thank-You Selfies 📸', icon: Image },
     { id: 'settings', label: 'Settings', icon: null },
   ];
 
@@ -348,7 +357,59 @@ export default function EditProjectPage() {
               </Field>
             </Section>
 
-            {project?.theme !== 'VELVET_ROMANCE' && (
+            <Section title="📱 Custom Background Wallpaper">
+              <Field label="Phone Background Wallpaper URL">
+                <input
+                  value={form.wallpaperUrl}
+                  onChange={e => update('wallpaperUrl', e.target.value)}
+                  placeholder="https://..."
+                  className="input-romantic mb-3"
+                />
+                <MediaUploader
+                  projectId={id as string}
+                  accept="image"
+                  maxFiles={1}
+                  label="Upload custom wallpaper"
+                  onUpload={({ url }) => update('wallpaperUrl', url)}
+                />
+              </Field>
+            </Section>
+
+            <Section title="🎬 Secret Personalized Video">
+              <Field label="Special Recipient Video URL">
+                <input
+                  value={form.secretVideoUrl}
+                  onChange={e => update('secretVideoUrl', e.target.value)}
+                  placeholder="https://..."
+                  className="input-romantic mb-3"
+                />
+                <MediaUploader
+                  projectId={id as string}
+                  accept="video"
+                  maxFiles={1}
+                  label="Upload edited video file"
+                  onUpload={({ url }) => update('secretVideoUrl', url)}
+                />
+              </Field>
+            </Section>
+
+            <Section title="🐼 Thank-You Selfie settings">
+              <div className="flex items-center justify-between p-3 glass-card">
+                <div>
+                  <p className="text-rose-cream font-serif text-sm">Ask Recipient for Thank-You Selfie</p>
+                  <p className="text-rose-cream/30 text-xs font-sans">A cute panda at the end asks them to snap/upload a selfie</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => update('enableSelfieThankYou', !form.enableSelfieThankYou)}
+                  className={`w-12 h-6 rounded-full transition-all duration-300 relative ${form.enableSelfieThankYou ? 'bg-rose-blush' : 'bg-white/10'}`}
+                >
+                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${form.enableSelfieThankYou ? 'left-7' : 'left-1'}`} />
+                </button>
+              </div>
+            </Section>
+
+            {project?.theme !== 'VELVET_ROMANCE' && project?.theme !== 'SWEET_DIARY' && (
             <Section title="🎊 Celebration Settings (Celestial Birthday)">
               <Field label="Celebrate Text (max 30 words)">
                 <input value={form.celebrateText} onChange={e => {
@@ -689,9 +750,9 @@ export default function EditProjectPage() {
             </Section>
             )}
 
-            {project?.theme === 'VELVET_ROMANCE' && (
+            {(project?.theme === 'VELVET_ROMANCE' || project?.theme === 'SWEET_DIARY') && (
               <>
-                <Section title="🌹 Velvet Romance - Hero & Envelope Settings">
+                <Section title="💌 Envelope & Seal Settings">
                   <Field label="Hero Tagline (Embossed gold text)">
                     <input
                       value={form.heroTagline}
@@ -743,7 +804,7 @@ export default function EditProjectPage() {
                   </Field>
                 </Section>
 
-                <Section title="✍️ Velvet Romance - Secret Love Letter Scroll">
+                <Section title="✍️ Personal Letter Settings">
                   <Field label="Scroll Letter Message">
                     <textarea
                       value={form.letterMessage}
@@ -804,7 +865,7 @@ export default function EditProjectPage() {
                   </div>
                 </Section>
 
-                <Section title="💍 Velvet Romance - Promise Wall Settings">
+                <Section title="💍 Promise Wall Settings">
                   <Field label="Promise Wall Header Title">
                     <input
                       value={form.promiseWallTitle}
@@ -919,7 +980,7 @@ export default function EditProjectPage() {
                   </div>
                 </Section>
 
-                <Section title="📸 Velvet Romance - Gallery Settings">
+                <Section title="📸 Gallery Settings">
                   <Field label="Gallery Section Title">
                     <input
                       value={form.galleryTitle}
@@ -974,7 +1035,7 @@ export default function EditProjectPage() {
                   </Field>
                 </Section>
 
-                <Section title="📊 Velvet Romance - Relationship Infographics">
+                <Section title="📊 Relationship Infographics">
                   <div className="flex items-center justify-between p-3 glass-card mb-6">
                     <div>
                       <p className="text-rose-cream font-serif text-sm">Show Love Stats Counters</p>
@@ -1104,7 +1165,7 @@ export default function EditProjectPage() {
                   )}
                 </Section>
 
-                <Section title="🎉 Velvet Romance - Finale Settings">
+                <Section title="🎉 Grand Finale Settings">
                   <Field label="Closing Title">
                     <input
                       value={form.endingTitle}
@@ -1224,6 +1285,58 @@ export default function EditProjectPage() {
                           className="text-white bg-red-500/80 p-1.5 rounded-lg hover:bg-red-500 transition-colors"
                         >
                           <Trash2 size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Section>
+          </motion.div>
+        )}
+
+        {/* SELFIES TAB */}
+        {activeTab === 'selfies' && (
+          <motion.div key="selfies" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
+            <Section title="Thank-You Selfies Received 📸">
+              <p className="text-rose-cream/40 text-sm font-sans mb-6">
+                Here are the thank-you selfies submitted by the recipient of your memory page!
+              </p>
+
+              {!project?.heroConfig?.selfies || project.heroConfig.selfies.length === 0 ? (
+                <div className="text-center py-12 glass-card rounded-2xl">
+                  <p className="text-rose-cream/30 font-serif text-lg">No selfies received yet 🐼</p>
+                  <p className="text-rose-cream/20 font-sans text-xs mt-1">They will appear here once the recipient snaps or uploads a selfie at the end of the page!</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {project.heroConfig.selfies.map((s: any, idx: number) => (
+                    <div key={idx} className="p-3 glass-card rounded-2xl border border-rose-cream/10 relative group flex flex-col justify-between">
+                      <div className="aspect-square rounded-xl overflow-hidden border border-white/5 bg-black">
+                        <img src={s.url} alt="selfie" className="w-full h-full object-cover" />
+                      </div>
+                      <div className="mt-2 flex items-center justify-between">
+                        <span className="text-[10px] text-rose-cream/40 font-sans">
+                          {new Date(s.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                        <button
+                          onClick={async () => {
+                            if (confirm('Are you sure you want to delete this selfie?')) {
+                              try {
+                                const updatedSelfies = project.heroConfig.selfies.filter((_: any, i: number) => i !== idx);
+                                const updatedHeroConfig = { ...project.heroConfig, selfies: updatedSelfies };
+                                await projectsAPI.update(project.id, { heroConfig: updatedHeroConfig });
+                                setForm((f: any) => ({ ...f, selfies: updatedSelfies }));
+                                setProject((p: any) => ({ ...p, heroConfig: updatedHeroConfig }));
+                                toast.success('Selfie deleted');
+                              } catch {
+                                toast.error('Failed to delete selfie');
+                              }
+                            }
+                          }}
+                          className="text-red-400 hover:text-red-600 transition-colors p-1"
+                        >
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     </div>

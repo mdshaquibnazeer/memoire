@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
 
 // ─────────────────────────────────────────────
 // INTERFACES
@@ -25,6 +25,7 @@ interface GalleryItem {
 }
 
 interface Project {
+  id: string;
   title: string;
   slug: string;
   subtitle: string | null;
@@ -34,6 +35,8 @@ interface Project {
   startDate: string | null;
   coverImageUrl: string | null;
   backgroundMusicUrl?: string | null;
+  isPasswordProtected?: boolean;
+  accessPassword?: string | null;
   heroConfig: any;
   endingConfig: any;
   memories: Memory[];
@@ -134,10 +137,10 @@ function PasscodeScreen({ correctCode, onUnlock }: { correctCode: string; onUnlo
 
   const press = (val: string) => {
     if (val === 'del') { setInput(p => p.slice(0, -1)); return; }
-    if (input.length >= 4) return;
+    if (input.length >= correctCode.length) return;
     const next = input + val;
     setInput(next);
-    if (next.length === 4) {
+    if (next.length === correctCode.length) {
       if (next === correctCode) {
         setTimeout(onUnlock, 300);
       } else {
@@ -161,7 +164,6 @@ function PasscodeScreen({ correctCode, onUnlock }: { correctCode: string; onUnlo
         transition={{ duration: 0.8 }}
         className="relative z-10 w-full max-w-sm flex flex-col items-center"
       >
-        {/* Puppy character */}
         <motion.div
           animate={{ y: [0, -8, 0] }}
           transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
@@ -179,13 +181,13 @@ function PasscodeScreen({ correctCode, onUnlock }: { correctCode: string; onUnlo
           </p>
         </div>
 
-        {/* Passcode dots */}
+        {/* Passcode dots dynamically spaced based on code length */}
         <motion.div
           animate={shake ? { x: [-8, 8, -8, 8, 0] } : {}}
           transition={{ duration: 0.4 }}
           className="flex gap-4 mb-2"
         >
-          {[0, 1, 2, 3].map(i => (
+          {Array.from({ length: correctCode.length }).map((_, i) => (
             <motion.div
               key={i}
               animate={{ scale: input.length > i ? 1.2 : 1 }}
@@ -196,7 +198,7 @@ function PasscodeScreen({ correctCode, onUnlock }: { correctCode: string; onUnlo
         </motion.div>
 
         {hint && (
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-100 text-sm mb-2">
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-100 text-sm mb-2 font-bold">
             {hint}
           </motion.p>
         )}
@@ -221,11 +223,417 @@ function PasscodeScreen({ correctCode, onUnlock }: { correctCode: string; onUnlo
             </motion.button>
           ))}
         </div>
-
-        <p className="text-white/50 text-xs mt-5" style={{ fontFamily: 'Be Vietnam Pro, sans-serif' }}>
-          Hint: ask the sender 💌
-        </p>
       </motion.div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// FULLSCREEN VOW PROMISE CARD MODAL
+// ─────────────────────────────────────────────
+function FullscreenPromiseModal({ emoji, text, secretNote, onClose }: { emoji: string; text: string; secretNote: string; onClose: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-6 bg-black/90 backdrop-blur-md"
+    >
+      <motion.div
+        initial={{ scale: 0.85, rotate: -2 }}
+        animate={{ scale: 1, rotate: 0 }}
+        exit={{ scale: 0.85, opacity: 0 }}
+        className="w-full max-w-sm rounded-3xl p-8 text-center border-2 border-pink-200"
+        style={{
+          background: 'linear-gradient(135deg, #fff5f7 0%, #fff0f3 100%)',
+          boxShadow: '0 25px 50px rgba(255,105,180,0.25)',
+        }}
+      >
+        <span className="text-6xl block mb-6 animate-bounce">{emoji}</span>
+        <h3 className="text-lg font-bold text-pink-700 font-serif mb-3">Our Vow</h3>
+        <p className="text-md font-semibold text-pink-900 leading-snug mb-6" style={{ fontFamily: 'Be Vietnam Pro' }}>
+          "{text}"
+        </p>
+        <div className="p-4 rounded-2xl bg-white border border-pink-100 shadow-inner mb-6">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-pink-400 block mb-2">Secret Message</span>
+          <p className="text-sm italic text-pink-800 leading-relaxed">
+            {secretNote || 'A special promise to hold close to my heart.'}
+          </p>
+        </div>
+        <button
+          onClick={onClose}
+          className="px-6 py-2.5 rounded-full text-xs uppercase tracking-widest font-bold text-white bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 transition-all cursor-pointer shadow-md"
+        >
+          Close Vow 💖
+        </button>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// PROMISE WALL MODAL
+// ─────────────────────────────────────────────
+function PromiseWallModal({ project, onClose }: { project: Project; onClose: () => void }) {
+  const cfg = project.heroConfig || {};
+  const promises = cfg.promises || [];
+  const [activePromise, setActivePromise] = useState<any | null>(null);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-pink-100/80 backdrop-blur-md">
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto"
+      >
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">💍</span>
+            <span className="font-bold text-pink-700 font-serif">{cfg.promiseWallTitle || 'Our Vows'}</span>
+          </div>
+          <button onClick={onClose} className="text-pink-400 hover:text-pink-600 text-xl font-bold p-1">✕</button>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          {promises.map((p: any, idx: number) => (
+            <div
+              key={idx}
+              onClick={() => setActivePromise(p)}
+              className="p-4 rounded-2xl text-center border border-pink-100 hover:border-pink-300 bg-pink-50/30 hover:bg-pink-50/80 transition-all cursor-pointer flex flex-col items-center justify-center min-h-[120px]"
+            >
+              <span className="text-3xl mb-2">{p.emoji || '💖'}</span>
+              <p className="text-xs font-semibold text-pink-800 line-clamp-2">{p.text}</p>
+            </div>
+          ))}
+        </div>
+      </motion.div>
+
+      <AnimatePresence>
+        {activePromise && (
+          <FullscreenPromiseModal
+            emoji={activePromise.emoji}
+            text={activePromise.text}
+            secretNote={activePromise.secretNote}
+            onClose={() => setActivePromise(null)}
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// SECRET VIDEO PLAYER MODAL
+// ─────────────────────────────────────────────
+function SecretVideoModal({ url, onClose }: { url: string; onClose: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md"
+    >
+      <div className="relative max-w-3xl w-full max-h-[80vh] flex flex-col items-center">
+        <button onClick={onClose} className="absolute -top-12 right-0 text-white/70 hover:text-white text-3xl font-bold p-2">✕</button>
+        <div className="w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black">
+          <video src={url} controls autoPlay className="w-full h-auto max-h-[65vh]" />
+        </div>
+        <p className="text-white/60 text-xs mt-3 italic" style={{ fontFamily: 'Be Vietnam Pro' }}>
+          Your custom personalized video file 🎬
+        </p>
+      </div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// WAX SEAL ENVELOPE MODAL (Sweet Diary style)
+// ─────────────────────────────────────────────
+function EnvelopeLetterModal({
+  message,
+  signature,
+  musicUrl,
+  onClose,
+  welcomePopupText,
+  envelopeStyle = 'gold',
+  envelopeOpenEffect = 'shimmer',
+}: {
+  message: string;
+  signature?: string;
+  musicUrl?: string;
+  onClose: () => void;
+  welcomePopupText?: string;
+  envelopeStyle?: string;
+  envelopeOpenEffect?: string;
+}) {
+  const [phase, setPhase] = useState<'closed' | 'opening' | 'open' | 'reading'>('closed');
+  const [sealCrumble, setSealCrumble] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(0);
+  const localAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const fullText = message || '';
+  const words = fullText.split(/\s+/).filter(Boolean);
+  const totalCount = words.length;
+
+  useEffect(() => {
+    if (musicUrl && localAudioRef.current) {
+      localAudioRef.current.volume = 0.4;
+      localAudioRef.current.play().catch(() => {});
+    }
+    return () => {
+      localAudioRef.current?.pause();
+    };
+  }, [musicUrl]);
+
+  const handleEnvelopeClick = () => {
+    setSealCrumble(true);
+    setTimeout(() => {
+      setPhase('opening');
+      setTimeout(() => {
+        setPhase('open');
+        setTimeout(() => {
+          setPhase('reading');
+        }, 1000);
+      }, 1000);
+    }, 600);
+  };
+
+  useEffect(() => {
+    if (phase !== 'reading') return;
+    if (visibleCount >= totalCount) return;
+    const timer = setTimeout(() => {
+      setVisibleCount(c => c + 1);
+    }, 120);
+    return () => clearTimeout(timer);
+  }, [phase, visibleCount, totalCount]);
+
+  const visibleText = words.slice(0, visibleCount).join(' ');
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[10000] flex flex-col items-center justify-center p-6 bg-pink-100/95 backdrop-blur-md"
+    >
+      {musicUrl && <audio ref={localAudioRef} src={musicUrl} loop />}
+
+      <div className="relative flex flex-col items-center max-w-sm w-full" style={{ perspective: 1200 }}>
+        
+        {/* Envelope view */}
+        <AnimatePresence>
+          {phase !== 'reading' && (
+            <motion.div
+              key="envelope"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="w-full aspect-[4/3] rounded-3xl relative flex flex-col items-center justify-center cursor-pointer border border-pink-300/30 overflow-visible"
+              onClick={handleEnvelopeClick}
+              style={{
+                background: 'linear-gradient(145deg, #ffb6c1 0%, #ff8da1 100%)',
+                boxShadow: '0 25px 60px rgba(255,105,180,0.3), inset 0 0 20px rgba(255,255,255,0.2)',
+              }}
+            >
+              {/* Flap */}
+              <motion.div
+                animate={phase === 'opening' || phase === 'open' ? { rotateX: -180, y: -2 } : { rotateX: 0 }}
+                transition={{ duration: 1.2 }}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '50%',
+                  transformOrigin: 'top center',
+                  transformStyle: 'preserve-3d',
+                  zIndex: 10,
+                }}
+              >
+                <div
+                  className="absolute inset-0 backface-hidden rounded-t-3xl border-b border-white/20"
+                  style={{
+                    background: 'linear-gradient(180deg, #ff8da1 0%, #ffb6c1 100%)',
+                    clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
+                  }}
+                />
+                <div
+                  className="absolute inset-0 backface-hidden rounded-t-3xl rotate-y-180"
+                  style={{
+                    background: 'linear-gradient(180deg, #ffb6c1 0%, #ffe0ec 100%)',
+                    clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
+                  }}
+                />
+              </motion.div>
+
+              {/* Seal */}
+              <motion.div
+                animate={sealCrumble ? { scale: [1, 1.2, 0], opacity: 0 } : { scale: 1 }}
+                transition={{ duration: 0.5 }}
+                className="w-16 h-16 rounded-full flex items-center justify-center border-2 z-20 absolute"
+                style={{
+                  borderColor: '#fff',
+                  background: 'radial-gradient(circle, #e8607a, #b5264a)',
+                  boxShadow: '0 0 20px rgba(232,96,122,0.5)',
+                }}
+              >
+                <span className="text-3xl">💖</span>
+              </motion.div>
+
+              <p className="text-[10px] uppercase tracking-widest font-bold mt-20 text-white select-none z-10" style={{ fontFamily: 'Plus Jakarta Sans' }}>
+                {sealCrumble ? 'Opening...' : 'Tap seal to read letter'}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Parchment scroll */}
+        <AnimatePresence>
+          {phase === 'reading' && (
+            <motion.div
+              key="letter"
+              initial={{ opacity: 0, y: 50, scale: 0.93 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 30 }}
+              transition={{ duration: 0.7 }}
+              className="w-full max-h-[60vh] overflow-y-auto rounded-2xl p-6 relative border border-pink-200"
+              style={{
+                background: 'white',
+                backgroundImage: 'repeating-linear-gradient(transparent, transparent 27px, #ffb6c1 27px, #ffb6c1 28px)',
+                backgroundPositionY: '8px',
+                boxShadow: '0 25px 80px rgba(255,105,180,0.3)',
+              }}
+            >
+              <div className="relative z-10" style={{ fontFamily: 'Be Vietnam Pro' }}>
+                <p className="text-sm leading-8 text-pink-900 whitespace-pre-wrap">
+                  {visibleText}
+                  {visibleCount < totalCount && (
+                    <motion.span animate={{ opacity: [1, 0, 1] }} transition={{ duration: 0.6, repeat: Infinity }} className="text-pink-500 font-bold ml-1">|</motion.span>
+                  )}
+                </p>
+
+                {visibleCount >= totalCount && signature && (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                    className="text-right text-pink-600 font-serif italic mt-6 text-md font-bold"
+                  >
+                    — With Love, {signature} 🌸
+                  </motion.p>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Close Button */}
+        {phase === 'reading' && (
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1 }}
+            onClick={onClose}
+            className="mt-6 px-6 py-2.5 rounded-full text-xs uppercase tracking-widest font-bold text-white bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 transition-all cursor-pointer shadow-md"
+            style={{ fontFamily: 'Plus Jakarta Sans' }}
+          >
+            Close Letter 💌
+          </motion.button>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// CUTE PANDA SELFIE THANK YOU
+// ─────────────────────────────────────────────
+function PandaSelfieWidget({ projectSlug }: { projectSlug: string }) {
+  const [showPanda, setShowPanda] = useState(true);
+  const [state, setState] = useState<'invite' | 'uploading' | 'completed'>('invite');
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    setState('uploading');
+    try {
+      const file = e.target.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch(`/api/public/memory/${projectSlug}/selfie`, {
+        method: 'POST',
+        body: formData,
+      });
+      if (res.ok) {
+        setState('completed');
+      } else {
+        setState('invite');
+      }
+    } catch {
+      setState('invite');
+    }
+  };
+
+  if (!showPanda) return null;
+
+  return (
+    <div className="mt-12 p-6 rounded-3xl border border-pink-200 text-center relative z-10 mx-auto max-w-sm"
+      style={{ background: 'white', boxShadow: '0 12px 30px rgba(255,105,180,0.15)' }}>
+      <div className="relative inline-block mb-3">
+        {/* Animated Panda Emoji */}
+        <motion.div
+          animate={{ rotate: [0, -5, 5, 0] }}
+          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          className="text-6xl select-none"
+        >
+          🐼
+        </motion.div>
+      </div>
+
+      {state === 'invite' && (
+        <>
+          <p className="text-sm font-semibold text-pink-700 mb-2">Send a Selfie to Thank Them? 💕</p>
+          <p className="text-xs text-gray-500 mb-4">Snap or drop a selfie to say thank you for creating this memory page! It's not mandatory, but will bring a huge smile! 😊</p>
+          <div className="flex justify-center gap-3">
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="px-5 py-2.5 bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 text-white rounded-full text-xs font-bold uppercase tracking-wider cursor-pointer"
+            >
+              Take/Upload Selfie 📸
+            </button>
+            <button
+              onClick={() => setShowPanda(false)}
+              className="px-4 py-2 text-xs text-gray-400 hover:text-gray-600"
+            >
+              No, Thanks
+            </button>
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            capture="user"
+            onChange={handleUpload}
+            className="hidden"
+          />
+        </>
+      )}
+
+      {state === 'uploading' && (
+        <div>
+          <div className="w-8 h-8 rounded-full border-4 border-pink-200 border-t-pink-500 animate-spin mx-auto mb-3" />
+          <p className="text-xs text-pink-600 font-bold">Uploading selfie to thank them... 🐼</p>
+        </div>
+      )}
+
+      {state === 'completed' && (
+        <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }}>
+          <p className="text-sm font-semibold text-green-600 mb-2">Selfie sent successfully! 🎉</p>
+          <p className="text-xs text-gray-500">Your selfie has been shared to their dashboard. Thank you for making their day! ❤️</p>
+        </motion.div>
+      )}
     </div>
   );
 }
@@ -234,209 +642,25 @@ function PasscodeScreen({ correctCode, onUnlock }: { correctCode: string; onUnlo
 // AWARD MODAL
 // ─────────────────────────────────────────────
 function AwardModal({ project, onClose }: { project: Project; onClose: () => void }) {
-  const cfg = project.heroConfig || {};
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(255,182,193,0.7)', backdropFilter: 'blur(10px)' }}>
-      <motion.div
-        initial={{ scale: 0.6, opacity: 0, rotate: -5 }}
-        animate={{ scale: 1, opacity: 1, rotate: 0 }}
-        exit={{ scale: 0.6, opacity: 0 }}
-        transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-        className="relative w-full max-w-sm"
-        style={{ background: 'linear-gradient(135deg, #fff5f7 0%, #ffe4ec 100%)', borderRadius: '28px', padding: '32px 24px', boxShadow: '0 24px 60px rgba(255,100,130,0.3)', border: '2px solid rgba(255,141,161,0.4)' }}
-      >
-        <button onClick={onClose} className="absolute top-4 right-4 text-2xl text-pink-300 hover:text-pink-500 transition-colors">✕</button>
-
-        <div className="text-center">
-          <motion.div animate={{ rotate: [0, -10, 10, -5, 5, 0] }} transition={{ duration: 1.5, delay: 0.3 }} className="text-6xl mb-4">🏅</motion.div>
-          <div className="text-pink-300 text-xs font-bold tracking-widest uppercase mb-1" style={{ fontFamily: 'Be Vietnam Pro, sans-serif' }}>Certificate of Appreciation</div>
-          <h2 className="font-extrabold text-2xl mb-3" style={{ color: '#c0506a', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-            {cfg.awardTitle || 'Lifetime Bestie Award'}
-          </h2>
-          <div className="w-12 h-0.5 mx-auto mb-4" style={{ background: 'linear-gradient(90deg, transparent, #ff8da1, transparent)' }} />
-          <p className="text-sm leading-relaxed mb-4" style={{ color: '#a05070', fontFamily: 'Be Vietnam Pro, sans-serif' }}>
-            Proudly presented to
-          </p>
-          <div className="text-3xl font-bold mb-4" style={{ color: '#e05070', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-            {project.personTwoName || 'You'} 🌸
-          </div>
-          <p className="text-sm leading-relaxed" style={{ color: '#a05070', fontFamily: 'Be Vietnam Pro, sans-serif' }}>
-            {cfg.awardDescription || 'For being the most amazing, kind, and wonderful person in the entire universe.'}
-          </p>
-          <div className="flex justify-between items-center mt-6 pt-4" style={{ borderTop: '1px dashed #ffb6c1' }}>
-            <div className="text-center">
-              <div className="text-lg mb-1">🎀</div>
-              <div className="text-xs text-pink-300" style={{ fontFamily: 'Be Vietnam Pro, sans-serif' }}>{project.personOneName || 'Sender'}</div>
-            </div>
-            <div className="text-2xl">💕</div>
-            <div className="text-center">
-              <div className="text-lg mb-1">⭐</div>
-              <div className="text-xs text-pink-300" style={{ fontFamily: 'Be Vietnam Pro, sans-serif' }}>Forever</div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────
-// MEMORIES SEARCH MODAL
-// ─────────────────────────────────────────────
-function MemoriesModal({ project, onClose }: { project: Project; onClose: () => void }) {
-  const [tab, setTab] = useState<'all' | 'images' | 'memories'>('all');
-  const tabs = [{ id: 'all', label: 'All' }, { id: 'images', label: 'Images' }, { id: 'memories', label: 'Memories' }];
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
-      style={{ background: 'rgba(255,182,193,0.7)', backdropFilter: 'blur(10px)' }}>
-      <motion.div
-        initial={{ y: '100%', opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: '100%', opacity: 0 }}
-        transition={{ type: 'spring', stiffness: 150, damping: 25 }}
-        className="w-full max-w-lg h-[85vh] sm:h-[75vh] overflow-hidden flex flex-col"
-        style={{ background: 'white', borderRadius: '28px 28px 0 0', boxShadow: '0 -8px 40px rgba(255,100,130,0.2)' }}
-      >
-        {/* Header */}
-        <div className="px-5 pt-5 pb-3 flex-shrink-0">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">🔍</span>
-              <span className="font-bold text-lg" style={{ color: '#c0506a', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>Moments of Us</span>
-            </div>
-            <button onClick={onClose} className="text-xl text-pink-300 hover:text-pink-500">✕</button>
-          </div>
-          {/* Search bar mock */}
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full text-sm text-pink-300"
-            style={{ background: '#fff0f5', border: '1.5px solid #ffb6c1', fontFamily: 'Be Vietnam Pro, sans-serif' }}>
-            🔍 &nbsp;Search our memories...
-          </div>
-          {/* Tabs */}
-          <div className="flex gap-2 mt-3">
-            {tabs.map(t => (
-              <button key={t.id} onClick={() => setTab(t.id as any)}
-                className="px-4 py-1 rounded-full text-sm font-semibold transition-all"
-                style={{
-                  background: tab === t.id ? '#ff8da1' : '#fff0f5',
-                  color: tab === t.id ? 'white' : '#c0506a',
-                  fontFamily: 'Be Vietnam Pro, sans-serif',
-                }}>
-                {t.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Grid */}
-        <div className="overflow-y-auto flex-1 px-5 pb-5">
-          {(tab === 'all' || tab === 'images') && project.galleryItems.length > 0 && (
-            <div className="mb-4">
-              {tab === 'all' && <p className="text-xs font-bold text-pink-300 mb-2 uppercase tracking-wider">📸 Gallery</p>}
-              <div className="grid grid-cols-2 gap-2">
-                {project.galleryItems.map((g, i) => (
-                  <motion.div key={g.id} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }}
-                    className="aspect-square rounded-xl overflow-hidden" style={{ background: '#fff0f5' }}>
-                    {g.mediaUrl && <img src={g.mediaUrl} alt={g.caption || ''} className="w-full h-full object-cover" />}
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          )}
-          {(tab === 'all' || tab === 'memories') && project.memories.map((m, i) => (
-            <motion.div key={m.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.07 }}
-              className="flex gap-3 mb-3 p-3 rounded-2xl" style={{ background: '#fff0f5', border: '1px solid #ffb6c1' }}>
-              <div className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl"
-                style={{ background: '#ffe4ec' }}>
-                {m.emoji || '🌸'}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-sm truncate" style={{ color: '#c0506a', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>{m.title}</p>
-                {m.description && <p className="text-xs mt-0.5 line-clamp-2" style={{ color: '#a08090', fontFamily: 'Be Vietnam Pro, sans-serif' }}>{m.description}</p>}
-                <p className="text-xs mt-1 text-pink-300">{new Date(m.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
-              </div>
-            </motion.div>
-          ))}
-          {((tab === 'memories' && project.memories.length === 0) || (tab === 'images' && project.galleryItems.length === 0)) && (
-            <div className="text-center py-12 text-pink-300">
-              <div className="text-4xl mb-2">🌸</div>
-              <p style={{ fontFamily: 'Be Vietnam Pro, sans-serif' }}>No {tab} yet 💕</p>
-            </div>
-          )}
-        </div>
-      </motion.div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────
-// LOVE LETTER MODAL
-// ─────────────────────────────────────────────
-function LoveLetterModal({ project, onClose }: { project: Project; onClose: () => void }) {
-  const cfg = project.heroConfig || {};
-  const msg = cfg.loveLetterText || cfg.message || 'You are the most wonderful person I know. Happy Birthday! 💕';
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(255,182,193,0.7)', backdropFilter: 'blur(10px)' }}>
-      <motion.div
-        initial={{ rotateY: 90, opacity: 0 }}
-        animate={{ rotateY: 0, opacity: 1 }}
-        exit={{ rotateY: -90, opacity: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-sm overflow-hidden"
-        style={{ borderRadius: '24px', boxShadow: '0 24px 60px rgba(255,100,130,0.3)' }}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4"
-          style={{ background: 'linear-gradient(135deg, #ff8da1, #ffb6c1)' }}>
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">✉️</span>
-            <span className="font-bold text-white" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>With Love</span>
-          </div>
-          <button onClick={onClose} className="text-white/80 hover:text-white text-xl">✕</button>
-        </div>
-
-        {/* Notebook body */}
-        <div className="relative p-5 min-h-[320px]"
-          style={{ background: 'white', backgroundImage: 'repeating-linear-gradient(transparent, transparent 27px, #ffb6c1 27px, #ffb6c1 28px)', backgroundPositionY: '8px' }}>
-          {/* Vinyl record decoration */}
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
-            className="absolute -right-4 -top-4 w-20 h-20 rounded-full opacity-20 flex items-center justify-center text-4xl"
-            style={{ background: '#333' }}
-          >
-            <span>💿</span>
-          </motion.div>
-
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-lg">📝</span>
-            <span className="font-bold text-sm" style={{ color: '#c0506a', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-              To: {project.personTwoName || 'You'} 💕
-            </span>
-          </div>
-
-          <p className="text-sm leading-8 relative z-10" style={{ color: '#805060', fontFamily: 'Be Vietnam Pro, sans-serif', whiteSpace: 'pre-wrap' }}>
-            {msg}
-          </p>
-
-          <div className="mt-6 text-right">
-            <p className="text-sm italic" style={{ color: '#c0506a', fontFamily: 'Be Vietnam Pro, sans-serif' }}>
-              With all my love,<br />
-              <span className="font-bold">{project.personOneName || 'Sender'} 🌸</span>
-            </p>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between px-5 py-3"
-          style={{ background: '#fff0f5', borderTop: '1px dashed #ffb6c1' }}>
-          <span className="text-xs text-pink-300" style={{ fontFamily: 'Be Vietnam Pro, sans-serif' }}>
-            {cfg.vinylSong || 'Our song'} — {cfg.vinylArtist || project.personOneName || 'With love'}
-          </span>
-          <motion.span animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>💕</motion.span>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-pink-100/70 backdrop-blur-md">
+      <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+        className="w-full max-w-sm bg-white rounded-3xl p-6 text-center shadow-2xl relative">
+        <button onClick={onClose} className="absolute top-4 right-4 text-pink-400 hover:text-pink-600 text-xl font-bold p-1">✕</button>
+        <span className="text-7xl block mb-4 animate-bounce">🏆</span>
+        <h2 className="text-xl font-bold text-pink-700 font-serif mb-2">Certificate of Love</h2>
+        <p className="text-sm text-gray-500 mb-4" style={{ fontFamily: 'Be Vietnam Pro' }}>
+          This award is officially presented to:
+        </p>
+        <p className="text-xl font-extrabold text-pink-900 border-b-2 border-pink-200 pb-2 inline-block px-4 mb-4" style={{ fontFamily: 'Plus Jakarta Sans' }}>
+          {project.personTwoName || 'Recipient'}
+        </p>
+        <p className="text-sm text-pink-600 italic font-semibold leading-relaxed mb-6">
+          "For being the most incredible, caring, and wonderful person in my universe."
+        </p>
+        <div className="flex justify-between items-center text-xs text-gray-400 border-t border-pink-100 pt-4">
+          <span>Signed: {project.personOneName || 'Sender'}</span>
+          <span>Date: {project.startDate ? new Date(project.startDate).toLocaleDateString() : 'Forever'}</span>
         </div>
       </motion.div>
     </div>
@@ -449,82 +673,40 @@ function LoveLetterModal({ project, onClose }: { project: Project; onClose: () =
 const DEFAULT_REASONS = ['Your beautiful smile', 'Your kind heart', 'How you make me laugh', 'Our memories together', 'Your warm hugs', 'How genuine you are', 'Your amazing energy', 'Just being you 🌸'];
 
 function JarModal({ project, onClose }: { project: Project; onClose: () => void }) {
+  const [openedReason, setOpenedReason] = useState<string | null>(null);
   const cfg = project.heroConfig || {};
-  const reasons: string[] = cfg.jarReasons || DEFAULT_REASONS;
-  const [revealed, setRevealed] = useState<number[]>([]);
+  const customReasons = cfg.reasonsList || [];
+  const reasons = customReasons.length > 0 ? customReasons : DEFAULT_REASONS;
+
+  const pullReason = () => {
+    const random = reasons[Math.floor(Math.random() * reasons.length)];
+    setOpenedReason(random);
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
-      style={{ background: 'rgba(255,182,193,0.7)', backdropFilter: 'blur(10px)' }}>
-      <motion.div
-        initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-        transition={{ type: 'spring', stiffness: 150, damping: 25 }}
-        className="w-full max-w-sm overflow-hidden"
-        style={{ borderRadius: '28px 28px 0 0', background: 'white', boxShadow: '0 -8px 40px rgba(255,100,130,0.2)', maxHeight: '80vh' }}
-      >
-        <div className="px-5 py-4 flex items-center justify-between flex-shrink-0"
-          style={{ background: 'linear-gradient(135deg, #ffb6c1, #ff8da1)' }}>
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🏺</span>
-            <div>
-              <p className="font-bold text-white text-sm" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>Jar of Reasons</p>
-              <p className="text-white/80 text-xs" style={{ fontFamily: 'Be Vietnam Pro, sans-serif' }}>Everything I love about you</p>
-            </div>
-          </div>
-          <button onClick={onClose} className="text-white/80 hover:text-white text-xl">✕</button>
-        </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-pink-100/70 backdrop-blur-md">
+      <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+        className="w-full max-w-sm bg-white rounded-3xl p-6 text-center shadow-2xl relative">
+        <button onClick={onClose} className="absolute top-4 right-4 text-pink-400 hover:text-pink-600 text-xl font-bold p-1">✕</button>
+        <span className="text-7xl block mb-4">🏺</span>
+        <h2 className="text-xl font-bold text-pink-700 font-serif mb-2">Jar of Love Reasons</h2>
+        <p className="text-xs text-gray-400 mb-6">Tap the button to pull out a reason why you are so special!</p>
 
-        <div className="overflow-y-auto p-5" style={{ maxHeight: 'calc(80vh - 80px)' }}>
-          <p className="text-center text-xs text-pink-300 mb-4" style={{ fontFamily: 'Be Vietnam Pro, sans-serif' }}>
-            Tap the hearts to reveal 💕
-          </p>
-          <div className="grid grid-cols-2 gap-3">
-            {reasons.map((r, i) => (
-              <motion.button
-                key={i}
-                whileTap={{ scale: 0.92 }}
-                onClick={() => setRevealed(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i])}
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
-                className="relative flex flex-col items-center justify-center p-4 rounded-2xl min-h-[90px] transition-all duration-300 cursor-pointer"
-                style={{
-                  background: revealed.includes(i) ? 'linear-gradient(135deg, #ffe4ec, #ffb6c1)' : '#fff0f5',
-                  border: revealed.includes(i) ? '1.5px solid #ff8da1' : '1.5px solid #ffd0dc',
-                  boxShadow: revealed.includes(i) ? '0 4px 20px rgba(255,141,161,0.3)' : 'none',
-                }}
-              >
-                <motion.span
-                  animate={revealed.includes(i) ? { scale: [1, 1.3, 1] } : {}}
-                  transition={{ duration: 0.3 }}
-                  className="text-2xl mb-2"
-                >
-                  {revealed.includes(i) ? '💗' : '🤍'}
-                </motion.span>
-                <AnimatePresence>
-                  {revealed.includes(i) && (
-                    <motion.p
-                      initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                      className="text-xs text-center font-semibold leading-tight"
-                      style={{ color: '#c0506a', fontFamily: 'Be Vietnam Pro, sans-serif' }}
-                    >
-                      {r}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
-              </motion.button>
-            ))}
-          </div>
-
-          {revealed.length === reasons.length && (
-            <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
-              className="text-center mt-6 p-4 rounded-2xl"
-              style={{ background: 'linear-gradient(135deg, #ffe4ec, #ffb6c1)' }}>
-              <div className="text-3xl mb-1">💖</div>
-              <p className="font-bold text-sm" style={{ color: '#c0506a', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-                You revealed them all! That's how much I love you 🌸
-              </p>
+        <AnimatePresence mode="wait">
+          {openedReason ? (
+            <motion.div key="reason" initial={{ rotateY: 90, opacity: 0 }} animate={{ rotateY: 0, opacity: 1 }} exit={{ rotateY: -90, opacity: 0 }}
+              className="p-5 rounded-2xl bg-pink-50 border border-pink-100 shadow-inner mb-6 min-h-[80px] flex items-center justify-center">
+              <p className="text-sm font-semibold text-pink-800 italic">"{openedReason}"</p>
             </motion.div>
+          ) : (
+            <div className="mb-6 h-[80px]" />
           )}
-        </div>
+        </AnimatePresence>
+
+        <button onClick={pullReason}
+          className="px-6 py-2.5 rounded-full text-xs uppercase tracking-widest font-bold text-white bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 transition-all cursor-pointer shadow-md">
+          Pull a Reason 💌
+        </button>
       </motion.div>
     </div>
   );
@@ -534,86 +716,63 @@ function JarModal({ project, onClose }: { project: Project; onClose: () => void 
 // MUSIC PLAYER MODAL
 // ─────────────────────────────────────────────
 function MusicModal({ project, onClose }: { project: Project; onClose: () => void }) {
-  const [playing, setPlaying] = useState(false);
-  const [progress, setProgress] = useState(30);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const cfg = project.heroConfig || {};
-
-  useEffect(() => {
-    if (project.backgroundMusicUrl) {
-      audioRef.current = new Audio(project.backgroundMusicUrl);
-      audioRef.current.loop = true;
-    }
-    return () => { audioRef.current?.pause(); };
-  }, [project.backgroundMusicUrl]);
-
-  const togglePlay = () => {
-    if (!audioRef.current) return;
-    if (playing) { audioRef.current.pause(); } else { audioRef.current.play(); }
-    setPlaying(!playing);
-  };
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(255,182,193,0.7)', backdropFilter: 'blur(10px)' }}>
-      <motion.div
-        initial={{ scale: 0.7, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.7, opacity: 0 }}
-        transition={{ type: 'spring', stiffness: 200, damping: 22 }}
-        className="w-full max-w-xs"
-        style={{ background: 'linear-gradient(160deg, #2a0a1a 0%, #4a1525 100%)', borderRadius: '28px', padding: '28px 24px', boxShadow: '0 24px 60px rgba(0,0,0,0.5)' }}
-      >
-        <div className="flex justify-end mb-2">
-          <button onClick={onClose} className="text-white/40 hover:text-white/80 text-lg">✕</button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-pink-100/70 backdrop-blur-md">
+      <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+        className="w-full max-w-sm bg-white rounded-3xl p-6 text-center shadow-2xl relative">
+        <button onClick={onClose} className="absolute top-4 right-4 text-pink-400 hover:text-pink-600 text-xl font-bold p-1">✕</button>
+        <span className="text-7xl block mb-4 animate-spin" style={{ animationDuration: '8s' }}>💿</span>
+        <h2 className="text-xl font-bold text-pink-700 font-serif mb-2">Our Song</h2>
+        <p className="text-xs text-gray-400 mb-6">Enjoy the ambient track configured for this memory page</p>
+
+        <div className="p-4 rounded-xl bg-pink-50/50 mb-6 text-sm">
+          <p className="font-bold text-pink-800">Background Harmony</p>
+          <p className="text-xs text-gray-500 mt-1">Playing in the background of your story.</p>
         </div>
 
-        {/* Vinyl record */}
-        <div className="flex justify-center mb-6">
-          <motion.div
-            animate={playing ? { rotate: 360 } : {}}
-            transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
-            className="w-36 h-36 rounded-full flex items-center justify-center relative"
-            style={{ background: 'radial-gradient(circle at center, #444 0%, #222 30%, #111 60%, #333 100%)', boxShadow: '0 0 0 3px #ff8da1, 0 0 0 8px rgba(255,141,161,0.2)' }}
-          >
-            <div className="w-8 h-8 rounded-full" style={{ background: 'radial-gradient(circle, #ff8da1 0%, #c0506a 100%)' }} />
-            <div className="absolute inset-0 rounded-full" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 50%)' }} />
-          </motion.div>
-        </div>
+        <button onClick={onClose}
+          className="px-6 py-2.5 rounded-full text-xs uppercase tracking-widest font-bold text-white bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 transition-all cursor-pointer">
+          Enjoy Music 🎵
+        </button>
+      </motion.div>
+    </div>
+  );
+}
 
-        <div className="text-center mb-6">
-          <p className="font-bold text-white text-lg" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-            {cfg.vinylSong || project.title}
-          </p>
-          <p className="text-pink-300 text-sm mt-1" style={{ fontFamily: 'Be Vietnam Pro, sans-serif' }}>
-            {cfg.vinylArtist || project.personOneName || 'With Love'}
-          </p>
-        </div>
+// ─────────────────────────────────────────────
+// PHOTO TIMELINE / MEMORIES MODAL
+// ─────────────────────────────────────────────
+function MemoriesModal({ project, onClose }: { project: Project; onClose: () => void }) {
+  const memories = project.memories || [];
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-pink-100/70 backdrop-blur-md">
+      <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+        className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl relative max-h-[85vh] overflow-y-auto">
+        <button onClick={onClose} className="absolute top-4 right-4 text-pink-400 hover:text-pink-600 text-xl font-bold p-1">✕</button>
+        <h2 className="text-xl font-bold text-pink-700 font-serif mb-6 flex items-center gap-2">
+          <span>🔍</span> Our Memories Timeline
+        </h2>
 
-        {/* Progress bar */}
-        <div className="w-full h-1 rounded-full mb-4" style={{ background: 'rgba(255,255,255,0.1)' }}>
-          <motion.div className="h-full rounded-full" style={{ background: '#ff8da1', width: `${progress}%` }}
-            animate={playing ? { width: ['30%', '100%'] } : {}}
-            transition={{ duration: 60, ease: 'linear' }} />
-        </div>
-
-        {/* Controls */}
-        <div className="flex items-center justify-center gap-6">
-          <button className="text-white/50 hover:text-white text-xl transition-colors">⏮</button>
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={togglePlay}
-            className="w-14 h-14 rounded-full flex items-center justify-center text-2xl"
-            style={{ background: 'linear-gradient(135deg, #ff8da1, #ff69b4)', boxShadow: '0 4px 20px rgba(255,105,180,0.5)' }}
-          >
-            {playing ? '⏸' : '▶️'}
-          </motion.button>
-          <button className="text-white/50 hover:text-white text-xl transition-colors">⏭</button>
-        </div>
-
-        {!project.backgroundMusicUrl && (
-          <p className="text-center text-pink-400/60 text-xs mt-4" style={{ fontFamily: 'Be Vietnam Pro, sans-serif' }}>
-            Add a music URL in your project settings 🎵
-          </p>
+        {memories.length === 0 ? (
+          <p className="text-sm text-gray-400 italic text-center py-8">No timeline memories added yet.</p>
+        ) : (
+          <div className="relative border-l-2 border-pink-100 pl-4 ml-2 space-y-6">
+            {memories.map((m, idx) => (
+              <div key={m.id} className="relative">
+                <div className="absolute -left-[23px] top-1 w-3 h-3 rounded-full bg-pink-400 border-2 border-white" />
+                <span className="text-xs text-gray-400 block mb-1">
+                  {new Date(m.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                </span>
+                <p className="text-sm font-bold text-pink-900 mb-1">{m.emoji} {m.title}</p>
+                {m.description && <p className="text-xs text-gray-500 leading-relaxed mb-2">{m.description}</p>}
+                {m.imageUrl && (
+                  <div className="rounded-xl overflow-hidden max-h-32 border border-pink-100">
+                    <img src={m.imageUrl} alt={m.title} className="w-full h-full object-cover" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         )}
       </motion.div>
     </div>
@@ -621,155 +780,49 @@ function MusicModal({ project, onClose }: { project: Project; onClose: () => voi
 }
 
 // ─────────────────────────────────────────────
-// GIFT BOX MENU (main screen after unlock)
+// MAIN THEME COMPONENT
 // ─────────────────────────────────────────────
-type ModalType = 'award' | 'memories' | 'letter' | 'jar' | 'music' | null;
+type ModalType = 'award' | 'memories' | 'letter' | 'jar' | 'music' | 'vows' | 'video' | null;
 
-const MENU_ITEMS = [
-  { id: 'award', emoji: '🏅', label: 'Award', angle: -90 },
-  { id: 'memories', emoji: '🔍', label: 'Memories', angle: -18 },
-  { id: 'letter', emoji: '✉️', label: 'Love Letter', angle: 54 },
-  { id: 'jar', emoji: '🏺', label: 'Reasons', angle: 126 },
-  { id: 'music', emoji: '🎵', label: 'Music', angle: 198 },
-] as const;
-
-function GiftBoxMenu({ project, onOpenModal }: { project: Project; onOpenModal: (m: ModalType) => void }) {
-  const cfg = project.heroConfig || {};
-  const radius = 130;
-
-  return (
-    <div className="min-h-screen flex flex-col items-center relative overflow-hidden"
-      style={{ background: 'linear-gradient(160deg, #ffe0ec 0%, #ffb6c1 50%, #ff8da1 100%)' }}>
-      <FloatingHearts />
-      <ClickBurst />
-
-      <div className="relative z-10 w-full max-w-sm mx-auto px-5 pt-8 pb-6 flex flex-col items-center">
-        {/* Polaroid cover */}
-        <motion.div
-          initial={{ y: -20, opacity: 0, rotate: -3 }} animate={{ y: 0, opacity: 1, rotate: -3 }}
-          transition={{ duration: 0.7, delay: 0.2 }}
-          className="self-start ml-2 mb-4"
-          style={{ background: 'white', padding: '8px 8px 28px', borderRadius: '4px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', transform: 'rotate(-3deg)', width: '130px' }}
-        >
-          {project.coverImageUrl ? (
-            <img src={project.coverImageUrl} alt="cover" className="w-full aspect-square object-cover" style={{ borderRadius: '2px' }} />
-          ) : (
-            <div className="w-full aspect-square flex items-center justify-center text-4xl" style={{ background: '#fff0f5', borderRadius: '2px' }}>💕</div>
-          )}
-          <p className="text-center mt-2 text-xs font-bold" style={{ color: '#c0506a', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-            {project.startDate ? new Date(project.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '🌸'}
-          </p>
-        </motion.div>
-
-        {/* Happy Birthday text */}
-        <motion.div
-          initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 200, damping: 18, delay: 0.4 }}
-          className="text-center mb-2"
-        >
-          <h1 className="font-extrabold leading-none" style={{
-            fontSize: 'clamp(32px, 10vw, 48px)',
-            fontFamily: 'Plus Jakarta Sans, sans-serif',
-            color: 'white',
-            textShadow: '0 4px 20px rgba(192,80,106,0.4)',
-            WebkitTextStroke: '1.5px rgba(192,80,106,0.3)',
-          }}>
-            {cfg.celebrateText || `Happy Birthday,\n${project.personTwoName || 'You'}!`}
-          </h1>
-          {project.subtitle && (
-            <p className="text-white/70 text-sm mt-1" style={{ fontFamily: 'Be Vietnam Pro, sans-serif' }}>{project.subtitle}</p>
-          )}
-        </motion.div>
-
-        {/* Gift box + orbital menu */}
-        <div className="relative flex items-center justify-center my-6" style={{ width: '300px', height: '300px' }}>
-          {/* Orbital buttons */}
-          {MENU_ITEMS.map((item, i) => {
-            const rad = ((item.angle - 90) * Math.PI) / 180;
-            const x = radius * Math.cos(rad);
-            const y = radius * Math.sin(rad);
-            return (
-              <motion.button
-                key={item.id}
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.6 + i * 0.1, type: 'spring', stiffness: 200, damping: 18 }}
-                whileHover={{ scale: 1.15 }}
-                whileTap={{ scale: 0.88 }}
-                onClick={() => onOpenModal(item.id as ModalType)}
-                className="absolute flex flex-col items-center gap-1 cursor-pointer"
-                style={{ left: `calc(50% + ${x}px - 30px)`, top: `calc(50% + ${y}px - 30px)`, width: '60px' }}
-              >
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-xl"
-                  style={{ background: 'white', boxShadow: '0 4px 16px rgba(255,100,130,0.25)' }}>
-                  {item.emoji}
-                </div>
-                <span className="text-white text-xs font-bold text-center leading-tight drop-shadow"
-                  style={{ fontFamily: 'Be Vietnam Pro, sans-serif', textShadow: '0 1px 4px rgba(0,0,0,0.2)' }}>
-                  {item.label}
-                </span>
-              </motion.button>
-            );
-          })}
-
-          {/* Center gift box */}
-          <motion.div
-            animate={{ y: [0, -8, 0], rotate: [0, 1, -1, 0] }}
-            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-            className="relative z-10 text-7xl cursor-pointer select-none"
-          >
-            🎁
-            <motion.div
-              animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="absolute -inset-4 rounded-full"
-              style={{ background: 'radial-gradient(circle, rgba(255,141,161,0.3) 0%, transparent 70%)' }}
-            />
-          </motion.div>
-        </div>
-
-        <motion.p
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}
-          className="text-white/70 text-sm text-center"
-          style={{ fontFamily: 'Be Vietnam Pro, sans-serif' }}
-        >
-          Tap a section to open 💌
-        </motion.p>
-
-        {/* Message snippet */}
-        {cfg.message && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.4 }}
-            className="mt-4 w-full p-4 rounded-2xl text-center"
-            style={{ background: 'rgba(255,255,255,0.3)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.5)' }}
-          >
-            <p className="text-white text-sm leading-relaxed line-clamp-3" style={{ fontFamily: 'Be Vietnam Pro, sans-serif' }}>
-              "{cfg.message}"
-            </p>
-            <p className="text-white/60 text-xs mt-2">— {project.personOneName || 'Sender'}</p>
-          </motion.div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────
-// MAIN COMPONENT
-// ─────────────────────────────────────────────
 export default function SweetDiaryTheme({ project }: { project: Project }) {
   const cfg = project.heroConfig || {};
-  const passcode = cfg.passcode || '1234';
+  const passcode = project.isPasswordProtected && project.accessPassword ? project.accessPassword : (cfg.passcode || '1234');
   const [unlocked, setUnlocked] = useState(false);
   const [activeModal, setActiveModal] = useState<ModalType>(null);
 
+  const baseItems = [
+    { id: 'award', emoji: '🏅', label: 'Award' },
+    { id: 'memories', emoji: '🔍', label: 'Memories' },
+    { id: 'letter', emoji: '✉️', label: 'Love Letter' },
+    { id: 'jar', emoji: '🏺', label: 'Reasons' },
+    { id: 'music', emoji: '🎵', label: 'Music' },
+    ...(cfg.promises && cfg.promises.length > 0 ? [{ id: 'vows', emoji: '💍', label: 'Our Vows' }] : []),
+    ...(cfg.secretVideoUrl ? [{ id: 'video', emoji: '🎬', label: 'Secret Video' }] : []),
+  ];
+
+  const total = baseItems.length;
+  const menuItems = baseItems.map((item, index) => {
+    const angle = -90 + (index * 360) / total;
+    return { ...item, angle };
+  });
+
+  const radius = 130;
+
   return (
-    <>
-      {/* Google Fonts */}
+    <div
+      className="min-h-screen select-none"
+      style={{
+        background: cfg.wallpaperUrl ? `url(${cfg.wallpaperUrl}) center/cover no-repeat` : 'linear-gradient(160deg, #ffe0ec 0%, #ffb6c1 50%, #ff8da1 100%)',
+      }}
+    >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap');
         * { box-sizing: border-box; }
         body { margin: 0; }
+        .perspective { perspective: 1200px; }
+        .preserve-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
       `}</style>
 
       <AnimatePresence mode="wait">
@@ -778,20 +831,135 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
             <PasscodeScreen correctCode={passcode} onUnlock={() => setUnlocked(true)} />
           </motion.div>
         ) : (
-          <motion.div key="diary" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}>
-            <GiftBoxMenu project={project} onOpenModal={setActiveModal} />
+          <motion.div key="diary" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}
+            className="min-h-screen flex flex-col items-center justify-between pb-8 relative overflow-hidden"
+          >
+            <FloatingHearts />
+            <ClickBurst />
+
+            <div className="relative z-10 w-full max-w-sm mx-auto px-5 pt-8 pb-6 flex flex-col items-center flex-1 justify-center">
+              {/* Polaroid cover */}
+              <motion.div
+                initial={{ y: -20, opacity: 0, rotate: -3 }} animate={{ y: 0, opacity: 1, rotate: -3 }}
+                transition={{ duration: 0.7, delay: 0.2 }}
+                className="self-start ml-2 mb-4"
+                style={{ background: 'white', padding: '8px 8px 28px', borderRadius: '4px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', transform: 'rotate(-3deg)', width: '130px' }}
+              >
+                {project.coverImageUrl ? (
+                  <img src={project.coverImageUrl} alt="cover" className="w-full aspect-square object-cover" style={{ borderRadius: '2px' }} />
+                ) : (
+                  <div className="w-full aspect-square flex items-center justify-center text-4xl" style={{ background: '#fff0f5', borderRadius: '2px' }}>💕</div>
+                )}
+                <p className="text-center mt-2 text-xs font-bold" style={{ color: '#c0506a', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+                  {project.startDate ? new Date(project.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '🌸'}
+                </p>
+              </motion.div>
+
+              {/* Happy Birthday title */}
+              <motion.div
+                initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 200, damping: 18, delay: 0.4 }}
+                className="text-center mb-2"
+              >
+                <h1 className="font-extrabold leading-none" style={{
+                  fontSize: 'clamp(32px, 10vw, 48px)',
+                  fontFamily: 'Plus Jakarta Sans, sans-serif',
+                  color: 'white',
+                  textShadow: '0 4px 20px rgba(192,80,106,0.4)',
+                  WebkitTextStroke: '1.5px rgba(192,80,106,0.3)',
+                }}>
+                  {cfg.celebrateText || `Happy Birthday,\n${project.personTwoName || 'You'}!`}
+                </h1>
+                {project.subtitle && (
+                  <p className="text-white/70 text-sm mt-1" style={{ fontFamily: 'Be Vietnam Pro, sans-serif' }}>{project.subtitle}</p>
+                )}
+              </motion.div>
+
+              {/* Gift box + Dynamic menu */}
+              <div className="relative flex items-center justify-center my-6" style={{ width: '300px', height: '300px' }}>
+                {menuItems.map((item, i) => {
+                  const rad = ((item.angle - 90) * Math.PI) / 180;
+                  const x = radius * Math.cos(rad);
+                  const y = radius * Math.sin(rad);
+                  return (
+                    <motion.button
+                      key={item.id}
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.6 + i * 0.1, type: 'spring', stiffness: 200, damping: 18 }}
+                      whileHover={{ scale: 1.15 }}
+                      whileTap={{ scale: 0.88 }}
+                      onClick={() => setActiveModal(item.id as ModalType)}
+                      className="absolute flex flex-col items-center gap-1 cursor-pointer z-10"
+                      style={{ left: `calc(50% + ${x}px - 30px)`, top: `calc(50% + ${y}px - 30px)`, width: '60px' }}
+                    >
+                      <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-xl"
+                        style={{ background: 'white', boxShadow: '0 4px 16px rgba(255,100,130,0.25)' }}>
+                        {item.emoji}
+                      </div>
+                      <span className="text-white text-[10px] font-bold text-center leading-tight drop-shadow"
+                        style={{ fontFamily: 'Be Vietnam Pro, sans-serif', textShadow: '0 1px 4px rgba(0,0,0,0.4)' }}>
+                        {item.label}
+                      </span>
+                    </motion.button>
+                  );
+                })}
+
+                {/* Center gift box */}
+                <motion.div
+                  animate={{ y: [0, -8, 0], rotate: [0, 1, -1, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                  className="relative z-0 text-7xl cursor-pointer select-none"
+                >
+                  🎁
+                  <motion.div
+                    animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0, 0.5] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="absolute -inset-4 rounded-full"
+                    style={{ background: 'radial-gradient(circle, rgba(255,141,161,0.3) 0%, transparent 70%)' }}
+                  />
+                </motion.div>
+              </div>
+
+              <motion.p
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}
+                className="text-white/70 text-sm text-center font-bold"
+                style={{ fontFamily: 'Be Vietnam Pro, sans-serif' }}
+              >
+                Tap a section to open 💌
+              </motion.p>
+            </div>
+
+            {/* Selfie thank you loop */}
+            {cfg.enableSelfieThankYou && (
+              <PandaSelfieWidget projectSlug={project.slug} />
+            )}
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Modals */}
+      {/* Modals overlay rendering */}
       <AnimatePresence>
         {activeModal === 'award' && <AwardModal project={project} onClose={() => setActiveModal(null)} />}
         {activeModal === 'memories' && <MemoriesModal project={project} onClose={() => setActiveModal(null)} />}
-        {activeModal === 'letter' && <LoveLetterModal project={project} onClose={() => setActiveModal(null)} />}
         {activeModal === 'jar' && <JarModal project={project} onClose={() => setActiveModal(null)} />}
         {activeModal === 'music' && <MusicModal project={project} onClose={() => setActiveModal(null)} />}
+        {activeModal === 'vows' && <PromiseWallModal project={project} onClose={() => setActiveModal(null)} />}
+        {activeModal === 'video' && cfg.secretVideoUrl && (
+          <SecretVideoModal url={cfg.secretVideoUrl} onClose={() => setActiveModal(null)} />
+        )}
+        {activeModal === 'letter' && (
+          <EnvelopeLetterModal
+            message={cfg.letterMessage || cfg.loveLetterText}
+            signature={cfg.quillSignature}
+            musicUrl={cfg.letterMusicUrl || undefined}
+            welcomePopupText={cfg.welcomePopupText}
+            envelopeStyle={cfg.envelopeStyle}
+            envelopeOpenEffect={cfg.envelopeOpenEffect}
+            onClose={() => setActiveModal(null)}
+          />
+        )}
       </AnimatePresence>
-    </>
+    </div>
   );
 }
