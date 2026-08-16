@@ -94,6 +94,12 @@ export default function EditProjectPage() {
         secretVideoUrl: data.project.heroConfig?.secretVideoUrl || '',
         enableSelfieThankYou: data.project.heroConfig?.enableSelfieThankYou !== undefined ? data.project.heroConfig.enableSelfieThankYou : false,
         showCameraRollStrip: data.project.heroConfig?.showCameraRollStrip !== undefined ? data.project.heroConfig.showCameraRollStrip : true,
+        showLeftFilmstrip: data.project.heroConfig?.showLeftFilmstrip !== undefined ? data.project.heroConfig.showLeftFilmstrip : false,
+        showRightFilmstrip: data.project.heroConfig?.showRightFilmstrip !== undefined ? data.project.heroConfig.showRightFilmstrip : true,
+        showDatesFlowchart: data.project.heroConfig?.showDatesFlowchart !== undefined ? data.project.heroConfig.showDatesFlowchart : true,
+        enablePhoneFrameAfterPin: data.project.heroConfig?.enablePhoneFrameAfterPin !== undefined ? data.project.heroConfig.enablePhoneFrameAfterPin : false,
+        boxTheme: data.project.heroConfig?.boxTheme || 'frosted-rose',
+        phoneTheme: data.project.heroConfig?.phoneTheme || 'rose-gold',
         heroGreetingText: data.project.heroConfig?.heroGreetingText || '',
         giftBoxWishPrompt: data.project.heroConfig?.giftBoxWishPrompt || '',
         selfies: data.project.heroConfig?.selfies || [],
@@ -156,6 +162,12 @@ export default function EditProjectPage() {
           secretVideoUrl: form.secretVideoUrl,
           enableSelfieThankYou: form.enableSelfieThankYou,
           showCameraRollStrip: form.showCameraRollStrip !== undefined ? form.showCameraRollStrip : true,
+          showLeftFilmstrip: form.showLeftFilmstrip !== undefined ? form.showLeftFilmstrip : false,
+          showRightFilmstrip: form.showRightFilmstrip !== undefined ? form.showRightFilmstrip : true,
+          showDatesFlowchart: form.showDatesFlowchart !== undefined ? form.showDatesFlowchart : true,
+          enablePhoneFrameAfterPin: form.enablePhoneFrameAfterPin !== undefined ? form.enablePhoneFrameAfterPin : false,
+          boxTheme: form.boxTheme || 'frosted-rose',
+          phoneTheme: form.phoneTheme || 'rose-gold',
           heroGreetingText: form.heroGreetingText,
           giftBoxWishPrompt: form.giftBoxWishPrompt,
           selfies: form.selfies || [],
@@ -370,7 +382,102 @@ export default function EditProjectPage() {
               </Field>
             </Section>
 
-            <Section title="📱 Mobile Phone Frame & Wallpaper">
+            <Section title="🎨 Box & Frame Themes (Sweet Diary)">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <Field label="Card / Box Theme Style">
+                  <select
+                    value={form.boxTheme || 'frosted-rose'}
+                    onChange={e => update('boxTheme', e.target.value)}
+                    className="input-romantic bg-noir-midnight"
+                  >
+                    <option value="frosted-rose">Frosted Rose Glass 🌸</option>
+                    <option value="peach-cream">Peach Cream & Gold 🍑</option>
+                    <option value="sakura-blush">Sakura Blush ✨</option>
+                    <option value="velvet-glow">Velvet Glow Dark Rose 🍷</option>
+                  </select>
+                  <p className="text-[11px] text-rose-cream/40 mt-1 font-sans">
+                    Colors and glass style for notes, story cards, cake & gallery.
+                  </p>
+                </Field>
+
+                <Field label="Phone Bezel Skin">
+                  <select
+                    value={form.phoneTheme || 'rose-gold'}
+                    onChange={e => update('phoneTheme', e.target.value)}
+                    className="input-romantic bg-noir-midnight"
+                  >
+                    <option value="rose-gold">Rose Gold Titanium 💖</option>
+                    <option value="sakura-pink">Sakura Candy Pink 🎀</option>
+                    <option value="midnight-pink">Midnight Noir Pink 🖤</option>
+                  </select>
+                  <p className="text-[11px] text-rose-cream/40 mt-1 font-sans">
+                    Physical phone body finish and border reflections.
+                  </p>
+                </Field>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 glass-card">
+                  <div>
+                    <p className="text-rose-cream font-serif text-sm">Keep Phone Framed Body After Entering PIN</p>
+                    <p className="text-rose-cream/30 text-xs font-sans">
+                      If OFF: Entering PIN expands the website to a full responsive webpage layout.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => update('enablePhoneFrameAfterPin', !form.enablePhoneFrameAfterPin)}
+                    className={`w-12 h-6 rounded-full transition-all duration-300 relative ${form.enablePhoneFrameAfterPin ? 'bg-rose-blush' : 'bg-white/10'}`}
+                  >
+                    <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${form.enablePhoneFrameAfterPin ? 'left-7' : 'left-1'}`} />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between p-3 glass-card">
+                  <div>
+                    <p className="text-rose-cream font-serif text-sm">Show Left-Side Photo Filmstrip</p>
+                    <p className="text-rose-cream/30 text-xs font-sans">Displays an animated vertical camera roll on the left side</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => update('showLeftFilmstrip', !form.showLeftFilmstrip)}
+                    className={`w-12 h-6 rounded-full transition-all duration-300 relative ${form.showLeftFilmstrip ? 'bg-rose-blush' : 'bg-white/10'}`}
+                  >
+                    <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${form.showLeftFilmstrip ? 'left-7' : 'left-1'}`} />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between p-3 glass-card">
+                  <div>
+                    <p className="text-rose-cream font-serif text-sm">Show Right-Side Photo Filmstrip</p>
+                    <p className="text-rose-cream/30 text-xs font-sans">Displays an animated vertical camera roll on the right side</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => update('showRightFilmstrip', !form.showRightFilmstrip)}
+                    className={`w-12 h-6 rounded-full transition-all duration-300 relative ${form.showRightFilmstrip !== false ? 'bg-rose-blush' : 'bg-white/10'}`}
+                  >
+                    <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${form.showRightFilmstrip !== false ? 'left-7' : 'left-1'}`} />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between p-3 glass-card">
+                  <div>
+                    <p className="text-rose-cream font-serif text-sm">Show Important Dates Story Track</p>
+                    <p className="text-rose-cream/30 text-xs font-sans">Displays a vertical milestone flowchart beside the filmstrip</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => update('showDatesFlowchart', !form.showDatesFlowchart)}
+                    className={`w-12 h-6 rounded-full transition-all duration-300 relative ${form.showDatesFlowchart !== false ? 'bg-rose-blush' : 'bg-white/10'}`}
+                  >
+                    <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${form.showDatesFlowchart !== false ? 'left-7' : 'left-1'}`} />
+                  </button>
+                </div>
+              </div>
+            </Section>
+
+            <Section title="📱 Mobile Phone Wallpaper">
               <Field label="Phone Screen Wallpaper URL (Strictly for mobile frame display)">
                 <input
                   value={form.wallpaperUrl}
@@ -389,20 +496,6 @@ export default function EditProjectPage() {
                   💡 Note: This wallpaper appears strictly inside the mobile phone body screen. The website background remains a dynamic cute pastel live canvas with floating hearts & sparkles.
                 </p>
               </Field>
-
-              <div className="flex items-center justify-between p-3 glass-card mt-4">
-                <div>
-                  <p className="text-rose-cream font-serif text-sm">Show Right-Side Photo Filmstrip</p>
-                  <p className="text-rose-cream/30 text-xs font-sans">Displays an animated vertical camera roll of your gallery photos on the right side</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => update('showCameraRollStrip', !form.showCameraRollStrip)}
-                  className={`w-12 h-6 rounded-full transition-all duration-300 relative ${form.showCameraRollStrip !== false ? 'bg-rose-blush' : 'bg-white/10'}`}
-                >
-                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${form.showCameraRollStrip !== false ? 'left-7' : 'left-1'}`} />
-                </button>
-              </div>
             </Section>
 
             <Section title="💌 Hero Greeting & Story Messages">
