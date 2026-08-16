@@ -93,6 +93,10 @@ export default function EditProjectPage() {
         loveCategories: data.project.heroConfig?.loveCategories || [],
         wallpaperUrl: data.project.heroConfig?.wallpaperUrl || '',
         secretVideoUrl: data.project.heroConfig?.secretVideoUrl || '',
+        secretVideoCaption: data.project.heroConfig?.secretVideoCaption || '',
+        passcodeTitle: data.project.heroConfig?.passcodeTitle || '',
+        passcodeSubtitle: data.project.heroConfig?.passcodeSubtitle || '',
+        showPasscodeGreeting: data.project.heroConfig?.showPasscodeGreeting !== undefined ? data.project.heroConfig.showPasscodeGreeting : true,
         enableSelfieThankYou: data.project.heroConfig?.enableSelfieThankYou !== undefined ? data.project.heroConfig.enableSelfieThankYou : false,
         showCameraRollStrip: data.project.heroConfig?.showCameraRollStrip !== undefined ? data.project.heroConfig.showCameraRollStrip : true,
         showLeftFilmstrip: data.project.heroConfig?.showLeftFilmstrip !== undefined ? data.project.heroConfig.showLeftFilmstrip : false,
@@ -161,6 +165,10 @@ export default function EditProjectPage() {
           loveCategories: form.loveCategories,
           wallpaperUrl: form.wallpaperUrl,
           secretVideoUrl: form.secretVideoUrl,
+          secretVideoCaption: form.secretVideoCaption,
+          passcodeTitle: form.passcodeTitle,
+          passcodeSubtitle: form.passcodeSubtitle,
+          showPasscodeGreeting: form.showPasscodeGreeting !== undefined ? form.showPasscodeGreeting : true,
           enableSelfieThankYou: form.enableSelfieThankYou,
           showCameraRollStrip: form.showCameraRollStrip !== undefined ? form.showCameraRollStrip : true,
           showLeftFilmstrip: form.showLeftFilmstrip !== undefined ? form.showLeftFilmstrip : false,
@@ -563,6 +571,51 @@ export default function EditProjectPage() {
                   maxFiles={1}
                   label="Upload edited video file"
                   onUpload={({ url }) => update('secretVideoUrl', url)}
+                />
+              </Field>
+              <Field label="Secret Video Caption / Subtitle Note">
+                <input
+                  value={form.secretVideoCaption}
+                  onChange={e => update('secretVideoCaption', e.target.value)}
+                  placeholder="Personalized Secret Video 🎬"
+                  className="input-romantic"
+                />
+                <p className="text-[11px] text-rose-cream/40 mt-1 font-sans">
+                  Caption displayed below the video player popup.
+                </p>
+              </Field>
+            </Section>
+
+            <Section title="🔒 Passcode Screen Customization">
+              <div className="flex items-center justify-between p-3 glass-card mb-3">
+                <div>
+                  <p className="text-rose-cream font-serif text-sm">Show Passcode Greeting Card</p>
+                  <p className="text-rose-cream/30 text-xs font-sans">Displays frosted glass text backdrop above the PIN pad</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => update('showPasscodeGreeting', !form.showPasscodeGreeting)}
+                  className={`w-12 h-6 rounded-full transition-all duration-300 relative ${form.showPasscodeGreeting !== false ? 'bg-rose-blush' : 'bg-white/10'}`}
+                >
+                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${form.showPasscodeGreeting !== false ? 'left-7' : 'left-1'}`} />
+                </button>
+              </div>
+
+              <Field label="Passcode Screen Title">
+                <input
+                  value={form.passcodeTitle}
+                  onChange={e => update('passcodeTitle', e.target.value)}
+                  placeholder="Welcome, My Love 🌸"
+                  className="input-romantic"
+                />
+              </Field>
+
+              <Field label="Passcode Screen Subtitle">
+                <input
+                  value={form.passcodeSubtitle}
+                  onChange={e => update('passcodeSubtitle', e.target.value)}
+                  placeholder="Enter your 4-digit secret PIN"
+                  className="input-romantic"
                 />
               </Field>
             </Section>

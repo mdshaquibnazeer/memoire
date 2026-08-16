@@ -220,7 +220,7 @@ function FloatingHearts() {
 // CLICK BURST PARTICLE EFFECT
 // ─────────────────────────────────────────────
 interface Particle { id: number; x: number; y: number; emoji: string; size: number; angle: number; speed: number; }
-const BURST = ['💗', '✨', '🌸', '💕', '⭐', '🎀', '🐼', '🍰'];
+const BURST = ['💗', '✨', '🌸', '💕', '⭐', '🎀', '🍰'];
 
 function ClickBurst() {
   const [particles, setParticles] = useState<Particle[]>([]);
@@ -345,14 +345,20 @@ function PhoneFrame({
 }
 
 // ─────────────────────────────────────────────
-// PASSCODE SCREEN (WITH CUTE PANDA AVATAR)
+// PASSCODE SCREEN (CLEAN, ROMANTIC & ADJUSTABLE)
 // ─────────────────────────────────────────────
 function PasscodeScreen({
   correctCode,
   onUnlock,
+  title,
+  subtitle,
+  showGreeting = true,
 }: {
   correctCode: string;
   onUnlock: () => void;
+  title?: string;
+  subtitle?: string;
+  showGreeting?: boolean;
 }) {
   const [input, setInput] = useState('');
   const [shake, setShake] = useState(false);
@@ -387,41 +393,28 @@ function PasscodeScreen({
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex-1 flex flex-col items-center justify-between py-4"
+      className="flex-1 flex flex-col items-center justify-between py-6 px-2"
     >
-      <div className="flex flex-col items-center mt-2">
-        <div className="relative mb-3">
+      {/* Top Header / Greeting Card with High-Legibility Semi-Transparent Backdrop */}
+      {showGreeting !== false && (
+        <div className="flex flex-col items-center mt-1 px-5 py-3 rounded-2xl bg-black/25 backdrop-blur-md border border-white/20 shadow-lg text-center max-w-[270px]">
           <motion.div
-            animate={{
-              y: [0, -8, 0],
-              rotate: [0, -3, 3, 0],
-            }}
-            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            className="w-24 h-24 rounded-full flex items-center justify-center text-5xl shadow-lg border-2 border-white/80 select-none"
-            style={{
-              background: 'linear-gradient(135deg, #ffffff 0%, #ffe4ec 100%)',
-              boxShadow: '0 10px 25px rgba(255, 105, 180, 0.35)',
-            }}
+            animate={{ scale: [1, 1.15, 1] }}
+            transition={{ duration: 2.2, repeat: Infinity }}
+            className="w-10 h-10 rounded-full flex items-center justify-center text-xl bg-white/25 border border-white/40 mb-1.5 shadow-sm"
           >
-            🐼
+            🔒
           </motion.div>
-          <motion.div
-            animate={{ scale: [1, 1.25, 1] }}
-            transition={{ duration: 1.8, repeat: Infinity }}
-            className="absolute -bottom-1 -right-1 text-2xl"
-          >
-            💕
-          </motion.div>
+          <h2 className="text-base font-bold text-white font-serif tracking-wide drop-shadow-md">
+            {title || 'Welcome, My Love 🌸'}
+          </h2>
+          <p className="text-[11px] text-white/90 font-medium font-sans drop-shadow-xs mt-0.5">
+            {subtitle || 'Enter your 4-digit secret PIN'}
+          </p>
         </div>
+      )}
 
-        <h2 className="text-xl font-bold text-pink-900 font-serif tracking-wide drop-shadow-sm">
-          Welcome, My Love 🌸
-        </h2>
-        <p className="text-xs text-pink-800/80 mt-1 font-medium font-sans">
-          Enter your 4-digit secret PIN
-        </p>
-      </div>
-
+      {/* Passcode Indicator Dots */}
       <div className="flex flex-col items-center my-3">
         <motion.div
           animate={shake ? { x: [-10, 10, -10, 10, 0] } : {}}
@@ -431,35 +424,32 @@ function PasscodeScreen({
           {Array.from({ length: correctCode.length }).map((_, i) => (
             <motion.div
               key={i}
-              animate={input.length > i ? { scale: [1, 1.3, 1] } : {}}
+              animate={input.length > i ? { scale: [1, 1.35, 1] } : {}}
               className={`w-3.5 h-3.5 rounded-full transition-all duration-200 border-2 ${
                 input.length > i
-                  ? 'bg-pink-600 border-pink-600 shadow-md shadow-pink-400/50'
-                  : 'border-pink-400/60 bg-white/40'
+                  ? 'bg-pink-500 border-white shadow-md shadow-pink-500/60'
+                  : 'border-white/70 bg-white/30 backdrop-blur-xs'
               }`}
             />
           ))}
         </motion.div>
         {hint && (
-          <p className="text-rose-600 text-xs font-bold font-sans animate-pulse">{hint}</p>
+          <p className="text-rose-200 text-xs font-bold font-sans bg-rose-900/60 px-3 py-1 rounded-full border border-rose-400/40 animate-pulse">
+            {hint}
+          </p>
         )}
       </div>
 
+      {/* Aesthetic Frosted Glass PIN Pad */}
       <div
-        className="grid grid-cols-3 gap-2.5 w-full max-w-[280px] p-3 rounded-3xl backdrop-blur-md"
-        style={{ background: 'rgba(255, 255, 255, 0.55)', boxShadow: '0 8px 24px rgba(255, 105, 180, 0.15)' }}
+        className="grid grid-cols-3 gap-2.5 w-full max-w-[270px] p-3.5 rounded-3xl backdrop-blur-xl bg-black/25 border border-white/25 shadow-2xl"
       >
         {keys.map(k => (
           <motion.button
             key={k}
             whileTap={{ scale: 0.88 }}
             onClick={() => press(k)}
-            className="flex items-center justify-center h-12 sm:h-13 rounded-2xl text-lg font-bold cursor-pointer select-none transition-all"
-            style={{
-              background: k === 'del' ? 'rgba(255, 255, 255, 0.65)' : 'white',
-              color: '#9d174d',
-              boxShadow: '0 3px 10px rgba(244, 114, 182, 0.2)',
-            }}
+            className="flex items-center justify-center h-12 rounded-2xl text-lg font-bold cursor-pointer select-none transition-all bg-white/80 hover:bg-white text-pink-950 shadow-sm border border-white/60 active:bg-pink-100"
           >
             {k === 'del' ? '⌫' : k}
           </motion.button>
@@ -1344,7 +1334,15 @@ function PromiseWallModal({ project, onClose, boxTheme }: { project: Project; on
 // ─────────────────────────────────────────────
 // SECRET VIDEO PLAYER MODAL
 // ─────────────────────────────────────────────
-function SecretVideoModal({ url, onClose }: { url: string; onClose: () => void }) {
+function SecretVideoModal({
+  url,
+  caption,
+  onClose,
+}: {
+  url: string;
+  caption?: string;
+  onClose: () => void;
+}) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -1363,8 +1361,8 @@ function SecretVideoModal({ url, onClose }: { url: string; onClose: () => void }
         <div className="w-full rounded-2xl overflow-hidden border border-white/15 shadow-2xl bg-black">
           <video src={url} controls autoPlay className="w-full h-auto max-h-[70vh]" />
         </div>
-        <p className="text-white/70 text-xs mt-3 italic" style={{ fontFamily: 'Be Vietnam Pro' }}>
-          Personalized Secret Video 🎬
+        <p className="text-white/95 text-sm mt-3 font-serif italic text-center px-4 drop-shadow">
+          {caption || 'Personalized Secret Video 🎬'}
         </p>
       </div>
     </motion.div>
@@ -1665,7 +1663,7 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
     return { ...item, angle };
   });
 
-  // Orbital Radius: 135px inside phone, 155px full page
+  // Orbital Radius: 130px inside phone, 155px full page
   const radius = cfg.enablePhoneFrameAfterPin ? 130 : 155;
 
   // Orbital Wheel / Gift Box view
@@ -1819,7 +1817,13 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
           {!unlocked ? (
             <motion.div key="lock-view" initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }}>
               <PhoneFrame wallpaperUrl={cfg.wallpaperUrl} phoneTheme={phoneThemeKey}>
-                <PasscodeScreen correctCode={passcode} onUnlock={() => setUnlocked(true)} />
+                <PasscodeScreen
+                  correctCode={passcode}
+                  onUnlock={() => setUnlocked(true)}
+                  title={cfg.passcodeTitle}
+                  subtitle={cfg.passcodeSubtitle}
+                  showGreeting={cfg.showPasscodeGreeting !== false}
+                />
               </PhoneFrame>
             </motion.div>
           ) : (
@@ -2040,7 +2044,11 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
           />
         )}
         {activeModal === 'video' && cfg.secretVideoUrl && (
-          <SecretVideoModal url={cfg.secretVideoUrl} onClose={() => setActiveModal(null)} />
+          <SecretVideoModal
+            url={cfg.secretVideoUrl}
+            caption={cfg.secretVideoCaption}
+            onClose={() => setActiveModal(null)}
+          />
         )}
         {activeModal === 'wish' && (
           <MakeAWishModal
