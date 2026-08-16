@@ -120,6 +120,8 @@ export default function EditProjectPage() {
         labelReasonsJar: data.project.heroConfig?.labelReasonsJar || '',
         labelOurSong: data.project.heroConfig?.labelOurSong || '',
         labelSecretVideo: data.project.heroConfig?.labelSecretVideo || '',
+        websiteBackgroundUrl: data.project.heroConfig?.websiteBackgroundUrl || '',
+        finaleBackgroundUrl: data.project.heroConfig?.finaleBackgroundUrl || '',
         awardTitle: data.project.heroConfig?.awardTitle || '',
         awardSubtitle: data.project.heroConfig?.awardSubtitle || '',
         awardRecipientName: data.project.heroConfig?.awardRecipientName || '',
@@ -182,6 +184,8 @@ export default function EditProjectPage() {
           customStatValue3: Number(form.customStatValue3) || 0,
           loveCategories: form.loveCategories,
           wallpaperUrl: form.wallpaperUrl,
+          websiteBackgroundUrl: form.websiteBackgroundUrl,
+          finaleBackgroundUrl: form.finaleBackgroundUrl,
           secretVideoUrl: form.secretVideoUrl,
           secretVideoCaption: form.secretVideoCaption,
           passcodeTitle: form.passcodeTitle,
@@ -537,7 +541,26 @@ export default function EditProjectPage() {
               </div>
             </Section>
 
-            <Section title="📱 Mobile Phone Wallpaper">
+            <Section title="🖼️ Website & Phone Backgrounds">
+              <Field label="Website Background Image (Full Theme Background)">
+                <input
+                  value={form.websiteBackgroundUrl}
+                  onChange={e => update('websiteBackgroundUrl', e.target.value)}
+                  placeholder="/images/sweet_diary_bg.jpg"
+                  className="input-romantic mb-3"
+                />
+                <MediaUploader
+                  projectId={id as string}
+                  accept="image"
+                  maxFiles={1}
+                  label="Upload custom website background"
+                  onUpload={({ url }) => update('websiteBackgroundUrl', url)}
+                />
+                <p className="text-[11px] text-rose-cream/40 mt-2 font-sans">
+                  💡 By default, uses the aesthetic pink romantic candle & floral background. You can upload any custom background image here.
+                </p>
+              </Field>
+
               <Field label="Phone Screen Wallpaper URL (Strictly for mobile frame display)">
                 <input
                   value={form.wallpaperUrl}
@@ -553,7 +576,7 @@ export default function EditProjectPage() {
                   onUpload={({ url }) => update('wallpaperUrl', url)}
                 />
                 <p className="text-[11px] text-rose-cream/40 mt-2 font-sans">
-                  💡 Note: This wallpaper appears strictly inside the mobile phone body screen. The website background remains a dynamic cute pastel live canvas with floating hearts & sparkles.
+                  💡 Note: This wallpaper appears strictly inside the mobile phone body screen.
                 </p>
               </Field>
             </Section>
@@ -873,6 +896,35 @@ export default function EditProjectPage() {
                   <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${form.enableSelfieThankYou ? 'left-7' : 'left-1'}`} />
                 </button>
               </div>
+            </Section>
+
+            <Section title="🎊 Grand Finale Celebration Popup">
+              <Field label="Celebrate Text / Main Message">
+                <input
+                  value={form.celebrateText}
+                  onChange={e => update('celebrateText', e.target.value)}
+                  placeholder="Happy Birthday, My Love! 🎂"
+                  className="input-romantic"
+                />
+              </Field>
+              <Field label="Grand Finale Popup Background Image">
+                <input
+                  value={form.finaleBackgroundUrl}
+                  onChange={e => update('finaleBackgroundUrl', e.target.value)}
+                  placeholder="https://... or /images/..."
+                  className="input-romantic mb-3"
+                />
+                <MediaUploader
+                  projectId={id as string}
+                  accept="image"
+                  maxFiles={1}
+                  label="Upload celebration background image"
+                  onUpload={({ url }) => update('finaleBackgroundUrl', url)}
+                />
+                <p className="text-[11px] text-rose-cream/40 mt-1 font-sans">
+                  Optional custom background image for the Grand Finale celebration modal.
+                </p>
+              </Field>
             </Section>
 
             {project?.theme !== 'VELVET_ROMANCE' && project?.theme !== 'SWEET_DIARY' && (

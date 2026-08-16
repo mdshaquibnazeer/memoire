@@ -1731,10 +1731,12 @@ function MusicModal({ project, onClose, boxTheme }: { project: Project; onClose:
 function GrandFinaleOverlay({
   celebrateText,
   name,
+  bgUrl,
   onClose,
 }: {
   celebrateText?: string;
   name: string;
+  bgUrl?: string;
   onClose: () => void;
 }) {
   return (
@@ -1743,12 +1745,21 @@ function GrandFinaleOverlay({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[10002] flex flex-col items-center justify-center p-6 bg-pink-950/90 backdrop-blur-xl text-center select-none"
+      style={
+        bgUrl
+          ? {
+              backgroundImage: `linear-gradient(rgba(28, 0, 14, 0.75), rgba(28, 0, 14, 0.85)), url(${bgUrl})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }
+          : undefined
+      }
     >
       <motion.div
         initial={{ scale: 0.5, y: 50 }}
         animate={{ scale: 1, y: 0 }}
         transition={{ type: 'spring', damping: 15 }}
-        className="flex flex-col items-center max-w-lg"
+        className="flex flex-col items-center max-w-lg p-6 sm:p-8 rounded-3xl bg-black/35 backdrop-blur-md border border-white/20 shadow-2xl"
       >
         <span className="text-8xl block mb-6 animate-bounce">🎉</span>
         <h1 className="text-3xl sm:text-5xl font-extrabold text-white font-serif tracking-wide drop-shadow-lg mb-4">
@@ -1781,6 +1792,8 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
   const [selectedGalleryPhoto, setSelectedGalleryPhoto] = useState<GalleryItem | null>(null);
   const [selectedPromise, setSelectedPromise] = useState<any | null>(null);
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
+
+  const websiteBg = cfg.websiteBackgroundUrl || '/images/sweet_diary_bg.jpg';
 
   // Box & Phone Themes
   const boxThemeKey = cfg.boxTheme || 'frosted-rose';
@@ -1915,7 +1928,11 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
     <div
       className="min-h-screen select-none relative overflow-x-hidden"
       style={{
-        background: 'linear-gradient(160deg, #ffeef4 0%, #ffd4e5 40%, #ffb6d0 100%)',
+        backgroundImage: `linear-gradient(rgba(255, 238, 244, 0.62), rgba(255, 212, 229, 0.72)), url(${websiteBg})`,
+        backgroundPosition: 'center',
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed',
       }}
     >
       <style>{`
@@ -2289,6 +2306,7 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
           <GrandFinaleOverlay
             name={project.personTwoName || 'You'}
             celebrateText={cfg.celebrateText}
+            bgUrl={cfg.finaleBackgroundUrl}
             onClose={() => setActiveModal(null)}
           />
         )}
