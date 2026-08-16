@@ -107,9 +107,24 @@ export default function EditProjectPage() {
         enablePhoneFrameAfterPin: data.project.heroConfig?.enablePhoneFrameAfterPin !== undefined ? data.project.heroConfig.enablePhoneFrameAfterPin : false,
         boxTheme: data.project.heroConfig?.boxTheme || 'frosted-rose',
         phoneTheme: data.project.heroConfig?.phoneTheme || 'rose-gold',
-        heroGreetingText: data.project.heroConfig?.heroGreetingText || '',
-        heroTeaserText: data.project.heroConfig?.heroTeaserText || '',
-        giftBoxWishPrompt: data.project.heroConfig?.giftBoxWishPrompt || '',
+        revealHeroMessageOnPage: data.project.heroConfig?.revealHeroMessageOnPage || false,
+        revealEndingMessageOnPage: data.project.heroConfig?.revealEndingMessageOnPage || false,
+        enableMemoryCardPopup: data.project.heroConfig?.enableMemoryCardPopup !== undefined ? data.project.heroConfig.enableMemoryCardPopup : true,
+        enableGrandFinale: data.project.heroConfig?.enableGrandFinale !== undefined ? data.project.heroConfig.enableGrandFinale : true,
+        enablePhoneUnlock: data.project.heroConfig?.enablePhoneUnlock !== undefined ? data.project.heroConfig.enablePhoneUnlock : false,
+        labelLoveLetter: data.project.heroConfig?.labelLoveLetter || '',
+        labelCake: data.project.heroConfig?.labelCake || '',
+        labelVows: data.project.heroConfig?.labelVows || '',
+        labelMemories: data.project.heroConfig?.labelMemories || '',
+        labelLoveAward: data.project.heroConfig?.labelLoveAward || '',
+        labelReasonsJar: data.project.heroConfig?.labelReasonsJar || '',
+        labelOurSong: data.project.heroConfig?.labelOurSong || '',
+        labelSecretVideo: data.project.heroConfig?.labelSecretVideo || '',
+        awardTitle: data.project.heroConfig?.awardTitle || '',
+        awardSubtitle: data.project.heroConfig?.awardSubtitle || '',
+        awardRecipientName: data.project.heroConfig?.awardRecipientName || '',
+        awardDescription: data.project.heroConfig?.awardDescription || '',
+        awardSignerName: data.project.heroConfig?.awardSignerName || '',
         selfies: data.project.heroConfig?.selfies || [],
       });
     }).catch(() => {
@@ -185,6 +200,24 @@ export default function EditProjectPage() {
           heroGreetingText: form.heroGreetingText,
           heroTeaserText: form.heroTeaserText,
           giftBoxWishPrompt: form.giftBoxWishPrompt,
+          revealHeroMessageOnPage: form.revealHeroMessageOnPage || false,
+          revealEndingMessageOnPage: form.revealEndingMessageOnPage || false,
+          enableMemoryCardPopup: form.enableMemoryCardPopup !== undefined ? form.enableMemoryCardPopup : true,
+          enableGrandFinale: form.enableGrandFinale !== undefined ? form.enableGrandFinale : true,
+          enablePhoneUnlock: form.enablePhoneUnlock !== undefined ? form.enablePhoneUnlock : false,
+          labelLoveLetter: form.labelLoveLetter,
+          labelCake: form.labelCake,
+          labelVows: form.labelVows,
+          labelMemories: form.labelMemories,
+          labelLoveAward: form.labelLoveAward,
+          labelReasonsJar: form.labelReasonsJar,
+          labelOurSong: form.labelOurSong,
+          labelSecretVideo: form.labelSecretVideo,
+          awardTitle: form.awardTitle,
+          awardSubtitle: form.awardSubtitle,
+          awardRecipientName: form.awardRecipientName,
+          awardDescription: form.awardDescription,
+          awardSignerName: form.awardSignerName,
           selfies: form.selfies || [],
         },
         endingConfig: { 
@@ -561,6 +594,57 @@ export default function EditProjectPage() {
                   Short teaser line on the homepage card (the full message is revealed inside the popup).
                 </p>
               </Field>
+
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between p-3 glass-card">
+                  <div>
+                    <p className="text-rose-cream font-serif text-sm">Reveal Hero Message Directly on Page</p>
+                    <p className="text-rose-cream/30 text-xs font-sans">
+                      If OFF: Message is hidden on homepage and opens in full popup on click.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => update('revealHeroMessageOnPage', !form.revealHeroMessageOnPage)}
+                    className={`w-12 h-6 rounded-full transition-all duration-300 relative ${form.revealHeroMessageOnPage ? 'bg-rose-blush' : 'bg-white/10'}`}
+                  >
+                    <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${form.revealHeroMessageOnPage ? 'left-7' : 'left-1'}`} />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between p-3 glass-card">
+                  <div>
+                    <p className="text-rose-cream font-serif text-sm">Reveal Ending Note Directly on Page</p>
+                    <p className="text-rose-cream/30 text-xs font-sans">
+                      If OFF: Ending note is hidden on homepage and opens in full popup on click.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => update('revealEndingMessageOnPage', !form.revealEndingMessageOnPage)}
+                    className={`w-12 h-6 rounded-full transition-all duration-300 relative ${form.revealEndingMessageOnPage ? 'bg-rose-blush' : 'bg-white/10'}`}
+                  >
+                    <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${form.revealEndingMessageOnPage ? 'left-7' : 'left-1'}`} />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between p-3 glass-card">
+                  <div>
+                    <p className="text-rose-cream font-serif text-sm">Open Timeline Memory Cards in Popup</p>
+                    <p className="text-rose-cream/30 text-xs font-sans">
+                      Clicking any story timeline card opens that memory in an enlarged popup modal.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => update('enableMemoryCardPopup', !form.enableMemoryCardPopup)}
+                    className={`w-12 h-6 rounded-full transition-all duration-300 relative ${form.enableMemoryCardPopup !== false ? 'bg-rose-blush' : 'bg-white/10'}`}
+                  >
+                    <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${form.enableMemoryCardPopup !== false ? 'left-7' : 'left-1'}`} />
+                  </button>
+                </div>
+              </div>
+
               <Field label="Gift Box Surprise Wish Prompt">
                 <input
                   value={form.giftBoxWishPrompt}
@@ -571,6 +655,119 @@ export default function EditProjectPage() {
                 <p className="text-[11px] text-rose-cream/40 mt-1 font-sans">
                   Popup text shown when the recipient clicks the center 🎁 gift box.
                 </p>
+              </Field>
+            </Section>
+
+            <Section title="🏷️ Rename Orbital Menu Icons (Sweet Diary)">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Field label="✉️ Love Letter Icon Label">
+                  <input
+                    value={form.labelLoveLetter}
+                    onChange={e => update('labelLoveLetter', e.target.value)}
+                    placeholder="Love Letter"
+                    className="input-romantic"
+                  />
+                </Field>
+                <Field label="🎂 Cake & Wish Icon Label">
+                  <input
+                    value={form.labelCake}
+                    onChange={e => update('labelCake', e.target.value)}
+                    placeholder="Cake & Wish"
+                    className="input-romantic"
+                  />
+                </Field>
+                <Field label="💍 Our Vows Icon Label">
+                  <input
+                    value={form.labelVows}
+                    onChange={e => update('labelVows', e.target.value)}
+                    placeholder="Our Vows"
+                    className="input-romantic"
+                  />
+                </Field>
+                <Field label="🔍 Memories Icon Label">
+                  <input
+                    value={form.labelMemories}
+                    onChange={e => update('labelMemories', e.target.value)}
+                    placeholder="Memories"
+                    className="input-romantic"
+                  />
+                </Field>
+                <Field label="🏅 Love Award Icon Label">
+                  <input
+                    value={form.labelLoveAward}
+                    onChange={e => update('labelLoveAward', e.target.value)}
+                    placeholder="Love Award"
+                    className="input-romantic"
+                  />
+                </Field>
+                <Field label="🏺 Reasons Jar Icon Label">
+                  <input
+                    value={form.labelReasonsJar}
+                    onChange={e => update('labelReasonsJar', e.target.value)}
+                    placeholder="Reasons Jar"
+                    className="input-romantic"
+                  />
+                </Field>
+                <Field label="🎵 Our Song Icon Label">
+                  <input
+                    value={form.labelOurSong}
+                    onChange={e => update('labelOurSong', e.target.value)}
+                    placeholder="Our Song"
+                    className="input-romantic"
+                  />
+                </Field>
+                <Field label="🎬 Secret Video Icon Label">
+                  <input
+                    value={form.labelSecretVideo}
+                    onChange={e => update('labelSecretVideo', e.target.value)}
+                    placeholder="Secret Video"
+                    className="input-romantic"
+                  />
+                </Field>
+              </div>
+            </Section>
+
+            <Section title="🏆 Love Award Custom Content">
+              <Field label="Award Popup Title">
+                <input
+                  value={form.awardTitle}
+                  onChange={e => update('awardTitle', e.target.value)}
+                  placeholder="Certificate of Love"
+                  className="input-romantic"
+                />
+              </Field>
+              <Field label="Award Subtitle / Header">
+                <input
+                  value={form.awardSubtitle}
+                  onChange={e => update('awardSubtitle', e.target.value)}
+                  placeholder="This award is officially presented to:"
+                  className="input-romantic"
+                />
+              </Field>
+              <Field label="Recipient Name Override (Leave empty to use Recipient Name)">
+                <input
+                  value={form.awardRecipientName}
+                  onChange={e => update('awardRecipientName', e.target.value)}
+                  placeholder={form.personTwoName || "Recipient"}
+                  className="input-romantic"
+                />
+              </Field>
+              <Field label="Award Heartfelt Message / Description">
+                <textarea
+                  value={form.awardDescription}
+                  onChange={e => update('awardDescription', e.target.value)}
+                  placeholder="For being the most incredible, caring, and wonderful person in my universe."
+                  rows={3}
+                  className="input-romantic resize-none"
+                />
+              </Field>
+              <Field label="Signer Name Override (Leave empty to use Sender Name)">
+                <input
+                  value={form.awardSignerName}
+                  onChange={e => update('awardSignerName', e.target.value)}
+                  placeholder={form.personOneName || "Sender"}
+                  className="input-romantic"
+                />
               </Field>
             </Section>
 

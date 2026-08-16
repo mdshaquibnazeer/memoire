@@ -425,19 +425,15 @@ function PasscodeScreen({
         greetingPosition === 'top' ? 'justify-between' : 'justify-end gap-5'
       }`}
     >
-      {/* Top Greeting Position */}
       {greetingPosition === 'top' && (
         <div className="mt-2 flex justify-center w-full">
           {greetingCard}
         </div>
       )}
 
-      {/* Group: (Greeting if above-pin) + PIN Dots + PIN Keypad positioned lower */}
       <div className="flex flex-col items-center w-full max-w-[270px] space-y-4">
-        {/* Above-PIN Greeting Position */}
         {greetingPosition === 'above-pin' && greetingCard}
 
-        {/* Passcode Indicator Dots */}
         <div className="flex flex-col items-center">
           <motion.div
             animate={shake ? { x: [-10, 10, -10, 10, 0] } : {}}
@@ -463,7 +459,6 @@ function PasscodeScreen({
           )}
         </div>
 
-        {/* Aesthetic Frosted Glass PIN Pad (Ergonomic & Proportional) */}
         <div
           className="grid grid-cols-3 gap-2.5 w-full p-3.5 rounded-3xl backdrop-blur-xl border border-white/25 shadow-2xl"
           style={{ background: `rgba(0, 0, 0, ${Math.max(0.15, opacityVal)})` }}
@@ -561,7 +556,7 @@ function FullscreenFilmstripModal({
           </div>
           <button
             onClick={(e) => { e.stopPropagation(); onClose(); }}
-            className="w-9 h-9 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-lg cursor-pointer"
+            className="w-10 h-10 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-lg cursor-pointer"
           >
             ✕
           </button>
@@ -670,7 +665,7 @@ function FullscreenStoryTrackModal({
           </div>
           <button
             onClick={(e) => { e.stopPropagation(); onClose(); }}
-            className="w-9 h-9 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-lg cursor-pointer"
+            className="w-10 h-10 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-lg cursor-pointer"
           >
             ✕
           </button>
@@ -697,6 +692,78 @@ function FullscreenStoryTrackModal({
         </div>
       </motion.div>
     </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// FULLSCREEN SINGLE MEMORY MODAL (POPUP ON CLICK)
+// ─────────────────────────────────────────────
+function FullscreenSingleMemoryModal({
+  memory,
+  onClose,
+  boxTheme,
+}: {
+  memory: Memory;
+  onClose: () => void;
+  boxTheme: ThemeStyles;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-pink-950/75 backdrop-blur-md"
+    >
+      <motion.div
+        initial={{ scale: 0.9, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className={`w-full max-w-md rounded-3xl p-6 sm:p-8 relative shadow-2xl max-h-[85vh] overflow-y-auto ${boxTheme.modal}`}
+      >
+        <button
+          onClick={(e) => { e.stopPropagation(); onClose(); }}
+          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-lg cursor-pointer z-50 shadow-sm"
+        >
+          ✕
+        </button>
+
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-3xl">{memory.emoji || '✨'}</span>
+          <div>
+            <span className="text-xs font-bold text-pink-600 font-mono block">
+              {new Date(memory.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+            </span>
+            <h3 className={`font-serif font-bold text-xl sm:text-2xl ${boxTheme.title}`}>
+              {memory.title}
+            </h3>
+          </div>
+        </div>
+
+        {memory.imageUrl && (
+          <div className="rounded-2xl overflow-hidden border border-pink-200 my-4 shadow-md max-h-64">
+            <img src={memory.imageUrl} alt={memory.title} className="w-full h-full object-cover" />
+          </div>
+        )}
+
+        {memory.description && (
+          <div className={`p-4 rounded-2xl ${boxTheme.itemCard} my-4`}>
+            <p className="whitespace-pre-wrap text-sm leading-relaxed font-sans font-medium">
+              {memory.description}
+            </p>
+          </div>
+        )}
+
+        <div className="text-center mt-6">
+          <button
+            onClick={onClose}
+            className={`px-6 py-2.5 rounded-full text-xs uppercase tracking-widest font-bold shadow-md cursor-pointer ${boxTheme.accentBtn}`}
+          >
+            Close Memory 🌸
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -739,7 +806,7 @@ function MakeAWishModal({
       >
         <button
           onClick={(e) => { e.stopPropagation(); onClose(); }}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-base cursor-pointer z-50"
+          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-lg cursor-pointer z-50"
         >
           ✕
         </button>
@@ -912,7 +979,7 @@ function HeroMessageModal({
       >
         <button
           onClick={(e) => { e.stopPropagation(); onClose(); }}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-pink-100/80 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-base cursor-pointer z-50"
+          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-pink-100/80 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-lg cursor-pointer z-50"
         >
           ✕
         </button>
@@ -968,7 +1035,7 @@ function EndingLetterModal({
       >
         <button
           onClick={(e) => { e.stopPropagation(); onClose(); }}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-pink-100/80 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-base cursor-pointer z-50"
+          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-pink-100/80 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-lg cursor-pointer z-50"
         >
           ✕
         </button>
@@ -1020,7 +1087,7 @@ function MemoriesModal({ project, onClose, boxTheme }: { project: Project; onClo
           </div>
           <button
             onClick={(e) => { e.stopPropagation(); onClose(); }}
-            className="w-9 h-9 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-lg cursor-pointer"
+            className="w-10 h-10 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-lg cursor-pointer"
           >
             ✕
           </button>
@@ -1269,7 +1336,7 @@ function FullscreenPromiseModal({
       >
         <button
           onClick={(e) => { e.stopPropagation(); onClose(); }}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-base cursor-pointer z-50"
+          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-lg cursor-pointer z-50"
         >
           ✕
         </button>
@@ -1321,7 +1388,7 @@ function PromiseWallModal({ project, onClose, boxTheme }: { project: Project; on
           </div>
           <button
             onClick={(e) => { e.stopPropagation(); onClose(); }}
-            className="w-8 h-8 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-base cursor-pointer"
+            className="w-10 h-10 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-lg cursor-pointer"
           >
             ✕
           </button>
@@ -1379,7 +1446,7 @@ function SecretVideoModal({
       <div className="relative max-w-3xl w-full max-h-[85vh] flex flex-col items-center">
         <button
           onClick={(e) => { e.stopPropagation(); onClose(); }}
-          className="absolute -top-10 right-0 w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center font-bold text-lg cursor-pointer"
+          className="absolute -top-10 right-0 w-10 h-10 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center font-bold text-lg cursor-pointer"
         >
           ✕
         </button>
@@ -1409,7 +1476,7 @@ function LightboxModal({ item, onClose }: { item: GalleryItem; onClose: () => vo
       <div className="relative max-w-4xl w-full max-h-[88vh] flex flex-col items-center">
         <button
           onClick={(e) => { e.stopPropagation(); onClose(); }}
-          className="absolute -top-11 right-0 w-9 h-9 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center font-bold text-xl cursor-pointer"
+          className="absolute -top-11 right-0 w-10 h-10 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center font-bold text-xl cursor-pointer"
         >
           ✕
         </button>
@@ -1517,39 +1584,44 @@ function PandaSelfieWidget({ projectSlug, boxTheme }: { projectSlug: string; box
 }
 
 // ─────────────────────────────────────────────
-// AWARD MODAL
+// LOVE AWARD MODAL (CUSTOMIZABLE & EXPANDED HIT AREA)
 // ─────────────────────────────────────────────
 function AwardModal({ project, onClose, boxTheme }: { project: Project; onClose: () => void; boxTheme: ThemeStyles }) {
+  const cfg = project.heroConfig || {};
+
   return (
     <div
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-pink-900/60 backdrop-blur-md"
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-pink-950/70 backdrop-blur-md"
     >
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className={`w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl relative ${boxTheme.modal}`}
+        className={`w-full max-w-sm rounded-3xl p-6 sm:p-8 text-center shadow-2xl relative ${boxTheme.modal}`}
       >
         <button
           onClick={(e) => { e.stopPropagation(); onClose(); }}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-base cursor-pointer"
+          className="absolute top-3 right-3 w-11 h-11 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-xl cursor-pointer z-50 shadow-sm"
+          title="Close Award"
         >
           ✕
         </button>
         <span className="text-7xl block mb-4 animate-bounce">🏆</span>
-        <h2 className={`text-xl font-bold font-serif mb-2 ${boxTheme.title}`}>Certificate of Love</h2>
+        <h2 className={`text-xl font-bold font-serif mb-2 ${boxTheme.title}`}>
+          {cfg.awardTitle || 'Certificate of Love'}
+        </h2>
         <p className={`text-xs mb-3 ${boxTheme.subtitle}`} style={{ fontFamily: 'Be Vietnam Pro' }}>
-          This award is officially presented to:
+          {cfg.awardSubtitle || 'This award is officially presented to:'}
         </p>
         <p className={`text-xl font-extrabold border-b-2 pb-2 inline-block px-4 mb-4 ${boxTheme.title} ${boxTheme.border}`} style={{ fontFamily: 'Plus Jakarta Sans' }}>
-          {project.personTwoName || 'Recipient'}
+          {cfg.awardRecipientName || project.personTwoName || 'Recipient'}
         </p>
         <p className={`text-sm italic font-semibold leading-relaxed mb-6 ${boxTheme.subtitle}`}>
-          "For being the most incredible, caring, and wonderful person in my universe."
+          {cfg.awardDescription || '"For being the most incredible, caring, and wonderful person in my universe."'}
         </p>
         <div className={`flex justify-between items-center text-xs border-t pt-4 ${boxTheme.border} ${boxTheme.subtitle}`}>
-          <span>Signed: {project.personOneName || 'Sender'}</span>
+          <span>Signed: {cfg.awardSignerName || project.personOneName || 'Sender'}</span>
           <span>Date: {project.startDate ? new Date(project.startDate).toLocaleDateString() : 'Forever'}</span>
         </div>
       </motion.div>
@@ -1586,7 +1658,7 @@ function JarModal({ project, onClose, boxTheme }: { project: Project; onClose: (
       >
         <button
           onClick={(e) => { e.stopPropagation(); onClose(); }}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-base cursor-pointer"
+          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-lg cursor-pointer"
         >
           ✕
         </button>
@@ -1631,7 +1703,7 @@ function MusicModal({ project, onClose, boxTheme }: { project: Project; onClose:
       >
         <button
           onClick={(e) => { e.stopPropagation(); onClose(); }}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-base cursor-pointer"
+          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-lg cursor-pointer"
         >
           ✕
         </button>
@@ -1654,9 +1726,52 @@ function MusicModal({ project, onClose, boxTheme }: { project: Project; onClose:
 }
 
 // ─────────────────────────────────────────────
+// GRAND FINALE CELEBRATION OVERLAY
+// ─────────────────────────────────────────────
+function GrandFinaleOverlay({
+  celebrateText,
+  name,
+  onClose,
+}: {
+  celebrateText?: string;
+  name: string;
+  onClose: () => void;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[10002] flex flex-col items-center justify-center p-6 bg-pink-950/90 backdrop-blur-xl text-center select-none"
+    >
+      <motion.div
+        initial={{ scale: 0.5, y: 50 }}
+        animate={{ scale: 1, y: 0 }}
+        transition={{ type: 'spring', damping: 15 }}
+        className="flex flex-col items-center max-w-lg"
+      >
+        <span className="text-8xl block mb-6 animate-bounce">🎉</span>
+        <h1 className="text-3xl sm:text-5xl font-extrabold text-white font-serif tracking-wide drop-shadow-lg mb-4">
+          {celebrateText || `Happy Birthday, ${name}! 🎂`}
+        </h1>
+        <p className="text-pink-200 text-base sm:text-lg font-serif italic leading-relaxed mb-8 max-w-md">
+          May every wish and dream of yours bloom into reality! ✨
+        </p>
+        <button
+          onClick={onClose}
+          className="px-8 py-3.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-400 text-white font-bold text-sm tracking-wider uppercase shadow-xl hover:scale-105 transition-transform cursor-pointer"
+        >
+          Close Magic ✨
+        </button>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // MAIN THEME COMPONENT
 // ─────────────────────────────────────────────
-type ModalType = 'award' | 'memories' | 'letter' | 'jar' | 'music' | 'vows' | 'video' | 'wish' | 'cake' | 'heroNote' | 'endingNote' | 'filmstrip' | 'dates' | null;
+type ModalType = 'award' | 'memories' | 'letter' | 'jar' | 'music' | 'vows' | 'video' | 'wish' | 'cake' | 'heroNote' | 'endingNote' | 'filmstrip' | 'dates' | 'finale' | null;
 
 export default function SweetDiaryTheme({ project }: { project: Project }) {
   const cfg = project.heroConfig || {};
@@ -1665,21 +1780,23 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [selectedGalleryPhoto, setSelectedGalleryPhoto] = useState<GalleryItem | null>(null);
   const [selectedPromise, setSelectedPromise] = useState<any | null>(null);
+  const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
 
   // Box & Phone Themes
   const boxThemeKey = cfg.boxTheme || 'frosted-rose';
   const phoneThemeKey = cfg.phoneTheme || 'rose-gold';
   const boxTheme = BOX_THEMES[boxThemeKey] || BOX_THEMES['frosted-rose'];
 
+  // Dynamic Orbital Menu Labels
   const baseItems = [
-    { id: 'letter', emoji: '✉️', label: 'Love Letter' },
-    { id: 'cake', emoji: '🎂', label: 'Cake & Wish' },
-    { id: 'vows', emoji: '💍', label: 'Our Vows' },
-    { id: 'memories', emoji: '🔍', label: 'Memories' },
-    { id: 'award', emoji: '🏅', label: 'Love Award' },
-    { id: 'jar', emoji: '🏺', label: 'Reasons Jar' },
-    { id: 'music', emoji: '🎵', label: 'Our Song' },
-    ...(cfg.secretVideoUrl ? [{ id: 'video', emoji: '🎬', label: 'Secret Video' }] : []),
+    { id: 'letter', emoji: '✉️', label: cfg.labelLoveLetter || 'Love Letter' },
+    { id: 'cake', emoji: '🎂', label: cfg.labelCake || 'Cake & Wish' },
+    { id: 'vows', emoji: '💍', label: cfg.labelVows || 'Our Vows' },
+    { id: 'memories', emoji: '🔍', label: cfg.labelMemories || 'Memories' },
+    { id: 'award', emoji: '🏅', label: cfg.labelLoveAward || 'Love Award' },
+    { id: 'jar', emoji: '🏺', label: cfg.labelReasonsJar || 'Reasons Jar' },
+    { id: 'music', emoji: '🎵', label: cfg.labelOurSong || 'Our Song' },
+    ...(cfg.secretVideoUrl ? [{ id: 'video', emoji: '🎬', label: cfg.labelSecretVideo || 'Secret Video' }] : []),
   ];
 
   const total = baseItems.length;
@@ -1694,29 +1811,31 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
   // Orbital Wheel / Gift Box view
   const renderOrbitalStage = (isInsidePhone: boolean) => (
     <div className="flex flex-col items-center justify-between flex-1 py-2 w-full">
-      {/* Cover Polaroid Picture (Larger & Gracefully Positioned) */}
-      <motion.div
-        initial={{ y: -20, opacity: 0, rotate: -3 }}
-        animate={{ y: [0, -6, 0], opacity: 1, rotate: [-3, -1, -3] }}
-        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-        className="mb-4 sm:mb-6"
-        style={{
-          background: 'white',
-          padding: '10px 10px 24px',
-          borderRadius: '12px',
-          boxShadow: '0 15px 35px rgba(0,0,0,0.18)',
-          width: isInsidePhone ? '145px' : '190px',
-        }}
-      >
-        {project.coverImageUrl ? (
-          <img src={project.coverImageUrl} alt="cover" className="w-full aspect-square object-cover rounded-lg" />
-        ) : (
-          <div className="w-full aspect-square flex items-center justify-center text-4xl bg-pink-50 rounded-lg">💕</div>
-        )}
-        <p className="text-center mt-2.5 text-xs font-bold text-pink-700 font-sans">
-          {project.startDate ? new Date(project.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Forever 🌸'}
-        </p>
-      </motion.div>
+      {/* Cover Polaroid Picture (Shown ONLY when Phone Frame is OFF) */}
+      {!isInsidePhone && (
+        <motion.div
+          initial={{ y: -20, opacity: 0, rotate: -3 }}
+          animate={{ y: [0, -6, 0], opacity: 1, rotate: [-3, -1, -3] }}
+          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          className="mb-4 sm:mb-6"
+          style={{
+            background: 'white',
+            padding: '10px 10px 24px',
+            borderRadius: '12px',
+            boxShadow: '0 15px 35px rgba(0,0,0,0.18)',
+            width: '190px',
+          }}
+        >
+          {project.coverImageUrl ? (
+            <img src={project.coverImageUrl} alt="cover" className="w-full aspect-square object-cover rounded-lg" />
+          ) : (
+            <div className="w-full aspect-square flex items-center justify-center text-4xl bg-pink-50 rounded-lg">💕</div>
+          )}
+          <p className="text-center mt-2.5 text-xs font-bold text-pink-700 font-sans">
+            {project.startDate ? new Date(project.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Forever 🌸'}
+          </p>
+        </motion.div>
+      )}
 
       {/* Main Greeting Headline */}
       <motion.div
@@ -1870,32 +1989,52 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
               {/* SCROLLABLE STORY SECTIONS BELOW */}
               {/* ───────────────────────────────────────────── */}
               <div className="mt-12 space-y-16">
-                {/* 1. Hero Greeting Note Card (Shows ONLY Tagline & Teaser; Full text revealed in Popup Modal) */}
+                {/* 1. Hero Greeting Note Card */}
                 <section className="text-center max-w-xl mx-auto px-4">
                   <div
-                    onClick={() => setActiveModal('heroNote')}
-                    className={`p-6 sm:p-8 rounded-[32px] ${boxTheme.card} cursor-pointer hover:scale-[1.02] transition-transform`}
+                    onClick={() => {
+                      if (!cfg.revealHeroMessageOnPage) setActiveModal('heroNote');
+                    }}
+                    className={`p-6 sm:p-8 rounded-[32px] ${boxTheme.card} ${!cfg.revealHeroMessageOnPage ? 'cursor-pointer hover:scale-[1.02] transition-transform' : ''}`}
                   >
                     <h2 className={`font-serif text-2xl sm:text-3xl font-bold ${boxTheme.title} mb-2`}>
                       {cfg.heroTagline || `FOR YOU MY CARINO 🤍`}
                     </h2>
-                    <p className={`italic font-semibold text-sm sm:text-base font-sans my-3 ${boxTheme.subtitle}`}>
-                      {cfg.heroTeaserText || cfg.welcomePopupText || `CLICKK KROO MOTIII 🫣🥹`}
-                    </p>
-                    <div className="mt-4 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/90 border border-pink-300/80 shadow-xs">
-                      <span className="text-[11px] font-extrabold text-pink-600 uppercase tracking-widest">
-                        TAP TO VIEW OPENING MESSAGE ✨
-                      </span>
-                    </div>
+                    
+                    {cfg.revealHeroMessageOnPage ? (
+                      <p className={`whitespace-pre-wrap italic font-medium text-sm leading-relaxed font-sans my-4 ${boxTheme.subtitle}`}>
+                        {cfg.heroGreetingText || cfg.heroMessage || cfg.welcomePopupText ||
+                          `"Every single moment shared with you is a treasure. I built this special memory diary to celebrate your smile, your warmth, and the joy you bring into my life." 💕`}
+                      </p>
+                    ) : (
+                      <>
+                        <p className={`italic font-semibold text-sm sm:text-base font-sans my-3 ${boxTheme.subtitle}`}>
+                          {cfg.heroTeaserText || cfg.welcomePopupText || `CLICKK KROO MOTIII 🫣🥹`}
+                        </p>
+                        <div className="mt-4 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/90 border border-pink-300/80 shadow-xs">
+                          <span className="text-[11px] font-extrabold text-pink-600 uppercase tracking-widest">
+                            TAP TO VIEW OPENING MESSAGE ✨
+                          </span>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </section>
 
                 {/* 2. Birthday Cake & Candle Station */}
                 <section>
-                  <BirthdayCakeStation name={project.personTwoName || 'You'} boxTheme={boxTheme} />
+                  <BirthdayCakeStation
+                    name={project.personTwoName || 'You'}
+                    boxTheme={boxTheme}
+                    onWishSuccess={() => {
+                      if (cfg.enableGrandFinale !== false) {
+                        setTimeout(() => setActiveModal('finale'), 1800);
+                      }
+                    }}
+                  />
                 </section>
 
-                {/* 3. Our Memories Timeline Section */}
+                {/* 3. Our Memories Timeline Section (Click opens Single Memory Popup Modal) */}
                 {project.memories && project.memories.length > 0 && (
                   <section className="max-w-2xl mx-auto px-4">
                     <div className="text-center mb-8">
@@ -1913,7 +2052,11 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
                           initial={{ opacity: 0, x: 20 }}
                           whileInView={{ opacity: 1, x: 0 }}
                           viewport={{ once: true }}
-                          className={`relative p-5 rounded-3xl ${boxTheme.card}`}
+                          whileHover={cfg.enableMemoryCardPopup !== false ? { scale: 1.02 } : {}}
+                          onClick={() => {
+                            if (cfg.enableMemoryCardPopup !== false) setSelectedMemory(m);
+                          }}
+                          className={`relative p-5 rounded-3xl ${boxTheme.card} ${cfg.enableMemoryCardPopup !== false ? 'cursor-pointer' : ''}`}
                         >
                           <div className="absolute -left-[31px] top-6 w-4 h-4 rounded-full bg-pink-500 border-4 border-white shadow-sm" />
                           <span className="text-xs font-bold text-pink-500 block mb-1">
@@ -1923,12 +2066,17 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
                             {m.emoji} {m.title}
                           </h4>
                           {m.description && (
-                            <p className={`text-xs leading-relaxed font-sans mb-3 ${boxTheme.subtitle}`}>{m.description}</p>
+                            <p className={`text-xs leading-relaxed font-sans mb-3 line-clamp-3 ${boxTheme.subtitle}`}>{m.description}</p>
                           )}
                           {m.imageUrl && (
                             <div className="rounded-2xl overflow-hidden border border-pink-100 max-h-56">
                               <img src={m.imageUrl} alt={m.title} className="w-full h-full object-cover" />
                             </div>
+                          )}
+                          {cfg.enableMemoryCardPopup !== false && (
+                            <span className="text-[10px] font-bold text-pink-500 mt-2 block">
+                              Tap to expand story 🔍
+                            </span>
                           )}
                         </motion.div>
                       ))}
@@ -1994,29 +2142,54 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
                   </section>
                 )}
 
-                {/* 6. Closing Section (Themed Box + Popup Trigger; Full text revealed in Modal) */}
+                {/* 6. Closing Section (Themed Box + Popup Trigger) */}
                 <section className="text-center max-w-xl mx-auto px-4 pt-6">
                   <div
-                    onClick={() => setActiveModal('endingNote')}
-                    className={`p-8 rounded-[32px] ${boxTheme.card} cursor-pointer hover:scale-[1.02] transition-transform`}
+                    onClick={() => {
+                      if (!cfg.revealEndingMessageOnPage) setActiveModal('endingNote');
+                    }}
+                    className={`p-8 rounded-[32px] ${boxTheme.card} ${!cfg.revealEndingMessageOnPage ? 'cursor-pointer hover:scale-[1.02] transition-transform' : ''}`}
                   >
                     <span className="text-4xl mb-2 block">🌸</span>
                     <h3 className={`font-serif text-2xl font-bold ${boxTheme.title} mb-2`}>
                       {project.endingConfig?.title || 'Forever & Always'}
                     </h3>
-                    <p className={`text-xs italic font-medium font-sans mb-3 ${boxTheme.subtitle}`}>
-                      A final heartfelt note written with all my love 💕
-                    </p>
+
+                    {cfg.revealEndingMessageOnPage ? (
+                      <p className={`whitespace-pre-wrap text-sm leading-relaxed font-sans mb-4 ${boxTheme.subtitle}`}>
+                        {project.endingConfig?.message || 'Thank you for making every single day sweeter and brighter.'}
+                      </p>
+                    ) : (
+                      <p className={`text-xs italic font-medium font-sans mb-3 ${boxTheme.subtitle}`}>
+                        A final heartfelt note written with all my love 💕
+                      </p>
+                    )}
+
                     <p className={`font-serif italic font-bold text-base mb-4 ${boxTheme.title}`}>
                       {project.endingConfig?.endingSignature || `— With Love, ${project.personOneName || 'Me'} 💕`}
                     </p>
-                    <button
-                      type="button"
-                      className={`px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-md ${boxTheme.accentBtn}`}
-                    >
-                      Read Full Ending Note 💌
-                    </button>
+
+                    {!cfg.revealEndingMessageOnPage && (
+                      <button
+                        type="button"
+                        className={`px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-md ${boxTheme.accentBtn}`}
+                      >
+                        Read Full Ending Note 💌
+                      </button>
+                    )}
                   </div>
+
+                  {/* Grand Finale Button Trigger */}
+                  {cfg.enableGrandFinale !== false && (
+                    <div className="mt-8">
+                      <button
+                        onClick={() => setActiveModal('finale')}
+                        className="px-8 py-3 rounded-full bg-gradient-to-r from-pink-500 via-rose-400 to-pink-500 text-white font-bold text-xs uppercase tracking-widest shadow-lg hover:scale-105 transition-transform cursor-pointer"
+                      >
+                        🎉 Launch Grand Finale Magic ✨
+                      </button>
+                    </div>
+                  )}
                 </section>
 
                 {/* 7. Panda Selfie Widget */}
@@ -2093,7 +2266,7 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
             <div className={`relative w-full max-w-md rounded-3xl p-6 shadow-2xl ${boxTheme.modal}`}>
               <button
                 onClick={() => setActiveModal(null)}
-                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-base cursor-pointer z-50"
+                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-lg cursor-pointer z-50"
               >
                 ✕
               </button>
@@ -2112,6 +2285,13 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
             onClose={() => setActiveModal(null)}
           />
         )}
+        {activeModal === 'finale' && (
+          <GrandFinaleOverlay
+            name={project.personTwoName || 'You'}
+            celebrateText={cfg.celebrateText}
+            onClose={() => setActiveModal(null)}
+          />
+        )}
         {selectedGalleryPhoto && (
           <LightboxModal item={selectedGalleryPhoto} onClose={() => setSelectedGalleryPhoto(null)} />
         )}
@@ -2122,6 +2302,13 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
             secretNote={selectedPromise.secretNote}
             boxTheme={boxTheme}
             onClose={() => setSelectedPromise(null)}
+          />
+        )}
+        {selectedMemory && (
+          <FullscreenSingleMemoryModal
+            memory={selectedMemory}
+            boxTheme={boxTheme}
+            onClose={() => setSelectedMemory(null)}
           />
         )}
       </AnimatePresence>

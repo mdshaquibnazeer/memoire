@@ -104,35 +104,97 @@ export default function MemoryPage() {
   }
 
   if (requiresPassword) {
+    const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', 'del'];
+    const pressKey = (k: string) => {
+      if (k === 'del') {
+        setPassword(p => p.slice(0, -1));
+        return;
+      }
+      const next = password + k;
+      setPassword(next);
+      if (next.length >= 4) {
+        fetchProject(next);
+      }
+    };
+
     return (
-      <div className="min-h-screen bg-noir-midnight flex items-center justify-center px-4 sm:px-6">
+      <div className="min-h-screen bg-gradient-to-br from-[#1c000e] via-[#2d0019] to-[#12000a] flex items-center justify-center px-4 py-8 relative overflow-hidden">
         <FloatingParticles />
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="glass-card p-6 sm:p-8 lg:p-10 max-w-sm w-full text-center relative z-10"
-        >
-          <div className="text-4xl mb-4">🔒</div>
-          <h2 className="font-serif text-xl sm:text-2xl text-rose-cream mb-2">Private Memory</h2>
-          <p className="text-rose-cream/40 font-sans text-sm mb-5 sm:mb-6">
-            This memory is password protected.
-          </p>
-          <input
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            type="password"
-            placeholder="Enter password"
-            className="input-romantic mb-4"
-            onKeyDown={e => e.key === 'Enter' && fetchProject(password)}
-          />
-          {passwordError && <p className="text-red-400 text-sm mb-3">{passwordError}</p>}
-          <button
-            onClick={() => fetchProject(password)}
-            className="btn-romantic w-full"
+        <div className="relative z-10 w-full max-w-[380px]">
+          <div
+            className="rounded-[48px] p-3 shadow-2xl border border-white/20"
+            style={{
+              background: 'linear-gradient(145deg, #ffd1dc 0%, #ff9ebb 50%, #f4729f 100%)',
+              boxShadow: '0 25px 70px -10px rgba(255, 105, 180, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.6)',
+            }}
           >
-            <span>Unlock Memory</span>
-          </button>
-        </motion.div>
+            <div className="rounded-[40px] overflow-hidden bg-black/40 backdrop-blur-xl p-6 flex flex-col items-center min-h-[640px] justify-between border border-white/10 text-white">
+              {/* Dynamic Island / Time */}
+              <div className="w-full flex items-center justify-between text-xs text-white/80 font-bold px-2 pt-1">
+                <span>9:41</span>
+                <div className="w-20 h-4 bg-black/90 rounded-full" />
+                <span>5G 🔋</span>
+              </div>
+
+              {/* Header Title */}
+              <div className="text-center my-4">
+                <motion.div
+                  animate={{ scale: [1, 1.15, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="w-12 h-12 rounded-full flex items-center justify-center text-2xl bg-white/20 border border-white/40 mx-auto mb-2 shadow-sm"
+                >
+                  🔒
+                </motion.div>
+                <h2 className="font-serif text-xl font-bold tracking-wide">Private Memory</h2>
+                <p className="text-white/80 text-xs font-sans mt-1">Enter 4-digit PIN or password</p>
+              </div>
+
+              {/* Password Indicator Dots / Input */}
+              <div className="flex flex-col items-center my-2">
+                <div className="flex gap-4 mb-3">
+                  {[0, 1, 2, 3].map(i => (
+                    <div
+                      key={i}
+                      className={`w-3.5 h-3.5 rounded-full border-2 transition-all ${
+                        password.length > i ? 'bg-pink-500 border-white shadow-md' : 'border-white/60 bg-white/20'
+                      }`}
+                    />
+                  ))}
+                </div>
+                {passwordError && (
+                  <p className="text-rose-300 text-xs font-bold bg-rose-950/80 px-3 py-1 rounded-full border border-rose-500/40 animate-pulse">
+                    {passwordError}
+                  </p>
+                )}
+              </div>
+
+              {/* Number Keypad */}
+              <div className="grid grid-cols-3 gap-2.5 w-full max-w-[260px] p-3 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 mb-2">
+                {keys.map(k => (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => pressKey(k)}
+                    className="flex items-center justify-center h-12 rounded-2xl text-lg font-bold bg-white/80 hover:bg-white text-pink-950 active:bg-pink-200 transition-all cursor-pointer shadow-sm"
+                  >
+                    {k === 'del' ? '⌫' : k}
+                  </button>
+                ))}
+              </div>
+
+              {/* Manual Submit Button for text passwords */}
+              <div className="w-full max-w-[260px]">
+                <button
+                  type="button"
+                  onClick={() => fetchProject(password)}
+                  className="w-full py-2.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-400 text-white font-bold text-xs uppercase tracking-wider shadow-md hover:scale-[1.02] transition-transform cursor-pointer"
+                >
+                  Unlock Memory ✨
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
