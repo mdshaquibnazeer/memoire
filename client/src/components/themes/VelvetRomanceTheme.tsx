@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence, useMotionValue, useSpring, useInView } from 'framer-motion';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
 
 // ─────────────────────────────────────────────
 // INTERFACES
@@ -155,7 +155,6 @@ function TapExplosion() {
   const counter = useRef(0);
 
   const handleClick = useCallback((e: MouseEvent) => {
-    // Make sure we don't spam if tapping buttons (optional filter can be added, but burst is fun everywhere)
     const count = 12;
     const newParticles: BurstParticle[] = Array.from({ length: count }, (_, i) => ({
       id: counter.current++,
@@ -539,15 +538,278 @@ function StatCounter({ label, value }: { label: string; value: number }) {
 }
 
 // ─────────────────────────────────────────────
+// SECRET ENVELOPE MODAL (Interactive Open Letter)
+// ─────────────────────────────────────────────
+function EnvelopeLetterModal({
+  message,
+  signature,
+  musicUrl,
+  onClose,
+  disableLetterAutoScroll = false,
+  disableWordByWord = false,
+  letterScrollSpeed = 25,
+  letterWordDelay = 120,
+  letterAnimType = 'word',
+  letterCharDelay = 30,
+}: {
+  message: string;
+  signature?: string;
+  musicUrl?: string;
+  onClose: () => void;
+  disableLetterAutoScroll?: boolean;
+  disableWordByWord?: boolean;
+  letterScrollSpeed?: number;
+  letterWordDelay?: number;
+  letterAnimType?: 'word' | 'char';
+  letterCharDelay?: number;
+}) {
+  const [phase, setPhase] = useState<'closed' | 'opening' | 'open' | 'reading'>('closed');
+  const [sealCrumble, setSealCrumble] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(disableWordByWord ? 99999 : 0);
+  const letterScrollRef = useRef<HTMLDivElement>(null);
+  const localAudioRef = useRef<HTMLAudioElement>(null);
+
+  const fullText = message || '';
+  const words = fullText.split(/\s+/).filter(Boolean);
+  const totalWords = words.length;
+  const totalChars = fullText.length;
+  const isCharAnim = letterAnimType === 'char';
+  const totalCount = isCharAnim ? totalChars : totalWords;
+
+  // Manage letter ambient loops
+  useEffect(() => {
+    if (musicUrl && localAudioRef.current) {
+      localAudioRef.current.volume = 0.4;
+      localAudioRef.current.play().catch(() => {});
+    }
+    return () => {
+      if (localAudioRef.current) {
+        localAudioRef.current.pause();
+      }
+    };
+  }, [musicUrl]);
+
+  const handleEnvelopeClick = () => {
+    setSealCrumble(true);
+    setTimeout(() => {
+      setPhase('opening');
+      setTimeout(() => {
+        setPhase('open');
+        setTimeout(() => {
+          setPhase('reading');
+        }, 1000);
+      }, 1000);
+    }, 600);
+  };
+
+  // Word-by-word / character-by-character typewriter draw
+  useEffect(() => {
+    if (phase !== 'reading') return;
+    if (disableWordByWord) {
+      setVisibleCount(totalCount);
+      return;
+    }
+    if (visibleCount >= totalCount) return;
+
+    let delay = 120;
+    if (isCharAnim) {
+      delay = letterCharDelay !== undefined ? Number(letterCharDelay) : 30;
+    } else {
+      delay = letterWordDelay !== undefined ? Number(letterWordDelay) : 120;
+    }
+
+    const timer = setTimeout(() => {
+      setVisibleCount(c => c + 1);
+    }, delay);
+    return () => clearTimeout(timer);
+  }, [phase, visibleCount, totalCount, disableWordByWord, letterWordDelay, letterCharDelay, isCharAnim]);
+
+  // Auto scroll
+  useEffect(() => {
+    if (disableLetterAutoScroll || phase !== 'reading') return;
+    const scrollSpeed = letterScrollSpeed !== undefined ? Number(letterScrollSpeed) : 25;
+    if (scrollSpeed <= 0) return;
+
+    let lastTime = performance.now();
+    let frameId: number;
+    const el = letterScrollRef.current;
+
+    const scroll = (now: number) => {
+      if (el) {
+        const delta = (now - lastTime) / 1000;
+        if (el.scrollTop + el.clientHeight < el.scrollHeight) {
+          el.scrollTop += scrollSpeed * delta;
+        }
+      }
+      lastTime = now;
+      frameId = requestAnimationFrame(scroll);
+    };
+
+    frameId = requestAnimationFrame(scroll);
+    return () => cancelAnimationFrame(frameId);
+  }, [phase, disableLetterAutoScroll, letterScrollSpeed]);
+
+  const visibleText = isCharAnim
+    ? fullText.slice(0, visibleCount)
+    : words.slice(0, visibleCount).join(' ');
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[10000] flex flex-col items-center justify-center p-6 bg-black/95 backdrop-blur-md"
+    >
+      {musicUrl && <audio ref={localAudioRef} src={musicUrl} loop />}
+
+      <div className="relative flex flex-col items-center max-w-sm w-full" style={{ perspective: 1200 }}>
+        
+        {/* Envelope display during closed/opening phase */}
+        <AnimatePresence>
+          {phase !== 'reading' && (
+            <motion.div
+              key="envelope"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="w-full aspect-[4/3] rounded-3xl relative flex flex-col items-center justify-center cursor-pointer border border-[#f5c842]/30 overflow-visible"
+              onClick={handleEnvelopeClick}
+              style={{
+                background: 'linear-gradient(145deg, #2b0216 0%, #4e0329 100%)',
+                boxShadow: '0 25px 60px rgba(0,0,0,0.6), inset 0 0 20px rgba(245,200,66,0.15)',
+              }}
+            >
+              {/* Flap */}
+              <motion.div
+                animate={phase === 'opening' || phase === 'open' ? { rotateX: -180, y: -2 } : { rotateX: 0 }}
+                transition={{ duration: 1.2 }}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '50%',
+                  transformOrigin: 'top center',
+                  transformStyle: 'preserve-3d',
+                  zIndex: 10,
+                }}
+              >
+                {/* Flap Front */}
+                <div
+                  className="absolute inset-0 backface-hidden rounded-t-3xl border-b border-[#f5c842]/20"
+                  style={{
+                    background: 'linear-gradient(180deg, #3d0020 0%, #2b0216 100%)',
+                    clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
+                  }}
+                />
+                {/* Flap Back */}
+                <div
+                  className="absolute inset-0 backface-hidden rounded-t-3xl rotate-y-180"
+                  style={{
+                    background: 'linear-gradient(180deg, #2b0216 0%, #1c000f 100%)',
+                    clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
+                  }}
+                />
+              </motion.div>
+
+              {/* Wax Seal */}
+              <motion.div
+                animate={sealCrumble ? { scale: [1, 1.2, 0], opacity: 0 } : { scale: 1 }}
+                transition={{ duration: 0.5 }}
+                className="w-16 h-16 rounded-full flex items-center justify-center border-2 z-20 absolute"
+                style={{
+                  borderColor: '#f5c842',
+                  background: 'linear-gradient(135deg, #f5c842 0%, #b48500 100%)',
+                  boxShadow: '0 0 20px rgba(245,200,66,0.5)',
+                }}
+              >
+                <span className="text-3xl">🌹</span>
+              </motion.div>
+
+              <p className="text-[10px] uppercase tracking-widest font-bold mt-20 text-[#f5c842]/70 select-none z-10" style={{ fontFamily: 'Plus Jakarta Sans' }}>
+                {sealCrumble ? 'Opening...' : 'Tap seal to read letter'}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Scroll/Paper displaying letter text */}
+        <AnimatePresence>
+          {phase === 'reading' && (
+            <motion.div
+              key="letter"
+              ref={letterScrollRef}
+              initial={{ opacity: 0, y: 50, scale: 0.93 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 30 }}
+              transition={{ duration: 0.7 }}
+              className="w-full max-h-[60vh] overflow-y-auto rounded-2xl p-6 relative border border-[#f5c842]/30"
+              style={{
+                background: 'linear-gradient(135deg, #2a0216 0%, #120009 100%)',
+                boxShadow: '0 25px 80px rgba(0,0,0,0.8), inset 0 0 25px rgba(245,200,66,0.1)',
+              }}
+            >
+              {/* Paper Lines */}
+              <div className="absolute inset-0 pointer-events-none opacity-5">
+                {Array.from({ length: 30 }).map((_, i) => (
+                  <div key={i} className="w-full h-px bg-white" style={{ marginTop: '28px' }} />
+                ))}
+              </div>
+
+              <div className="relative z-10" style={{ fontFamily: 'Be Vietnam Pro' }}>
+                <p className="text-sm leading-relaxed text-white/90 whitespace-pre-wrap">
+                  {visibleText}
+                  {visibleCount < totalCount && (
+                    <motion.span animate={{ opacity: [1, 0, 1] }} transition={{ duration: 0.6, repeat: Infinity }} className="text-[#f5c842] font-bold ml-1">|</motion.span>
+                  )}
+                </p>
+
+                {visibleCount >= totalCount && signature && (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                    className="text-right text-[#f5c842] font-serif italic mt-6 text-md"
+                    style={{ fontFamily: 'Playfair Display' }}
+                  >
+                    — With Love, {signature} ✒️
+                  </motion.p>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Close Button */}
+        {phase === 'reading' && (
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1 }}
+            onClick={onClose}
+            className="mt-6 px-6 py-2.5 rounded-full text-xs uppercase tracking-widest font-bold text-[#1c000e] hover:bg-[#f5c842] transition-colors cursor-pointer"
+            style={{
+              background: '#f5c842',
+              boxShadow: '0 4px 15px rgba(245,200,66,0.3)',
+              fontFamily: 'Plus Jakarta Sans',
+            }}
+          >
+            Close Letter 💌
+          </motion.button>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // MAIN THEME COMPONENT
 // ─────────────────────────────────────────────
 export default function VelvetRomanceTheme({ project }: { project: Project }) {
   const cfg = project.heroConfig || {};
   const ending = project.endingConfig || {};
 
-  const [phase, setPhase] = useState<'closed' | 'opening' | 'open' | 'reading'>('closed');
-  const [sealCrumble, setSealCrumble] = useState(false);
-
+  const [showLetterModal, setShowLetterModal] = useState(false);
   const [flippedCount, setFlippedCount] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
   const [activePhoto, setActivePhoto] = useState<{ url: string; caption?: string } | null>(null);
@@ -562,19 +824,6 @@ export default function VelvetRomanceTheme({ project }: { project: Project }) {
       }
       return next;
     });
-  };
-
-  const handleEnvelopeClick = () => {
-    setSealCrumble(true);
-    setTimeout(() => {
-      setPhase('opening');
-      setTimeout(() => {
-        setPhase('open');
-        setTimeout(() => {
-          setPhase('reading');
-        }, 1200);
-      }, 1000);
-    }, 600);
   };
 
   return (
@@ -593,340 +842,263 @@ export default function VelvetRomanceTheme({ project }: { project: Project }) {
       <FallingRosePetals />
       <TapExplosion />
       {showConfetti && <PromiseConfetti />}
-      {ending.finaleStyle === 'all' && phase === 'reading' && <Fireworks />}
+      {ending.finaleStyle === 'all' && <Fireworks />}
 
       {/* Background Music widget player */}
-      {phase === 'reading' && <FloatingMusicWidget musicUrl={project.backgroundMusicUrl || undefined} />}
+      <FloatingMusicWidget musicUrl={project.backgroundMusicUrl || undefined} />
 
-      {/* Wax Seal Envelope Opening Ceremony */}
-      <AnimatePresence>
-        {phase !== 'reading' && (
-          <motion.div
-            key="envelope"
-            exit={{ opacity: 0, scale: 0.96 }}
-            transition={{ duration: 0.8 }}
-            className="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 bg-gradient-to-br from-[#1c000f] to-[#3a001d]"
-          >
-            <FallingRosePetals />
-            
-            {/* ENVELOPE CONTAINER: relative z-30 makes sure it stands above background particles */}
+      {/* Main Love Scroll View */}
+      <motion.div
+        key="diary"
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md mx-auto px-5 py-8 space-y-12 pb-28 relative z-30"
+      >
+        {/* SECTION 1: HEADER CARD */}
+        <div className="text-center py-6">
+          {project.coverImageUrl && (
             <motion.div
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-              className="w-full max-w-sm flex flex-col items-center relative z-30"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              onClick={() => setActivePhoto({ url: project.coverImageUrl! })}
+              className="w-32 h-32 rounded-full mx-auto overflow-hidden border-2 border-yellow-500/40 shadow-glow mb-4 cursor-zoom-in"
             >
-              {/* Header Title */}
-              <h1
-                className="text-center font-bold tracking-widest text-lg mb-8 select-none"
-                style={{
-                  color: '#f5c842',
-                  fontFamily: 'Playfair Display, serif',
-                  textShadow: '0 0 15px rgba(245,200,66,0.35)',
-                }}
-              >
-                {cfg.heroTagline || 'FOR YOU, MY LOVE'}
-              </h1>
+              <img src={project.coverImageUrl} alt="cover" className="w-full h-full object-cover" />
+            </motion.div>
+          )}
+          <h1 className="text-3xl font-bold font-serif text-yellow-500 animate-pulse" style={{ fontFamily: 'Playfair Display' }}>
+            {project.title}
+          </h1>
+          {project.subtitle && (
+            <p className="text-white/60 text-sm mt-1" style={{ fontFamily: 'Be Vietnam Pro' }}>
+              {project.subtitle}
+            </p>
+          )}
+        </div>
 
-              {/* 3D Envelope */}
+        {/* SECTION 2: SECRET LOVE LETTER (Interactive Envelope on Page) */}
+        {cfg.letterMessage && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-2xl">✉️</span>
+              <span className="font-bold text-sm tracking-wider uppercase text-yellow-500" style={{ fontFamily: 'Plus Jakarta Sans' }}>
+                Secret Scroll Letter
+              </span>
+            </div>
+            
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowLetterModal(true)}
+              className="w-full aspect-[4/3] rounded-3xl relative flex flex-col items-center justify-center cursor-pointer border border-[#f5c842]/30 overflow-hidden"
+              style={{
+                background: 'linear-gradient(145deg, #2b0216 0%, #4e0329 100%)',
+                boxShadow: '0 12px 35px rgba(0,0,0,0.5), inset 0 0 15px rgba(245,200,66,0.15)',
+              }}
+            >
               <div
-                onClick={handleEnvelopeClick}
-                className="w-full aspect-[4/3] rounded-3xl relative flex flex-col items-center justify-center cursor-pointer border border-[#f5c842]/30 overflow-visible"
+                className="w-16 h-16 rounded-full flex items-center justify-center border-2 z-10 animate-pulse"
                 style={{
-                  background: 'linear-gradient(145deg, #2b0216 0%, #4e0329 100%)',
-                  boxShadow: '0 25px 60px rgba(0,0,0,0.6), inset 0 0 20px rgba(245,200,66,0.15)',
-                  perspective: 1200,
+                  borderColor: '#f5c842',
+                  background: 'linear-gradient(135deg, #f5c842 0%, #b48500 100%)',
+                  boxShadow: '0 0 15px rgba(245,200,66,0.4)',
                 }}
               >
-                {/* 3D Flap */}
-                <motion.div
-                  animate={phase === 'opening' || phase === 'open' ? { rotateX: -180, y: -2 } : { rotateX: 0 }}
-                  transition={{ duration: 1.2, ease: 'easeInOut' }}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: '50%',
-                    transformOrigin: 'top center',
-                    transformStyle: 'preserve-3d',
-                    zIndex: 10,
-                  }}
-                >
-                  {/* Flap Outer Front */}
-                  <div
-                    className="absolute inset-0 backface-hidden rounded-t-3xl border-b border-[#f5c842]/20"
-                    style={{
-                      background: 'linear-gradient(180deg, #3d0020 0%, #2b0216 100%)',
-                      clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
-                    }}
-                  />
-                  {/* Flap Outer Back */}
-                  <div
-                    className="absolute inset-0 backface-hidden rounded-t-3xl rotate-y-180"
-                    style={{
-                      background: 'linear-gradient(180deg, #2b0216 0%, #1c000f 100%)',
-                      clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
-                    }}
-                  />
-                </motion.div>
-
-                {/* Wax Seal Button (crumble/fades out on click) */}
-                <motion.div
-                  animate={sealCrumble ? { scale: [1, 1.2, 0], opacity: 0 } : { scale: 1 }}
-                  transition={{ duration: 0.5 }}
-                  className="w-16 h-16 rounded-full flex items-center justify-center border-2 z-20 cursor-pointer absolute"
-                  style={{
-                    borderColor: '#f5c842',
-                    background: 'linear-gradient(135deg, #f5c842 0%, #b48500 100%)',
-                    boxShadow: '0 0 20px rgba(245,200,66,0.5)',
-                  }}
-                >
-                  <span className="text-3xl text-[#1a0010]">🌹</span>
-                </motion.div>
-
-                <p className="text-[10px] uppercase tracking-widest font-bold mt-20 text-[#f5c842]/70 select-none z-10" style={{ fontFamily: 'Plus Jakarta Sans' }}>
-                  {sealCrumble ? 'Opening Letter...' : 'Tap seal to open 💌'}
-                </p>
+                <span className="text-3xl text-[#1a0010]">🌹</span>
               </div>
-
-              <p className="text-white/40 text-xs mt-8 italic text-center" style={{ fontFamily: 'Be Vietnam Pro' }}>
-                {cfg.welcomePopupText || 'A romantic tribute created especially for you.'}
+              <p className="text-xs uppercase tracking-widest font-semibold mt-4 text-[#f5c842]/70 select-none z-10" style={{ fontFamily: 'Plus Jakarta Sans' }}>
+                Open Secret Letter 💌
               </p>
             </motion.div>
-          </motion.div>
+          </div>
+        )}
+
+        {/* SECTION 3: STORY TIMELINE */}
+        {project.memories.length > 0 && (
+          <div className="space-y-6">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-2xl">💍</span>
+              <span className="font-bold text-sm tracking-wider uppercase text-yellow-500" style={{ fontFamily: 'Plus Jakarta Sans' }}>
+                Our Chapters Together
+              </span>
+            </div>
+
+            <div className="relative border-l border-yellow-500/20 ml-3 pl-6 space-y-8">
+              {project.memories.map((m, i) => (
+                <div key={m.id} className="relative">
+                  {/* Circle node */}
+                  <div
+                    className="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full border-2 border-yellow-500"
+                    style={{ background: '#1c000f', boxShadow: '0 0 10px #f5c842' }}
+                  />
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-bold font-serif text-yellow-500" style={{ fontFamily: 'Playfair Display' }}>
+                        {m.emoji} {m.title}
+                      </h3>
+                      <span className="text-xs text-white/40">{new Date(m.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}</span>
+                    </div>
+                    {m.description && (
+                      <p className="text-xs text-white/60 leading-relaxed" style={{ fontFamily: 'Be Vietnam Pro' }}>
+                        {m.description}
+                      </p>
+                    )}
+                    {m.imageUrl && (
+                      <div
+                        onClick={() => setActivePhoto({ url: m.imageUrl!, caption: m.description || m.title })}
+                        className="rounded-xl overflow-hidden max-h-40 border border-white/5 cursor-zoom-in"
+                      >
+                        <img src={m.imageUrl} alt={m.title} className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* SECTION 4: PROMISE VOWS WALL */}
+        {cfg.promises && cfg.promises.length > 0 && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">🌹</span>
+                <span className="font-bold text-sm tracking-wider uppercase text-yellow-500" style={{ fontFamily: 'Plus Jakarta Sans' }}>
+                  {cfg.promiseWallTitle || 'Our Vows'}
+                </span>
+              </div>
+            </div>
+
+            {/* Crystal Progress heart */}
+            <ProgressHeart current={flippedCount} total={cfg.promises.length} />
+
+            <div className="grid grid-cols-2 gap-3 mt-4">
+              {cfg.promises.map((p: any, idx: number) => (
+                <PromiseCard
+                  key={idx}
+                  emoji={p.emoji}
+                  text={p.text}
+                  secretNote={p.secretNote}
+                  cardStyle={cfg.promiseCardStyle}
+                  onFlip={handleCardFlip}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* SECTION 5: STATS */}
+        {cfg.showStats && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">📊</span>
+              <span className="font-bold text-sm tracking-wider uppercase text-yellow-500" style={{ fontFamily: 'Plus Jakarta Sans' }}>
+                Love Ledger Stats
+              </span>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <StatCounter label={cfg.customStatLabel1 || 'Dates'} value={cfg.customStatValue1 || 0} />
+              <StatCounter label={cfg.customStatLabel2 || 'Trips'} value={cfg.customStatValue2 || 0} />
+              <StatCounter label={cfg.customStatLabel3 || 'Hours'} value={cfg.customStatValue3 || 0} />
+            </div>
+
+            {cfg.loveCategories && cfg.loveCategories.length > 0 && (
+              <div className="p-5 rounded-2xl border border-yellow-500/10" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                <p className="text-xs uppercase tracking-wide text-white/50 mb-3" style={{ fontFamily: 'Be Vietnam Pro' }}>
+                  Love Time Distribution
+                </p>
+                <div className="space-y-3">
+                  {cfg.loveCategories.map((c: any, idx: number) => (
+                    <div key={idx} className="space-y-1">
+                      <div className="flex justify-between text-xs font-semibold">
+                        <span>{c.label}</span>
+                        <span>{c.percent}%</span>
+                      </div>
+                      <div className="w-full h-1.5 rounded-full bg-white/5">
+                        <div className="h-full rounded-full bg-yellow-500" style={{ width: `${c.percent}%` }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* SECTION 6: PHOTO CAROUSEL */}
+        {project.galleryItems.length > 0 && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">📸</span>
+              <span className="font-bold text-sm tracking-wider uppercase text-yellow-500" style={{ fontFamily: 'Plus Jakarta Sans' }}>
+                {cfg.galleryTitle || 'Moments Frame'}
+              </span>
+            </div>
+            {cfg.galleryQuote && (
+              <p className="text-xs italic text-white/50 text-center" style={{ fontFamily: 'Be Vietnam Pro' }}>
+                "{cfg.galleryQuote}"
+              </p>
+            )}
+
+            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x">
+              {project.galleryItems.map((g, idx) => (
+                <div
+                  key={g.id}
+                  onClick={() => setActivePhoto({ url: g.mediaUrl, caption: g.caption || undefined })}
+                  className="w-64 flex-shrink-0 snap-center rounded-2xl overflow-hidden border border-white/10 cursor-zoom-in"
+                  style={{ background: 'rgba(255,255,255,0.02)' }}
+                >
+                  <div className="aspect-[4/3] w-full overflow-hidden">
+                    <img
+                      src={g.mediaUrl}
+                      alt={g.caption || ''}
+                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                      style={{ filter: cfg.sepiaFilter ? 'sepia(0.35) contrast(1.05)' : 'none' }}
+                    />
+                  </div>
+                  {g.caption && (
+                    <p className="p-3 text-xs text-white/70 text-center font-sans truncate" style={{ fontFamily: 'Be Vietnam Pro' }}>
+                      {g.caption}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* SECTION 7: ENDING FINALE */}
+        <div className="text-center py-12 border-t border-yellow-500/10 space-y-4">
+          <h2 className="text-2xl font-serif text-yellow-500" style={{ fontFamily: 'Playfair Display' }}>
+            {ending.title || 'Forever Yours'}
+          </h2>
+          <p className="text-sm text-white/70 leading-relaxed font-sans" style={{ fontFamily: 'Be Vietnam Pro' }}>
+            {ending.message || 'Thank you for being my constant, my love, and my absolute favorite person.'}
+          </p>
+          <div className="text-4xl">🌹</div>
+        </div>
+      </motion.div>
+
+      {/* Secret Love Letter modal overlay popup */}
+      <AnimatePresence>
+        {showLetterModal && (
+          <EnvelopeLetterModal
+            message={cfg.letterMessage}
+            signature={cfg.quillSignature}
+            musicUrl={cfg.letterMusicUrl || undefined}
+            onClose={() => setShowLetterModal(false)}
+            disableLetterAutoScroll={cfg.disableLetterAutoScroll}
+            disableWordByWord={cfg.disableWordByWord}
+            letterScrollSpeed={cfg.letterScrollSpeed}
+            letterWordDelay={cfg.letterWordDelay}
+            letterAnimType={cfg.letterAnimType}
+            letterCharDelay={cfg.letterCharDelay}
+          />
         )}
       </AnimatePresence>
 
-      {/* Main Love Scroll View */}
-      {phase === 'reading' && (
-        <motion.div
-          key="diary"
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-md mx-auto px-5 py-8 space-y-12 pb-28 relative z-30"
-        >
-          {/* SECTION 1: HEADER CARD */}
-          <div className="text-center py-6">
-            {project.coverImageUrl && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                onClick={() => setActivePhoto({ url: project.coverImageUrl! })}
-                className="w-32 h-32 rounded-full mx-auto overflow-hidden border-2 border-yellow-500/40 shadow-glow mb-4 cursor-zoom-in"
-              >
-                <img src={project.coverImageUrl} alt="cover" className="w-full h-full object-cover" />
-              </motion.div>
-            )}
-            <h1 className="text-3xl font-bold font-serif text-yellow-500" style={{ fontFamily: 'Playfair Display' }}>
-              {project.title}
-            </h1>
-            {project.subtitle && (
-              <p className="text-white/60 text-sm mt-1" style={{ fontFamily: 'Be Vietnam Pro' }}>
-                {project.subtitle}
-              </p>
-            )}
-          </div>
-
-          {/* SECTION 2: SECRET LOVE LETTER */}
-          {cfg.letterMessage && (
-            <div
-              className="p-6 rounded-2xl border border-yellow-500/20 relative overflow-hidden"
-              style={{
-                background: 'linear-gradient(135deg, rgba(26,0,16,0.85) 0%, rgba(50,0,25,0.85) 100%)',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-              }}
-            >
-              {/* Spinning vinyl design overlay */}
-              <div className="absolute top-2 right-2 w-10 h-10 rounded-full border border-yellow-500/20 flex items-center justify-center animate-spin" style={{ animationDuration: '6s' }}>
-                💿
-              </div>
-
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-2xl">✉️</span>
-                <span className="font-bold text-sm tracking-wider uppercase text-yellow-500" style={{ fontFamily: 'Plus Jakarta Sans' }}>
-                  Secret Scroll Letter
-                </span>
-              </div>
-              <p className="text-sm leading-relaxed whitespace-pre-wrap font-sans text-white/80" style={{ fontFamily: 'Be Vietnam Pro' }}>
-                {cfg.letterMessage}
-              </p>
-              {cfg.quillSignature && (
-                <p className="text-right text-yellow-500 font-serif italic mt-4 text-md" style={{ fontFamily: 'Playfair Display' }}>
-                  — With Love, {cfg.quillSignature} ✒️
-                </p>
-              )}
-            </div>
-          )}
-
-          {/* SECTION 3: STORY TIMELINE */}
-          {project.memories.length > 0 && (
-            <div className="space-y-6">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl">💍</span>
-                <span className="font-bold text-sm tracking-wider uppercase text-yellow-500" style={{ fontFamily: 'Plus Jakarta Sans' }}>
-                  Our Chapters Together
-                </span>
-              </div>
-
-              <div className="relative border-l border-yellow-500/20 ml-3 pl-6 space-y-8">
-                {project.memories.map((m, i) => (
-                  <div key={m.id} className="relative">
-                    {/* Circle node */}
-                    <div
-                      className="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full border-2 border-yellow-500"
-                      style={{ background: '#1c000f', boxShadow: '0 0 10px #f5c842' }}
-                    />
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-bold font-serif text-yellow-500" style={{ fontFamily: 'Playfair Display' }}>
-                          {m.emoji} {m.title}
-                        </h3>
-                        <span className="text-xs text-white/40">{new Date(m.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}</span>
-                      </div>
-                      {m.description && (
-                        <p className="text-xs text-white/60 leading-relaxed" style={{ fontFamily: 'Be Vietnam Pro' }}>
-                          {m.description}
-                        </p>
-                      )}
-                      {m.imageUrl && (
-                        <div
-                          onClick={() => setActivePhoto({ url: m.imageUrl!, caption: m.description || m.title })}
-                          className="rounded-xl overflow-hidden max-h-40 border border-white/5 cursor-zoom-in"
-                        >
-                          <img src={m.imageUrl} alt={m.title} className="w-full h-full object-cover" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* SECTION 4: PROMISE VOWS WALL */}
-          {cfg.promises && cfg.promises.length > 0 && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">🌹</span>
-                  <span className="font-bold text-sm tracking-wider uppercase text-yellow-500" style={{ fontFamily: 'Plus Jakarta Sans' }}>
-                    {cfg.promiseWallTitle || 'Our Vows'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Crystal Progress heart */}
-              <ProgressHeart current={flippedCount} total={cfg.promises.length} />
-
-              <div className="grid grid-cols-2 gap-3 mt-4">
-                {cfg.promises.map((p: any, idx: number) => (
-                  <PromiseCard
-                    key={idx}
-                    emoji={p.emoji}
-                    text={p.text}
-                    secretNote={p.secretNote}
-                    cardStyle={cfg.promiseCardStyle}
-                    onFlip={handleCardFlip}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* SECTION 5: STATS */}
-          {cfg.showStats && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">📊</span>
-                <span className="font-bold text-sm tracking-wider uppercase text-yellow-500" style={{ fontFamily: 'Plus Jakarta Sans' }}>
-                  Love Ledger Stats
-                </span>
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                <StatCounter label={cfg.customStatLabel1 || 'Dates'} value={cfg.customStatValue1 || 0} />
-                <StatCounter label={cfg.customStatLabel2 || 'Trips'} value={cfg.customStatValue2 || 0} />
-                <StatCounter label={cfg.customStatLabel3 || 'Hours'} value={cfg.customStatValue3 || 0} />
-              </div>
-
-              {cfg.loveCategories && cfg.loveCategories.length > 0 && (
-                <div className="p-5 rounded-2xl border border-yellow-500/10" style={{ background: 'rgba(255,255,255,0.02)' }}>
-                  <p className="text-xs uppercase tracking-wide text-white/50 mb-3" style={{ fontFamily: 'Be Vietnam Pro' }}>
-                    Love Time Distribution
-                  </p>
-                  <div className="space-y-3">
-                    {cfg.loveCategories.map((c: any, idx: number) => (
-                      <div key={idx} className="space-y-1">
-                        <div className="flex justify-between text-xs font-semibold">
-                          <span>{c.label}</span>
-                          <span>{c.percent}%</span>
-                        </div>
-                        <div className="w-full h-1.5 rounded-full bg-white/5">
-                          <div className="h-full rounded-full bg-yellow-500" style={{ width: `${c.percent}%` }} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* SECTION 6: PHOTO CAROUSEL */}
-          {project.galleryItems.length > 0 && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">📸</span>
-                <span className="font-bold text-sm tracking-wider uppercase text-yellow-500" style={{ fontFamily: 'Plus Jakarta Sans' }}>
-                  {cfg.galleryTitle || 'Moments Frame'}
-                </span>
-              </div>
-              {cfg.galleryQuote && (
-                <p className="text-xs italic text-white/50 text-center" style={{ fontFamily: 'Be Vietnam Pro' }}>
-                  "{cfg.galleryQuote}"
-                </p>
-              )}
-
-              <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x">
-                {project.galleryItems.map((g, idx) => (
-                  <div
-                    key={g.id}
-                    onClick={() => setActivePhoto({ url: g.mediaUrl, caption: g.caption || undefined })}
-                    className="w-64 flex-shrink-0 snap-center rounded-2xl overflow-hidden border border-white/10 cursor-zoom-in"
-                    style={{ background: 'rgba(255,255,255,0.02)' }}
-                  >
-                    <div className="aspect-[4/3] w-full overflow-hidden">
-                      <img
-                        src={g.mediaUrl}
-                        alt={g.caption || ''}
-                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                        style={{ filter: cfg.sepiaFilter ? 'sepia(0.35) contrast(1.05)' : 'none' }}
-                      />
-                    </div>
-                    {g.caption && (
-                      <p className="p-3 text-xs text-white/70 text-center font-sans truncate" style={{ fontFamily: 'Be Vietnam Pro' }}>
-                        {g.caption}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* SECTION 7: ENDING FINALE */}
-          <div className="text-center py-12 border-t border-yellow-500/10 space-y-4">
-            <h2 className="text-2xl font-serif text-yellow-500" style={{ fontFamily: 'Playfair Display' }}>
-              {ending.title || 'Forever Yours'}
-            </h2>
-            <p className="text-sm text-white/70 leading-relaxed font-sans" style={{ fontFamily: 'Be Vietnam Pro' }}>
-              {ending.message || 'Thank you for being my constant, my love, and my absolute favorite person.'}
-            </p>
-            <div className="text-4xl">🌹</div>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Lightbox / swipe preview */}
+      {/* Lightbox photo previews zoom */}
       {activePhoto && (
         <Lightbox
           url={activePhoto.url}
