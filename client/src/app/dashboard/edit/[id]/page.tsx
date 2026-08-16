@@ -93,6 +93,9 @@ export default function EditProjectPage() {
         wallpaperUrl: data.project.heroConfig?.wallpaperUrl || '',
         secretVideoUrl: data.project.heroConfig?.secretVideoUrl || '',
         enableSelfieThankYou: data.project.heroConfig?.enableSelfieThankYou !== undefined ? data.project.heroConfig.enableSelfieThankYou : false,
+        showCameraRollStrip: data.project.heroConfig?.showCameraRollStrip !== undefined ? data.project.heroConfig.showCameraRollStrip : true,
+        heroGreetingText: data.project.heroConfig?.heroGreetingText || '',
+        giftBoxWishPrompt: data.project.heroConfig?.giftBoxWishPrompt || '',
         selfies: data.project.heroConfig?.selfies || [],
       });
     }).catch(() => {
@@ -127,7 +130,7 @@ export default function EditProjectPage() {
           letterMessage: form.letterMessage,
           letterAnimType: form.letterAnimType,
           letterCharDelay: form.letterCharDelay,
-          // Velvet Romance config values
+          // Velvet Romance & Sweet Diary config values
           heroTagline: form.heroTagline,
           envelopeStyle: form.envelopeStyle,
           envelopeOpenEffect: form.envelopeOpenEffect,
@@ -152,6 +155,9 @@ export default function EditProjectPage() {
           wallpaperUrl: form.wallpaperUrl,
           secretVideoUrl: form.secretVideoUrl,
           enableSelfieThankYou: form.enableSelfieThankYou,
+          showCameraRollStrip: form.showCameraRollStrip !== undefined ? form.showCameraRollStrip : true,
+          heroGreetingText: form.heroGreetingText,
+          giftBoxWishPrompt: form.giftBoxWishPrompt,
           selfies: form.selfies || [],
         },
         endingConfig: { 
@@ -364,8 +370,8 @@ export default function EditProjectPage() {
               </Field>
             </Section>
 
-            <Section title="📱 Custom Background Wallpaper">
-              <Field label="Phone Background Wallpaper URL">
+            <Section title="📱 Mobile Phone Frame & Wallpaper">
+              <Field label="Phone Screen Wallpaper URL (Strictly for mobile frame display)">
                 <input
                   value={form.wallpaperUrl}
                   onChange={e => update('wallpaperUrl', e.target.value)}
@@ -376,9 +382,52 @@ export default function EditProjectPage() {
                   projectId={id as string}
                   accept="image"
                   maxFiles={1}
-                  label="Upload custom wallpaper"
+                  label="Upload mobile wallpaper"
                   onUpload={({ url }) => update('wallpaperUrl', url)}
                 />
+                <p className="text-[11px] text-rose-cream/40 mt-2 font-sans">
+                  💡 Note: This wallpaper appears strictly inside the mobile phone body screen. The website background remains a dynamic cute pastel live canvas with floating hearts & sparkles.
+                </p>
+              </Field>
+
+              <div className="flex items-center justify-between p-3 glass-card mt-4">
+                <div>
+                  <p className="text-rose-cream font-serif text-sm">Show Right-Side Photo Filmstrip</p>
+                  <p className="text-rose-cream/30 text-xs font-sans">Displays an animated vertical camera roll of your gallery photos on the right side</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => update('showCameraRollStrip', !form.showCameraRollStrip)}
+                  className={`w-12 h-6 rounded-full transition-all duration-300 relative ${form.showCameraRollStrip !== false ? 'bg-rose-blush' : 'bg-white/10'}`}
+                >
+                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${form.showCameraRollStrip !== false ? 'left-7' : 'left-1'}`} />
+                </button>
+              </div>
+            </Section>
+
+            <Section title="💌 Hero Greeting & Story Messages">
+              <Field label="Hero Story Intro / Romantic Greeting Message">
+                <textarea
+                  value={form.heroGreetingText}
+                  onChange={e => update('heroGreetingText', e.target.value)}
+                  placeholder="Every single moment shared with you is a treasure..."
+                  rows={4}
+                  className="input-romantic resize-none font-sans text-sm"
+                />
+                <p className="text-[11px] text-rose-cream/40 mt-1 font-sans">
+                  Appears in the story intro section right below the mobile phone frame.
+                </p>
+              </Field>
+              <Field label="Gift Box Surprise Wish Prompt">
+                <input
+                  value={form.giftBoxWishPrompt}
+                  onChange={e => update('giftBoxWishPrompt', e.target.value)}
+                  placeholder="What is your biggest wish today, my love? 🌟"
+                  className="input-romantic"
+                />
+                <p className="text-[11px] text-rose-cream/40 mt-1 font-sans">
+                  Popup text shown when the recipient clicks the center 🎁 gift box.
+                </p>
               </Field>
             </Section>
 
