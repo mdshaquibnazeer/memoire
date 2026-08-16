@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { ChevronRight, ChevronLeft, Sparkles } from 'lucide-react';
-import { projectsAPI, aiAPI } from '@/lib/api';
+import { ChevronRight, ChevronLeft, Sparkles, Wand2 } from 'lucide-react';
+import { projectsAPI } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 
 const THEMES = [
@@ -82,12 +82,20 @@ interface CreateForm {
   startDate: string;
 }
 
-export default function CreateProjectPage() {
+function CreateProjectContent() {
   const { user } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [step, setStep] = useState(0);
   const [selectedTheme, setSelectedTheme] = useState('SCRAPBOOK_LOVE');
   const [loading, setLoading] = useState(false);
+  const [existingProjects, setExistingProjects] = useState<any[]>([]);
+  const [sourceProjectId, setSourceProjectId] = useState<string>('');
+  const [loadingSource, setLoadingSource] = useState(false);
+
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<CreateForm>();
+  const watchedNames = watch(['personOneName', 'personTwoName', 'occasion']);
 
   const isAuthorized = (themeId: string) => {
     if (!user) return false;
@@ -103,8 +111,63 @@ export default function CreateProjectPage() {
     }
   };
 
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<CreateForm>();
-  const watchedNames = watch(['personOneName', 'personTwoName', 'occasion']);
+  // Load existing projects for cloning
+  useEffect(() => {
+    async function loadProjects() {
+      try {
+        const { data } = await projectsAPI.list({ limit: 50 });
+        if (data?.projects) {
+          const userProjs = data.projects.filter((p: any) => !p.id.startsWith('demo-'));
+          setExistingProjects(userProjs);
+        }
+      } catch (err) {
+        console.error('Failed to load projects for cloning', err);
+      }
+    }
+    loadProjects();
+  }, []);
+
+  // Handle URL query parameters (e.g. ?cloneFrom=... or ?theme=...)
+  useEffect(() => {
+    const themeParam = searchParams.get('theme');
+    if (themeParam && THEMES.some(t => t.id === themeParam)) {
+      setSelectedTheme(themeParam);
+    }
+
+    const cloneParam = searchParams.get('cloneFrom');
+    if (cloneParam) {
+      handleSelectSourceProject(cloneParam);
+    }
+  }, [searchParams]);
+
+  const handleSelectSourceProject = async (projId: string) => {
+    setSourceProjectId(projId);
+    if (!projId) return;
+
+    setLoadingSource(true);
+    try {
+      const { data } = await projectsAPI.get(projId);
+      const proj = data?.project;
+      if (proj) {
+        if (proj.title) setValue('title', proj.title);
+        if (proj.subtitle) setValue('subtitle', proj.subtitle);
+        if (proj.personOneName) setValue('personOneName', proj.personOneName);
+        if (proj.personTwoName) setValue('personTwoName', proj.personTwoName);
+        if (proj.occasion) setValue('occasion', proj.occasion);
+        if (proj.startDate) {
+          try {
+            const d = new Date(proj.startDate).toISOString().split('T')[0];
+            setValue('startDate', d);
+          } catch (e) {}
+        }
+        toast.success(`Loaded details from "${proj.title}"! All memories, photos, letter & vows will be copied.`);
+      }
+    } catch (err) {
+      toast.error('Failed to load project details for cloning.');
+    } finally {
+      setLoadingSource(false);
+    }
+  };
 
   const steps = ['Choose Theme', 'Name Your Story', 'Review & Create'];
 
@@ -114,8 +177,9 @@ export default function CreateProjectPage() {
       const { data: project } = await projectsAPI.create({
         ...data,
         theme: selectedTheme,
+        sourceProjectId: sourceProjectId || undefined,
       });
-      toast.success('Memory created! Start building your story ✨');
+      toast.success(sourceProjectId ? 'Memory cloned into new theme ✨' : 'Memory created! Start building your story ✨');
       router.push(`/dashboard/edit/${project.project.id}`);
     } catch (err: any) {
       toast.error(err.response?.data?.error || 'Failed to create project');
@@ -123,11 +187,15 @@ export default function CreateProjectPage() {
     }
   };
 
+  const selectedSourceProject = existingProjects.find(p => p.id === sourceProjectId);
+
   return (
     <div className="max-w-3xl mx-auto">
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8 sm:mb-10">
         <p className="font-script text-lg sm:text-xl text-rose-deep mb-1">new creation</p>
-        <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-rose-cream">Tell Your Story</h1>
+        <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-rose-cream">
+          {sourceProjectId ? 'Switch Theme / Clone Story' : 'Tell Your Story'}
+        </h1>
       </motion.div>
 
       {/* Step indicators */}
@@ -209,6 +277,40 @@ export default function CreateProjectPage() {
               className="space-y-6">
               <h2 className="font-serif text-2xl text-rose-cream mb-6">Tell us about your story</h2>
 
+              {/* CLONE / IMPORT OPTION */}
+              {existingProjects.length > 0 && (
+                <div className="p-5 rounded-2xl border border-rose-500/30 bg-rose-950/30 backdrop-blur-md relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl pointer-events-none" />
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <Wand2 size={18} className="text-rose-400" />
+                    <label className="text-sm font-serif font-semibold text-rose-cream">
+                      Reuse content from a previous memory?
+                    </label>
+                  </div>
+                  <p className="text-xs text-rose-cream/60 mb-3 font-sans">
+                    Automatically copy your love letter, promise wall vows, secret video, photos, and music to this new theme.
+                  </p>
+                  <select
+                    value={sourceProjectId}
+                    onChange={(e) => handleSelectSourceProject(e.target.value)}
+                    disabled={loadingSource}
+                    className="input-romantic bg-noir-midnight/90 border-white/20 text-rose-cream text-sm w-full cursor-pointer py-2.5 px-3 rounded-xl focus:border-rose-400"
+                  >
+                    <option value="">✨ Start fresh (create blank memory)</option>
+                    {existingProjects.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.title} ({p.theme.replace(/_/g, ' ')})
+                      </option>
+                    ))}
+                  </select>
+                  {loadingSource && (
+                    <p className="text-xs text-rose-300 animate-pulse mt-2 font-sans flex items-center gap-1.5">
+                      <Sparkles size={12} /> Loading memories and content from selected project...
+                    </p>
+                  )}
+                </div>
+              )}
+
               <div>
                 <label className="block text-rose-cream/60 text-sm font-sans mb-2">Title *</label>
                 <input
@@ -288,15 +390,30 @@ export default function CreateProjectPage() {
                       </div>
                       <ReviewRow label="Names" value={[name1, name2].filter(Boolean).join(' & ') || '—'} />
                       <ReviewRow label="Occasion" value={occasion || '—'} />
+                      {selectedSourceProject && (
+                        <div className="pt-2 border-t border-white/10">
+                          <ReviewRow label="Cloning Content From" value={`${selectedSourceProject.title} (${selectedSourceProject.theme.replace(/_/g, ' ')})`} />
+                        </div>
+                      )}
                     </>
                   );
                 })()}
               </div>
 
+              {selectedSourceProject && (
+                <div className="mt-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-200 text-xs font-sans flex items-start gap-2.5">
+                  <Sparkles size={16} className="text-amber-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold block mb-0.5">Content Cloning Active</span>
+                    All personal letter messages, promise cards, custom passwords, secret videos, photos, and music from <strong>{selectedSourceProject.title}</strong> will be seamlessly transferred to your new <strong>{THEMES.find(t => t.id === selectedTheme)?.name}</strong> memory!
+                  </div>
+                </div>
+              )}
+
               <div className="mt-6 glass-card p-5 flex items-start gap-3">
                 <Sparkles size={18} className="text-rose-deep mt-0.5 flex-shrink-0" />
                 <p className="text-rose-cream/50 font-sans text-sm">
-                  After creating your project, you'll be taken to the editor where you can add
+                  After creating your project, you'll be taken to the editor where you can customize
                   photos, memories, music, messages, and publish your memory website.
                 </p>
               </div>
@@ -318,7 +435,7 @@ export default function CreateProjectPage() {
             </button>
           ) : (
             <button type="submit" disabled={loading} className="btn-romantic disabled:opacity-50">
-              <span>{loading ? 'Creating...' : 'Create My Memory ✨'}</span>
+              <span>{loading ? 'Creating...' : (sourceProjectId ? 'Clone & Create Memory ✨' : 'Create My Memory ✨')}</span>
             </button>
           )}
         </div>
@@ -333,5 +450,13 @@ function ReviewRow({ label, value }: { label: string; value: string }) {
       <span className="text-rose-cream/40 font-sans text-sm">{label}</span>
       <span className="text-rose-cream font-serif">{value}</span>
     </div>
+  );
+}
+
+export default function CreateProjectPage() {
+  return (
+    <Suspense fallback={<div className="max-w-3xl mx-auto text-rose-cream/40 p-10 font-sans text-center">Loading creator...</div>}>
+      <CreateProjectContent />
+    </Suspense>
   );
 }

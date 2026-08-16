@@ -164,6 +164,7 @@ export const createProject = async (req: Request, res: Response, next: NextFunct
       personTwoName,
       occasion,
       startDate,
+      sourceProjectId,
     } = req.body;
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
@@ -194,21 +195,79 @@ export const createProject = async (req: Request, res: Response, next: NextFunct
       return res.status(403).json({ error: 'Your authorization for this theme has expired. Contact admin to renew.' });
     }
 
-    const slug = await generateSlug(title, userId);
+    let sourceProject: any = null;
+    if (sourceProjectId) {
+      sourceProject = await prisma.project.findFirst({
+        where: {
+          id: sourceProjectId,
+          OR: [
+            { userId },
+            { userId: 'system-demo' }
+          ]
+        },
+        include: {
+          memories: true,
+          galleryItems: true,
+        }
+      });
+    }
+
+    const finalTitle = title || sourceProject?.title || 'Our Memory Story';
+    const slug = await generateSlug(finalTitle, userId);
 
     const project = await prisma.project.create({
       data: {
         userId,
         slug,
-        title,
-        subtitle,
-        theme: theme || 'ROMANTIC_GLOW',
-        personOneName,
-        personTwoName,
-        occasion,
-        startDate: startDate ? new Date(startDate) : undefined,
+        title: finalTitle,
+        subtitle: subtitle !== undefined ? subtitle : (sourceProject?.subtitle || undefined),
+        theme: requestedTheme,
+        personOneName: personOneName !== undefined ? personOneName : (sourceProject?.personOneName || undefined),
+        personTwoName: personTwoName !== undefined ? personTwoName : (sourceProject?.personTwoName || undefined),
+        occasion: occasion !== undefined ? occasion : (sourceProject?.occasion || undefined),
+        startDate: startDate ? new Date(startDate) : (sourceProject?.startDate ? new Date(sourceProject.startDate) : undefined),
+        coverImageUrl: sourceProject?.coverImageUrl || undefined,
+        backgroundMusicUrl: sourceProject?.backgroundMusicUrl || undefined,
+        heroConfig: sourceProject?.heroConfig ? JSON.parse(JSON.stringify(sourceProject.heroConfig)) : undefined,
+        endingConfig: sourceProject?.endingConfig ? JSON.parse(JSON.stringify(sourceProject.endingConfig)) : undefined,
+        seoTitle: sourceProject?.seoTitle || undefined,
+        seoDescription: sourceProject?.seoDescription || undefined,
+        isPasswordProtected: sourceProject?.isPasswordProtected || false,
+        accessPassword: sourceProject?.accessPassword || undefined,
       },
     });
+
+    if (sourceProject) {
+      if (sourceProject.memories && sourceProject.memories.length > 0) {
+        await prisma.memory.createMany({
+          data: sourceProject.memories.map((m: any) => ({
+            projectId: project.id,
+            title: m.title,
+            description: m.description,
+            date: m.date,
+            imageUrl: m.imageUrl,
+            videoUrl: m.videoUrl,
+            location: m.location,
+            emoji: m.emoji,
+            sortOrder: m.sortOrder,
+          }))
+        });
+      }
+      if (sourceProject.galleryItems && sourceProject.galleryItems.length > 0) {
+        await prisma.galleryItem.createMany({
+          data: sourceProject.galleryItems.map((g: any) => ({
+            projectId: project.id,
+            mediaUrl: g.mediaUrl,
+            mediaType: g.mediaType,
+            caption: g.caption,
+            altText: g.altText,
+            width: g.width,
+            height: g.height,
+            sortOrder: g.sortOrder,
+          }))
+        });
+      }
+    }
 
     res.status(201).json({ project });
   } catch (error) {

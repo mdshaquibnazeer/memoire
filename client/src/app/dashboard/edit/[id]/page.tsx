@@ -242,6 +242,13 @@ export default function EditProjectPage() {
               <Eye size={16} /> Preview
             </a>
           )}
+          <button
+            onClick={() => router.push(`/dashboard/create?cloneFrom=${id}`)}
+            className="btn-ghost text-sm flex items-center gap-2 text-rose-300 hover:text-rose-200"
+            title="Use this memory's content with another theme"
+          >
+            <Sparkles size={16} /> Switch Theme
+          </button>
           <button onClick={save} disabled={saving}
             className="btn-ghost text-sm flex items-center gap-2 disabled:opacity-50">
             <Save size={16} /> {saving ? 'Saving...' : 'Save'}

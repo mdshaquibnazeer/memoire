@@ -281,9 +281,17 @@ function ProjectCard({ project, index, onDelete }: {
               >
                 <Edit size={12} /> Edit
               </Link>
+              <Link
+                href={`/dashboard/create?cloneFrom=${project.id}`}
+                className="flex items-center gap-1.5 text-xs font-sans px-3 py-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 transition-all border border-rose-500/20"
+                title="Create a new template with the same memories, photos, letter & vows"
+              >
+                <Sparkles size={12} /> Switch Theme
+              </Link>
               <button
                 onClick={() => onDelete(project.id, project.title)}
                 className="flex items-center gap-1.5 text-xs font-sans px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400/60 hover:text-red-400 transition-all ml-auto"
+                title="Delete project"
               >
                 <Trash2 size={12} />
               </button>
