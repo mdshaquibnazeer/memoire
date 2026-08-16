@@ -65,6 +65,8 @@ export default function EditProjectPage() {
         letterCharDelay: data.project.heroConfig?.letterCharDelay !== undefined ? data.project.heroConfig.letterCharDelay : 30,
         endingTitle: data.project.endingConfig?.title || '',
         endingMessage: data.project.endingConfig?.message || '',
+        endingSignature: data.project.endingConfig?.endingSignature || '',
+        finaleStyle: data.project.endingConfig?.finaleStyle || 'all',
         isPasswordProtected: data.project.isPasswordProtected || false,
         accessPassword: '',
         // Velvet Romance Theme Fields
@@ -89,7 +91,6 @@ export default function EditProjectPage() {
         customStatLabel3: data.project.heroConfig?.customStatLabel3 || '',
         customStatValue3: data.project.heroConfig?.customStatValue3 || 0,
         loveCategories: data.project.heroConfig?.loveCategories || [],
-        finaleStyle: data.project.endingConfig?.finaleStyle || 'all',
         wallpaperUrl: data.project.heroConfig?.wallpaperUrl || '',
         secretVideoUrl: data.project.heroConfig?.secretVideoUrl || '',
         enableSelfieThankYou: data.project.heroConfig?.enableSelfieThankYou !== undefined ? data.project.heroConfig.enableSelfieThankYou : false,
@@ -175,6 +176,7 @@ export default function EditProjectPage() {
         endingConfig: { 
           title: form.endingTitle, 
           message: form.endingMessage,
+          endingSignature: form.endingSignature,
           finaleStyle: form.finaleStyle,
         },
         isPasswordProtected: form.isPasswordProtected,
@@ -380,6 +382,17 @@ export default function EditProjectPage() {
                 <textarea value={form.endingMessage} onChange={e => update('endingMessage', e.target.value)}
                   placeholder="Your final heartfelt note..." rows={3} className="input-romantic resize-none" />
               </Field>
+              <Field label="Custom Ending Sign-off / Signature">
+                <input
+                  value={form.endingSignature}
+                  onChange={e => update('endingSignature', e.target.value)}
+                  placeholder="— With Love, John 💕"
+                  className="input-romantic"
+                />
+                <p className="text-[11px] text-rose-cream/40 mt-1 font-sans">
+                  Customizes the sign-off displayed at the end of the memory page.
+                </p>
+              </Field>
             </Section>
 
             <Section title="🎨 Box & Frame Themes (Sweet Diary)">
@@ -421,7 +434,7 @@ export default function EditProjectPage() {
                   <div>
                     <p className="text-rose-cream font-serif text-sm">Keep Phone Framed Body After Entering PIN</p>
                     <p className="text-rose-cream/30 text-xs font-sans">
-                      If OFF: Entering PIN expands the website to a full responsive webpage layout.
+                      If OFF: Entering PIN expands the website to a full responsive webpage layout without being boxed inside a phone.
                     </p>
                   </div>
                   <button
@@ -499,16 +512,28 @@ export default function EditProjectPage() {
             </Section>
 
             <Section title="💌 Hero Greeting & Story Messages">
-              <Field label="Hero Story Intro / Romantic Greeting Message">
+              <div className="flex justify-between items-center mb-1">
+                <label className="text-xs font-serif text-rose-cream/80">Hero Story Intro / Greeting Note</label>
+                {form.heroMessage && (
+                  <button
+                    type="button"
+                    onClick={() => update('heroGreetingText', form.heroMessage)}
+                    className="text-[11px] text-rose-blush hover:underline cursor-pointer font-sans"
+                  >
+                    ✨ Use same message as Hero Opening Message
+                  </button>
+                )}
+              </div>
+              <Field label="">
                 <textarea
                   value={form.heroGreetingText}
                   onChange={e => update('heroGreetingText', e.target.value)}
-                  placeholder="Every single moment shared with you is a treasure..."
+                  placeholder={form.heroMessage || "Every single moment shared with you is a treasure..."}
                   rows={4}
                   className="input-romantic resize-none font-sans text-sm"
                 />
                 <p className="text-[11px] text-rose-cream/40 mt-1 font-sans">
-                  Appears in the story intro section right below the mobile phone frame.
+                  Appears in the story intro section right below the mobile phone frame. (If left blank, it automatically uses your Hero Opening Message).
                 </p>
               </Field>
               <Field label="Gift Box Surprise Wish Prompt">

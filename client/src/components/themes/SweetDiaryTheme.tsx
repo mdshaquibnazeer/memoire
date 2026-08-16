@@ -44,36 +44,64 @@ interface Project {
 }
 
 // ─────────────────────────────────────────────
-// THEMES CONFIGURATION
+// UNIVERSAL BOX THEMES
 // ─────────────────────────────────────────────
-const BOX_THEMES: Record<string, { card: string; title: string; subtitle: string; border: string; accent: string }> = {
+interface ThemeStyles {
+  card: string;
+  modal: string;
+  title: string;
+  subtitle: string;
+  itemCard: string;
+  accentBtn: string;
+  pill: string;
+  border: string;
+  iconBg: string;
+}
+
+const BOX_THEMES: Record<string, ThemeStyles> = {
   'frosted-rose': {
-    card: 'bg-white/75 backdrop-blur-xl border border-pink-200/90 shadow-[0_15px_40px_rgba(244,114,182,0.18)] text-pink-950',
+    card: 'bg-white/70 backdrop-blur-xl border border-pink-200/80 shadow-[0_15px_40px_rgba(244,114,182,0.18)] text-pink-950',
+    modal: 'bg-gradient-to-br from-[#fff7fa] to-[#ffeef5] text-pink-950 border border-pink-200 shadow-2xl',
     title: 'text-pink-950',
-    subtitle: 'text-pink-700/80',
+    subtitle: 'text-pink-800/80',
+    itemCard: 'bg-white/85 border border-pink-200/80 hover:border-pink-400 hover:bg-pink-50/70 text-pink-950 shadow-sm',
+    accentBtn: 'bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 text-white shadow-pink-400/30',
+    pill: 'bg-white/90 text-pink-950 border border-pink-200/80 shadow-xs',
     border: 'border-pink-200',
-    accent: 'from-pink-500 to-rose-400',
+    iconBg: 'bg-white text-pink-900 border-2 border-white/80 shadow-[0_6px_18px_rgba(244,114,182,0.3)]',
   },
   'peach-cream': {
-    card: 'bg-[#fff8f2]/85 backdrop-blur-xl border border-amber-200/80 shadow-[0_15px_40px_rgba(251,191,36,0.16)] text-amber-950',
+    card: 'bg-[#fff9f4]/80 backdrop-blur-xl border border-amber-200/80 shadow-[0_15px_40px_rgba(251,191,36,0.16)] text-amber-950',
+    modal: 'bg-gradient-to-br from-[#fffaf5] to-[#fff1e6] text-amber-950 border border-amber-200 shadow-2xl',
     title: 'text-amber-950',
-    subtitle: 'text-amber-800/80',
+    subtitle: 'text-amber-900/80',
+    itemCard: 'bg-white/85 border border-amber-200/80 hover:border-amber-400 hover:bg-amber-50/70 text-amber-950 shadow-sm',
+    accentBtn: 'bg-gradient-to-r from-amber-500 to-rose-400 hover:from-amber-600 hover:to-rose-500 text-white shadow-amber-400/30',
+    pill: 'bg-white/90 text-amber-950 border border-amber-200/80 shadow-xs',
     border: 'border-amber-200',
-    accent: 'from-amber-500 to-rose-400',
+    iconBg: 'bg-white text-amber-900 border-2 border-white/80 shadow-[0_6px_18px_rgba(251,191,36,0.3)]',
   },
   'sakura-blush': {
-    card: 'bg-[#fff0f6]/85 backdrop-blur-xl border border-rose-200/90 shadow-[0_15px_40px_rgba(244,63,94,0.18)] text-rose-950',
+    card: 'bg-[#fff0f7]/80 backdrop-blur-xl border border-rose-200/80 shadow-[0_15px_40px_rgba(244,63,94,0.18)] text-rose-950',
+    modal: 'bg-gradient-to-br from-[#fff3f8] to-[#ffe4f0] text-rose-950 border border-rose-200 shadow-2xl',
     title: 'text-rose-950',
-    subtitle: 'text-rose-700/80',
+    subtitle: 'text-rose-900/80',
+    itemCard: 'bg-white/85 border border-rose-200/80 hover:border-rose-400 hover:bg-rose-50/70 text-rose-950 shadow-sm',
+    accentBtn: 'bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white shadow-rose-400/30',
+    pill: 'bg-white/90 text-rose-950 border border-rose-200/80 shadow-xs',
     border: 'border-rose-200',
-    accent: 'from-rose-500 to-pink-500',
+    iconBg: 'bg-white text-rose-900 border-2 border-white/80 shadow-[0_6px_18px_rgba(244,63,94,0.3)]',
   },
   'velvet-glow': {
-    card: 'bg-[#2a0e20]/90 backdrop-blur-xl border border-pink-400/40 shadow-[0_15px_40px_rgba(0,0,0,0.45)] text-pink-100',
+    card: 'bg-[#230c1c]/90 backdrop-blur-xl border border-pink-500/40 shadow-[0_15px_45px_rgba(0,0,0,0.55)] text-pink-100',
+    modal: 'bg-gradient-to-br from-[#280e20] to-[#1a0815] text-pink-100 border border-pink-400/30 shadow-2xl',
     title: 'text-pink-100',
-    subtitle: 'text-pink-300/80',
+    subtitle: 'text-pink-300/90',
+    itemCard: 'bg-white/10 border border-pink-400/30 hover:border-pink-300 hover:bg-white/15 text-pink-100 shadow-sm',
+    accentBtn: 'bg-gradient-to-r from-pink-600 to-rose-500 hover:from-pink-700 hover:to-rose-600 text-white shadow-pink-600/40',
+    pill: 'bg-pink-900/80 text-pink-200 border border-pink-500/30 shadow-xs',
     border: 'border-pink-400/30',
-    accent: 'from-pink-600 to-rose-500',
+    iconBg: 'bg-[#3b122c] text-pink-100 border-2 border-pink-400/50 shadow-[0_6px_18px_rgba(244,63,94,0.3)]',
   },
 };
 
@@ -103,7 +131,7 @@ function WhiteHeartsTrail() {
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       const dist = Math.hypot(e.clientX - lastPos.current.x, e.clientY - lastPos.current.y);
-      if (dist > 24) {
+      if (dist > 22) {
         lastPos.current = { x: e.clientX, y: e.clientY };
         const id = idRef.current++;
         const newHeart = {
@@ -446,23 +474,24 @@ function PasscodeScreen({
 // ─────────────────────────────────────────────
 function FilmstripColumn({
   galleryItems,
-  onSelectPhoto,
+  onOpenFilmstripModal,
   position = 'right',
 }: {
   galleryItems: GalleryItem[];
-  onSelectPhoto: (item: GalleryItem) => void;
+  onOpenFilmstripModal: () => void;
   position?: 'left' | 'right';
 }) {
   if (!galleryItems || galleryItems.length === 0) return null;
 
   return (
     <div
-      className={`hidden xl:flex fixed ${position === 'left' ? 'left-6' : 'right-6'} top-24 bottom-24 w-36 z-30 flex-col items-center pointer-events-auto`}
+      onClick={onOpenFilmstripModal}
+      className={`hidden xl:flex fixed ${position === 'left' ? 'left-6' : 'right-6'} top-24 bottom-24 w-36 z-30 flex-col items-center pointer-events-auto cursor-pointer group`}
     >
-      <div className="mb-2 px-3 py-1 rounded-full bg-white/80 backdrop-blur-md border border-pink-200 text-[11px] font-bold text-pink-700 shadow-sm flex items-center gap-1">
+      <div className="mb-2 px-3 py-1 rounded-full bg-white/85 backdrop-blur-md border border-pink-200 text-[11px] font-bold text-pink-700 shadow-sm flex items-center gap-1 group-hover:scale-105 transition-transform">
         <span>📸</span> {position === 'left' ? 'Memories' : 'Film Strip'}
       </div>
-      <div className="flex-1 w-full overflow-hidden relative rounded-2xl bg-white/40 p-2 border border-pink-300/40 backdrop-blur-sm shadow-xl">
+      <div className="flex-1 w-full overflow-hidden relative rounded-2xl bg-white/45 p-2 border border-pink-300/40 backdrop-blur-sm shadow-xl group-hover:border-pink-400 transition-colors">
         <motion.div
           animate={{ y: position === 'left' ? ['-50%', '0%'] : ['0%', '-50%'] }}
           transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
@@ -471,11 +500,10 @@ function FilmstripColumn({
           {[...galleryItems, ...galleryItems].map((item, idx) => (
             <div
               key={idx}
-              onClick={() => onSelectPhoto(item)}
-              className="w-full aspect-[4/5] rounded-xl overflow-hidden cursor-pointer relative group border-2 border-white bg-white shadow-md hover:scale-105 transition-transform"
+              className="w-full aspect-[4/5] rounded-xl overflow-hidden relative group/item border-2 border-white bg-white shadow-md hover:scale-105 transition-transform"
             >
               <img src={item.mediaUrl} alt={item.caption || 'Memory'} className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold">
+              <div className="absolute inset-0 bg-pink-500/25 opacity-0 group-hover/item:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold">
                 🔍
               </div>
             </div>
@@ -487,12 +515,75 @@ function FilmstripColumn({
 }
 
 // ─────────────────────────────────────────────
+// FULLSCREEN FILMSTRIP MODAL (INTERACTIVE VIEWER)
+// ─────────────────────────────────────────────
+function FullscreenFilmstripModal({
+  galleryItems,
+  onSelectPhoto,
+  onClose,
+  boxTheme,
+}: {
+  galleryItems: GalleryItem[];
+  onSelectPhoto: (item: GalleryItem) => void;
+  onClose: () => void;
+  boxTheme: ThemeStyles;
+}) {
+  return (
+    <div
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-pink-950/70 backdrop-blur-md"
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className={`w-full max-w-xl rounded-3xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto relative ${boxTheme.modal}`}
+      >
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">📸</span>
+            <h3 className={`font-serif font-bold text-lg sm:text-xl ${boxTheme.title}`}>Photo Filmstrip & Camera Roll</h3>
+          </div>
+          <button
+            onClick={(e) => { e.stopPropagation(); onClose(); }}
+            className="w-9 h-9 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-lg cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+
+        <p className={`text-xs ${boxTheme.subtitle} mb-4`}>
+          Click any memory photo below to view in full resolution!
+        </p>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {galleryItems.map((item) => (
+            <div
+              key={item.id}
+              onClick={() => onSelectPhoto(item)}
+              className="aspect-[4/5] rounded-2xl overflow-hidden cursor-pointer relative group border-2 border-white/80 bg-white/70 shadow-md hover:scale-105 transition-transform"
+            >
+              <img src={item.mediaUrl} alt={item.caption || 'Photo'} className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-pink-600/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
+                <span className="text-white text-[11px] font-bold drop-shadow truncate">{item.caption || 'View Photo 🔍'}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // IMPORTANT DATES FLOWCHART / STORY TRACK
 // ─────────────────────────────────────────────
 function DatesFlowchart({
   project,
+  onOpenModal,
 }: {
   project: Project;
+  onOpenModal: () => void;
 }) {
   const dates = [
     ...(project.startDate ? [{ label: 'Where It Began 💫', date: project.startDate, emoji: '🌱' }] : []),
@@ -501,11 +592,14 @@ function DatesFlowchart({
   ];
 
   return (
-    <div className="hidden lg:flex fixed left-6 top-24 bottom-24 w-36 z-30 flex-col items-center pointer-events-auto">
-      <div className="mb-2 px-3 py-1 rounded-full bg-white/80 backdrop-blur-md border border-pink-200 text-[11px] font-bold text-pink-700 shadow-sm flex items-center gap-1">
+    <div
+      onClick={onOpenModal}
+      className="hidden lg:flex fixed left-6 top-24 bottom-24 w-36 z-30 flex-col items-center pointer-events-auto cursor-pointer group"
+    >
+      <div className="mb-2 px-3 py-1 rounded-full bg-white/85 backdrop-blur-md border border-pink-200 text-[11px] font-bold text-pink-700 shadow-sm flex items-center gap-1 group-hover:scale-105 transition-transform">
         <span>🗓️</span> Story Track
       </div>
-      <div className="flex-1 w-full overflow-y-auto relative rounded-2xl bg-white/45 p-3 border border-pink-300/40 backdrop-blur-sm shadow-xl flex flex-col justify-around">
+      <div className="flex-1 w-full overflow-y-auto relative rounded-2xl bg-white/45 p-3 border border-pink-300/40 backdrop-blur-sm shadow-xl flex flex-col justify-around group-hover:border-pink-400 transition-colors">
         {dates.map((d, idx) => (
           <div key={idx} className="relative flex flex-col items-center text-center">
             {idx > 0 && <div className="w-0.5 h-6 bg-pink-300/60 my-1" />}
@@ -526,16 +620,84 @@ function DatesFlowchart({
 }
 
 // ─────────────────────────────────────────────
+// FULLSCREEN STORY TRACK MODAL
+// ─────────────────────────────────────────────
+function FullscreenStoryTrackModal({
+  project,
+  onClose,
+  boxTheme,
+}: {
+  project: Project;
+  onClose: () => void;
+  boxTheme: ThemeStyles;
+}) {
+  const dates = [
+    ...(project.startDate ? [{ label: 'Where It Began', description: 'The day our beautiful story started.', date: project.startDate, emoji: '🌱' }] : []),
+    ...(project.memories ? project.memories.map(m => ({ label: m.title, description: m.description, date: m.date, emoji: m.emoji || '✨' })) : []),
+    { label: 'Forever & Always', description: 'To a lifetime of love and unforgettable memories.', date: null, emoji: '♾️' },
+  ];
+
+  return (
+    <div
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-pink-950/70 backdrop-blur-md"
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className={`w-full max-w-lg rounded-3xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto relative ${boxTheme.modal}`}
+      >
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">🗓️</span>
+            <h3 className={`font-serif font-bold text-lg sm:text-xl ${boxTheme.title}`}>Story Milestones Track</h3>
+          </div>
+          <button
+            onClick={(e) => { e.stopPropagation(); onClose(); }}
+            className="w-9 h-9 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-lg cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="relative border-l-2 border-pink-300 ml-4 pl-6 space-y-6">
+          {dates.map((d, idx) => (
+            <div key={idx} className={`relative p-4 rounded-2xl ${boxTheme.itemCard}`}>
+              <div className="absolute -left-[31px] top-4 w-4 h-4 rounded-full bg-pink-500 border-2 border-white shadow-xs" />
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xl">{d.emoji}</span>
+                <h4 className={`font-serif font-bold text-base ${boxTheme.title}`}>{d.label}</h4>
+              </div>
+              {d.date && (
+                <span className="text-[11px] font-bold text-pink-600 block mb-1">
+                  {new Date(d.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                </span>
+              )}
+              {d.description && (
+                <p className={`text-xs leading-relaxed font-sans ${boxTheme.subtitle}`}>{d.description}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // MAKE A WISH / SURPRISE POPUP MODAL (FROM GIFT BOX)
 // ─────────────────────────────────────────────
 function MakeAWishModal({
   onClose,
   recipientName,
   customPrompt,
+  boxTheme,
 }: {
   onClose: () => void;
   recipientName: string;
   customPrompt?: string;
+  boxTheme: ThemeStyles;
 }) {
   const [wish, setWish] = useState('');
   const [saved, setSaved] = useState(false);
@@ -558,20 +720,17 @@ function MakeAWishModal({
         initial={{ scale: 0.85, y: 20 }}
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.85, opacity: 0 }}
-        className="w-full max-w-sm rounded-3xl p-6 text-center border-2 border-pink-200 relative shadow-2xl"
-        style={{
-          background: 'linear-gradient(145deg, #fff5f8 0%, #ffe4ec 100%)',
-        }}
+        className={`w-full max-w-sm rounded-3xl p-6 text-center relative shadow-2xl ${boxTheme.modal}`}
       >
         <button
           onClick={(e) => { e.stopPropagation(); onClose(); }}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-pink-100/80 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-base cursor-pointer z-50"
+          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-base cursor-pointer z-50"
         >
           ✕
         </button>
         <span className="text-6xl block mb-3 animate-bounce">🎁</span>
-        <h3 className="text-xl font-bold text-pink-800 font-serif mb-1">Make a Secret Wish! ✨</h3>
-        <p className="text-xs text-pink-700/80 mb-4 font-sans">
+        <h3 className={`text-xl font-bold font-serif mb-1 ${boxTheme.title}`}>Make a Secret Wish! ✨</h3>
+        <p className={`text-xs mb-4 font-sans ${boxTheme.subtitle}`}>
           {customPrompt || `What is your deepest wish today, ${recipientName || 'my love'}?`}
         </p>
 
@@ -587,19 +746,19 @@ function MakeAWishModal({
             />
             <button
               type="submit"
-              className="w-full py-2.5 rounded-full text-xs uppercase tracking-wider font-bold text-white bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 transition-all cursor-pointer shadow-md"
+              className={`w-full py-2.5 rounded-full text-xs uppercase tracking-wider font-bold shadow-md cursor-pointer ${boxTheme.accentBtn}`}
             >
               Send Wish to the Stars 🌠
             </button>
           </form>
         ) : (
-          <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="p-4 bg-white/80 rounded-2xl border border-pink-100">
+          <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className={`p-4 rounded-2xl ${boxTheme.itemCard}`}>
             <span className="text-4xl block mb-2">🎉</span>
-            <p className="text-sm font-bold text-pink-800 mb-1">Your wish has been whispered to the universe!</p>
-            <p className="text-xs text-pink-600 italic">"May every tiny sparkle of this wish come true." ✨</p>
+            <p className={`text-sm font-bold mb-1 ${boxTheme.title}`}>Your wish has been whispered to the universe!</p>
+            <p className={`text-xs italic ${boxTheme.subtitle}`}>"May every tiny sparkle of this wish come true." ✨</p>
             <button
               onClick={onClose}
-              className="mt-4 px-5 py-2 bg-pink-500 text-white rounded-full text-xs font-bold uppercase tracking-wider cursor-pointer"
+              className={`mt-4 px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider cursor-pointer ${boxTheme.accentBtn}`}
             >
               Close 💕
             </button>
@@ -615,9 +774,11 @@ function MakeAWishModal({
 // ─────────────────────────────────────────────
 function BirthdayCakeStation({
   name,
+  boxTheme,
   onWishSuccess,
 }: {
   name: string;
+  boxTheme: ThemeStyles;
   onWishSuccess?: () => void;
 }) {
   const [blown, setBlown] = useState(false);
@@ -635,11 +796,11 @@ function BirthdayCakeStation({
   };
 
   return (
-    <div className="relative max-w-md mx-auto my-10 p-6 rounded-3xl text-center bg-white/70 backdrop-blur-xl border border-pink-200 shadow-xl">
+    <div className={`relative max-w-md mx-auto my-10 p-6 rounded-3xl text-center ${boxTheme.card}`}>
       <span className="text-xs uppercase tracking-widest text-pink-600 font-bold block mb-1">
         ✨ Interactive Birthday Cake
       </span>
-      <h3 className="font-serif text-2xl font-bold text-pink-900 mb-4">
+      <h3 className={`font-serif text-2xl font-bold mb-4 ${boxTheme.title}`}>
         Blow the Candles, {name}! 🎂
       </h3>
 
@@ -688,7 +849,7 @@ function BirthdayCakeStation({
         </div>
       </div>
 
-      <p className="text-xs text-pink-800/80 font-medium font-sans">
+      <p className={`text-xs font-medium font-sans ${boxTheme.subtitle}`}>
         {!blown ? '👆 Tap the cake to blow the candles and make a wish!' : '🎉 Candles blown! May all your wishes come true!'}
       </p>
 
@@ -696,6 +857,7 @@ function BirthdayCakeStation({
         {showWishModal && (
           <MakeAWishModal
             recipientName={name}
+            boxTheme={boxTheme}
             onClose={() => setShowWishModal(false)}
             customPrompt="What is your birthday wish for this upcoming year? 🎂"
           />
@@ -712,10 +874,12 @@ function HeroMessageModal({
   tagline,
   message,
   onClose,
+  boxTheme,
 }: {
   tagline?: string;
   message?: string;
   onClose: () => void;
+  boxTheme: ThemeStyles;
 }) {
   return (
     <motion.div
@@ -729,8 +893,7 @@ function HeroMessageModal({
         initial={{ scale: 0.9, y: 20 }}
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="w-full max-w-md rounded-3xl p-6 sm:p-8 text-center relative border border-pink-200 shadow-2xl"
-        style={{ background: 'linear-gradient(145deg, #ffffff 0%, #fff0f5 100%)' }}
+        className={`w-full max-w-md rounded-3xl p-6 sm:p-8 text-center relative ${boxTheme.modal}`}
       >
         <button
           onClick={(e) => { e.stopPropagation(); onClose(); }}
@@ -739,17 +902,17 @@ function HeroMessageModal({
           ✕
         </button>
         <span className="text-5xl block mb-3 animate-bounce">💌</span>
-        <h3 className="font-serif font-bold text-xl text-pink-900 mb-2">
+        <h3 className={`font-serif font-bold text-xl mb-2 ${boxTheme.title}`}>
           {tagline || 'Hero Opening Note'}
         </h3>
-        <div className="p-4 rounded-2xl bg-pink-50/70 border border-pink-100 text-pink-900 text-sm leading-relaxed font-sans text-left my-4">
+        <div className={`p-4 rounded-2xl ${boxTheme.itemCard} text-sm leading-relaxed font-sans text-left my-4`}>
           <p className="whitespace-pre-wrap italic font-medium">
             {message || 'No opening message specified yet.'}
           </p>
         </div>
         <button
           onClick={onClose}
-          className="px-6 py-2.5 rounded-full text-xs uppercase tracking-widest font-bold text-white bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 shadow-md cursor-pointer"
+          className={`px-6 py-2.5 rounded-full text-xs uppercase tracking-widest font-bold shadow-md cursor-pointer ${boxTheme.accentBtn}`}
         >
           Close Note 🌸
         </button>
@@ -766,11 +929,13 @@ function EndingLetterModal({
   message,
   signature,
   onClose,
+  boxTheme,
 }: {
   title?: string;
   message?: string;
   signature?: string;
   onClose: () => void;
+  boxTheme: ThemeStyles;
 }) {
   return (
     <motion.div
@@ -784,8 +949,7 @@ function EndingLetterModal({
         initial={{ scale: 0.9, y: 20 }}
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="w-full max-w-md rounded-3xl p-6 sm:p-8 text-center relative border border-pink-200 shadow-2xl"
-        style={{ background: 'linear-gradient(145deg, #ffffff 0%, #fff0f5 100%)' }}
+        className={`w-full max-w-md rounded-3xl p-6 sm:p-8 text-center relative ${boxTheme.modal}`}
       >
         <button
           onClick={(e) => { e.stopPropagation(); onClose(); }}
@@ -794,22 +958,22 @@ function EndingLetterModal({
           ✕
         </button>
         <span className="text-5xl block mb-3">🌸</span>
-        <h3 className="font-serif font-bold text-2xl text-pink-950 mb-2">
+        <h3 className={`font-serif font-bold text-2xl mb-2 ${boxTheme.title}`}>
           {title || 'Forever & Always'}
         </h3>
-        <div className="p-5 rounded-2xl bg-pink-50/70 border border-pink-100 text-pink-900 text-sm leading-relaxed font-sans text-left my-4">
+        <div className={`p-5 rounded-2xl ${boxTheme.itemCard} text-sm leading-relaxed font-sans text-left my-4`}>
           <p className="whitespace-pre-wrap italic font-medium">
             {message || 'Thank you for making every single day sweeter and brighter.'}
           </p>
         </div>
         {signature && (
-          <p className="font-serif italic font-bold text-pink-700 text-base mb-4">
-            — With All My Love, {signature} 💕
+          <p className={`font-serif italic font-bold text-base mb-4 ${boxTheme.title}`}>
+            {signature}
           </p>
         )}
         <button
           onClick={onClose}
-          className="px-6 py-2.5 rounded-full text-xs uppercase tracking-widest font-bold text-white bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 shadow-md cursor-pointer"
+          className={`px-6 py-2.5 rounded-full text-xs uppercase tracking-widest font-bold shadow-md cursor-pointer ${boxTheme.accentBtn}`}
         >
           Cherish Always 💖
         </button>
@@ -821,7 +985,7 @@ function EndingLetterModal({
 // ─────────────────────────────────────────────
 // MEMORIES TIMELINE MODAL (FROM ORBITAL MENU)
 // ─────────────────────────────────────────────
-function MemoriesModal({ project, onClose }: { project: Project; onClose: () => void }) {
+function MemoriesModal({ project, onClose, boxTheme }: { project: Project; onClose: () => void; boxTheme: ThemeStyles }) {
   const memories = project.memories || [];
   return (
     <div
@@ -832,43 +996,39 @@ function MemoriesModal({ project, onClose }: { project: Project; onClose: () => 
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="w-full max-w-lg rounded-3xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto relative"
-        style={{
-          background: 'linear-gradient(145deg, #fff7fa 0%, #ffe9f2 100%)',
-          border: '1px solid rgba(244, 114, 182, 0.4)',
-        }}
+        className={`w-full max-w-lg rounded-3xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto relative ${boxTheme.modal}`}
       >
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <span className="text-2xl">🔍</span>
-            <h3 className="font-serif font-bold text-pink-900 text-lg sm:text-xl">Our Memories & Milestones</h3>
+            <h3 className={`font-serif font-bold text-lg sm:text-xl ${boxTheme.title}`}>Our Memories & Milestones</h3>
           </div>
           <button
             onClick={(e) => { e.stopPropagation(); onClose(); }}
-            className="w-9 h-9 rounded-full bg-pink-100/80 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-lg cursor-pointer"
+            className="w-9 h-9 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-lg cursor-pointer"
           >
             ✕
           </button>
         </div>
 
         {memories.length === 0 ? (
-          <div className="text-center py-12 text-pink-800/70 text-sm">
+          <div className={`text-center py-12 text-sm ${boxTheme.subtitle}`}>
             <span className="text-4xl block mb-2">🌸</span>
             No timeline memories added yet.
           </div>
         ) : (
           <div className="relative border-l-2 border-pink-300 ml-4 pl-5 space-y-6">
             {memories.map((m) => (
-              <div key={m.id} className="relative p-4 rounded-2xl bg-white/90 border border-pink-200 shadow-sm">
+              <div key={m.id} className={`relative p-4 rounded-2xl ${boxTheme.itemCard}`}>
                 <div className="absolute -left-[27px] top-4 w-3.5 h-3.5 rounded-full bg-pink-500 border-2 border-white shadow-xs" />
                 <span className="text-[11px] font-bold text-pink-600 block mb-1">
                   {new Date(m.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                 </span>
-                <h4 className="font-serif font-bold text-pink-950 text-base mb-1">
+                <h4 className={`font-serif font-bold text-base mb-1 ${boxTheme.title}`}>
                   {m.emoji} {m.title}
                 </h4>
                 {m.description && (
-                  <p className="text-xs text-gray-700 leading-relaxed font-sans mb-2">{m.description}</p>
+                  <p className={`text-xs leading-relaxed font-sans mb-2 ${boxTheme.subtitle}`}>{m.description}</p>
                 )}
                 {m.imageUrl && (
                   <div className="rounded-xl overflow-hidden border border-pink-100 max-h-48 mt-2">
@@ -1065,7 +1225,19 @@ function EnvelopeLetterModal({
 // ─────────────────────────────────────────────
 // FULLSCREEN VOW PROMISE CARD MODAL
 // ─────────────────────────────────────────────
-function FullscreenPromiseModal({ emoji, text, secretNote, onClose }: { emoji: string; text: string; secretNote: string; onClose: () => void }) {
+function FullscreenPromiseModal({
+  emoji,
+  text,
+  secretNote,
+  onClose,
+  boxTheme,
+}: {
+  emoji: string;
+  text: string;
+  secretNote: string;
+  onClose: () => void;
+  boxTheme: ThemeStyles;
+}) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -1078,8 +1250,7 @@ function FullscreenPromiseModal({ emoji, text, secretNote, onClose }: { emoji: s
         initial={{ scale: 0.85, rotate: -2 }}
         animate={{ scale: 1, rotate: 0 }}
         exit={{ scale: 0.85, opacity: 0 }}
-        className="w-full max-w-sm rounded-3xl p-8 text-center border-2 border-pink-200 shadow-2xl relative"
-        style={{ background: 'linear-gradient(135deg, #fff5f7 0%, #fff0f3 100%)' }}
+        className={`w-full max-w-sm rounded-3xl p-8 text-center relative shadow-2xl ${boxTheme.modal}`}
       >
         <button
           onClick={(e) => { e.stopPropagation(); onClose(); }}
@@ -1088,19 +1259,19 @@ function FullscreenPromiseModal({ emoji, text, secretNote, onClose }: { emoji: s
           ✕
         </button>
         <span className="text-6xl block mb-4 animate-bounce">{emoji}</span>
-        <h3 className="text-lg font-bold text-pink-700 font-serif mb-2">Our Special Vow</h3>
-        <p className="text-md font-semibold text-pink-900 leading-snug mb-5" style={{ fontFamily: 'Be Vietnam Pro' }}>
+        <h3 className={`text-lg font-bold font-serif mb-2 ${boxTheme.title}`}>Our Special Vow</h3>
+        <p className={`text-md font-semibold leading-snug mb-5 ${boxTheme.title}`} style={{ fontFamily: 'Be Vietnam Pro' }}>
           "{text}"
         </p>
-        <div className="p-4 rounded-2xl bg-white border border-pink-100 shadow-inner mb-6">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-pink-400 block mb-1">Secret Note</span>
-          <p className="text-xs italic text-pink-800 leading-relaxed">
+        <div className={`p-4 rounded-2xl ${boxTheme.itemCard} mb-6`}>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-pink-500 block mb-1">Secret Note</span>
+          <p className={`text-xs italic leading-relaxed ${boxTheme.subtitle}`}>
             {secretNote || 'A promise to cherish forever.'}
           </p>
         </div>
         <button
           onClick={onClose}
-          className="px-6 py-2.5 rounded-full text-xs uppercase tracking-widest font-bold text-white bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 transition-all cursor-pointer shadow-md"
+          className={`px-6 py-2.5 rounded-full text-xs uppercase tracking-widest font-bold shadow-md cursor-pointer ${boxTheme.accentBtn}`}
         >
           Close Vow 💖
         </button>
@@ -1112,7 +1283,7 @@ function FullscreenPromiseModal({ emoji, text, secretNote, onClose }: { emoji: s
 // ─────────────────────────────────────────────
 // PROMISE WALL MODAL (ORBITAL MENU LIST)
 // ─────────────────────────────────────────────
-function PromiseWallModal({ project, onClose }: { project: Project; onClose: () => void }) {
+function PromiseWallModal({ project, onClose, boxTheme }: { project: Project; onClose: () => void; boxTheme: ThemeStyles }) {
   const cfg = project.heroConfig || {};
   const promises = cfg.promises || [];
   const [activePromise, setActivePromise] = useState<any | null>(null);
@@ -1126,12 +1297,12 @@ function PromiseWallModal({ project, onClose }: { project: Project; onClose: () 
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto relative"
+        className={`w-full max-w-md rounded-3xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto relative ${boxTheme.modal}`}
       >
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <span className="text-2xl">💍</span>
-            <span className="font-bold text-pink-700 font-serif text-lg">{cfg.promiseWallTitle || 'Our Vows'}</span>
+            <span className={`font-bold font-serif text-lg ${boxTheme.title}`}>{cfg.promiseWallTitle || 'Our Vows'}</span>
           </div>
           <button
             onClick={(e) => { e.stopPropagation(); onClose(); }}
@@ -1146,10 +1317,10 @@ function PromiseWallModal({ project, onClose }: { project: Project; onClose: () 
             <div
               key={idx}
               onClick={() => setActivePromise(p)}
-              className="p-4 rounded-2xl text-center border border-pink-100 hover:border-pink-300 bg-pink-50/40 hover:bg-pink-100/60 transition-all cursor-pointer flex flex-col items-center justify-center min-h-[120px]"
+              className={`p-4 rounded-2xl text-center cursor-pointer flex flex-col items-center justify-center min-h-[120px] transition-all hover:scale-105 ${boxTheme.itemCard}`}
             >
               <span className="text-3xl mb-2">{p.emoji || '💖'}</span>
-              <p className="text-xs font-semibold text-pink-900 line-clamp-2">{p.text}</p>
+              <p className={`text-xs font-semibold line-clamp-2 ${boxTheme.title}`}>{p.text}</p>
             </div>
           ))}
         </div>
@@ -1161,6 +1332,7 @@ function PromiseWallModal({ project, onClose }: { project: Project; onClose: () 
             emoji={activePromise.emoji}
             text={activePromise.text}
             secretNote={activePromise.secretNote}
+            boxTheme={boxTheme}
             onClose={() => setActivePromise(null)}
           />
         )}
@@ -1234,7 +1406,7 @@ function LightboxModal({ item, onClose }: { item: GalleryItem; onClose: () => vo
 // ─────────────────────────────────────────────
 // CUTE PANDA SELFIE THANK YOU
 // ─────────────────────────────────────────────
-function PandaSelfieWidget({ projectSlug }: { projectSlug: string }) {
+function PandaSelfieWidget({ projectSlug, boxTheme }: { projectSlug: string; boxTheme: ThemeStyles }) {
   const [showPanda, setShowPanda] = useState(true);
   const [state, setState] = useState<'invite' | 'uploading' | 'completed'>('invite');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -1264,7 +1436,7 @@ function PandaSelfieWidget({ projectSlug }: { projectSlug: string }) {
   if (!showPanda) return null;
 
   return (
-    <div className="my-12 p-6 rounded-3xl border border-pink-200 text-center relative z-10 mx-auto max-w-sm bg-white/80 backdrop-blur-xl shadow-xl">
+    <div className={`my-12 p-6 rounded-3xl text-center relative z-10 mx-auto max-w-sm ${boxTheme.card}`}>
       <div className="relative inline-block mb-3">
         <motion.div
           animate={{ rotate: [0, -6, 6, 0] }}
@@ -1277,12 +1449,12 @@ function PandaSelfieWidget({ projectSlug }: { projectSlug: string }) {
 
       {state === 'invite' && (
         <>
-          <p className="text-sm font-semibold text-pink-700 mb-2">Send a Selfie to Thank Them? 💕</p>
-          <p className="text-xs text-gray-500 mb-4">Snap or drop a cute selfie to say thank you for creating this memory page!</p>
+          <p className={`text-sm font-semibold mb-2 ${boxTheme.title}`}>Send a Selfie to Thank Them? 💕</p>
+          <p className={`text-xs mb-4 ${boxTheme.subtitle}`}>Snap or drop a cute selfie to say thank you for creating this memory page!</p>
           <div className="flex justify-center gap-3">
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="px-5 py-2.5 bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 text-white rounded-full text-xs font-bold uppercase tracking-wider cursor-pointer shadow-md"
+              className={`px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider cursor-pointer shadow-md ${boxTheme.accentBtn}`}
             >
               Take / Upload Selfie 📸
             </button>
@@ -1324,7 +1496,7 @@ function PandaSelfieWidget({ projectSlug }: { projectSlug: string }) {
 // ─────────────────────────────────────────────
 // AWARD MODAL
 // ─────────────────────────────────────────────
-function AwardModal({ project, onClose }: { project: Project; onClose: () => void }) {
+function AwardModal({ project, onClose, boxTheme }: { project: Project; onClose: () => void; boxTheme: ThemeStyles }) {
   return (
     <div
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
@@ -1334,7 +1506,7 @@ function AwardModal({ project, onClose }: { project: Project; onClose: () => voi
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="w-full max-w-sm bg-white rounded-3xl p-6 text-center shadow-2xl relative"
+        className={`w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl relative ${boxTheme.modal}`}
       >
         <button
           onClick={(e) => { e.stopPropagation(); onClose(); }}
@@ -1343,17 +1515,17 @@ function AwardModal({ project, onClose }: { project: Project; onClose: () => voi
           ✕
         </button>
         <span className="text-7xl block mb-4 animate-bounce">🏆</span>
-        <h2 className="text-xl font-bold text-pink-700 font-serif mb-2">Certificate of Love</h2>
-        <p className="text-xs text-gray-500 mb-3" style={{ fontFamily: 'Be Vietnam Pro' }}>
+        <h2 className={`text-xl font-bold font-serif mb-2 ${boxTheme.title}`}>Certificate of Love</h2>
+        <p className={`text-xs mb-3 ${boxTheme.subtitle}`} style={{ fontFamily: 'Be Vietnam Pro' }}>
           This award is officially presented to:
         </p>
-        <p className="text-xl font-extrabold text-pink-900 border-b-2 border-pink-200 pb-2 inline-block px-4 mb-4" style={{ fontFamily: 'Plus Jakarta Sans' }}>
+        <p className={`text-xl font-extrabold border-b-2 pb-2 inline-block px-4 mb-4 ${boxTheme.title} ${boxTheme.border}`} style={{ fontFamily: 'Plus Jakarta Sans' }}>
           {project.personTwoName || 'Recipient'}
         </p>
-        <p className="text-sm text-pink-600 italic font-semibold leading-relaxed mb-6">
+        <p className={`text-sm italic font-semibold leading-relaxed mb-6 ${boxTheme.subtitle}`}>
           "For being the most incredible, caring, and wonderful person in my universe."
         </p>
-        <div className="flex justify-between items-center text-xs text-gray-400 border-t border-pink-100 pt-4">
+        <div className={`flex justify-between items-center text-xs border-t pt-4 ${boxTheme.border} ${boxTheme.subtitle}`}>
           <span>Signed: {project.personOneName || 'Sender'}</span>
           <span>Date: {project.startDate ? new Date(project.startDate).toLocaleDateString() : 'Forever'}</span>
         </div>
@@ -1367,7 +1539,7 @@ function AwardModal({ project, onClose }: { project: Project; onClose: () => voi
 // ─────────────────────────────────────────────
 const DEFAULT_REASONS = ['Your beautiful smile', 'Your kind heart', 'How you make me laugh', 'Our memories together', 'Your warm hugs', 'How genuine you are', 'Your amazing energy', 'Just being you 🌸'];
 
-function JarModal({ project, onClose }: { project: Project; onClose: () => void }) {
+function JarModal({ project, onClose, boxTheme }: { project: Project; onClose: () => void; boxTheme: ThemeStyles }) {
   const [openedReason, setOpenedReason] = useState<string | null>(null);
   const cfg = project.heroConfig || {};
   const customReasons = cfg.reasonsList || [];
@@ -1387,7 +1559,7 @@ function JarModal({ project, onClose }: { project: Project; onClose: () => void 
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="w-full max-w-sm bg-white rounded-3xl p-6 text-center shadow-2xl relative"
+        className={`w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl relative ${boxTheme.modal}`}
       >
         <button
           onClick={(e) => { e.stopPropagation(); onClose(); }}
@@ -1396,14 +1568,14 @@ function JarModal({ project, onClose }: { project: Project; onClose: () => void 
           ✕
         </button>
         <span className="text-7xl block mb-4">🏺</span>
-        <h2 className="text-xl font-bold text-pink-700 font-serif mb-2">Jar of Love Reasons</h2>
-        <p className="text-xs text-gray-400 mb-6">Tap the button to pull out a reason why you are so special!</p>
+        <h2 className={`text-xl font-bold font-serif mb-2 ${boxTheme.title}`}>Jar of Love Reasons</h2>
+        <p className={`text-xs mb-6 ${boxTheme.subtitle}`}>Tap the button to pull out a reason why you are so special!</p>
 
         <AnimatePresence mode="wait">
           {openedReason ? (
             <motion.div key="reason" initial={{ rotateY: 90, opacity: 0 }} animate={{ rotateY: 0, opacity: 1 }} exit={{ rotateY: -90, opacity: 0 }}
-              className="p-5 rounded-2xl bg-pink-50 border border-pink-100 shadow-inner mb-6 min-h-[80px] flex items-center justify-center">
-              <p className="text-sm font-semibold text-pink-800 italic">"{openedReason}"</p>
+              className={`p-5 rounded-2xl mb-6 min-h-[80px] flex items-center justify-center shadow-inner ${boxTheme.itemCard}`}>
+              <p className={`text-sm font-semibold italic ${boxTheme.title}`}>"{openedReason}"</p>
             </motion.div>
           ) : (
             <div className="mb-6 h-[80px]" />
@@ -1411,7 +1583,7 @@ function JarModal({ project, onClose }: { project: Project; onClose: () => void 
         </AnimatePresence>
 
         <button onClick={pullReason}
-          className="px-6 py-2.5 rounded-full text-xs uppercase tracking-widest font-bold text-white bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 transition-all cursor-pointer shadow-md">
+          className={`px-6 py-2.5 rounded-full text-xs uppercase tracking-widest font-bold shadow-md cursor-pointer ${boxTheme.accentBtn}`}>
           Pull a Reason 💌
         </button>
       </motion.div>
@@ -1422,7 +1594,7 @@ function JarModal({ project, onClose }: { project: Project; onClose: () => void 
 // ─────────────────────────────────────────────
 // MUSIC PLAYER MODAL
 // ─────────────────────────────────────────────
-function MusicModal({ project, onClose }: { project: Project; onClose: () => void }) {
+function MusicModal({ project, onClose, boxTheme }: { project: Project; onClose: () => void; boxTheme: ThemeStyles }) {
   return (
     <div
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
@@ -1432,7 +1604,7 @@ function MusicModal({ project, onClose }: { project: Project; onClose: () => voi
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="w-full max-w-sm bg-white rounded-3xl p-6 text-center shadow-2xl relative"
+        className={`w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl relative ${boxTheme.modal}`}
       >
         <button
           onClick={(e) => { e.stopPropagation(); onClose(); }}
@@ -1441,16 +1613,16 @@ function MusicModal({ project, onClose }: { project: Project; onClose: () => voi
           ✕
         </button>
         <span className="text-7xl block mb-4 animate-spin" style={{ animationDuration: '8s' }}>💿</span>
-        <h2 className="text-xl font-bold text-pink-700 font-serif mb-2">Our Song</h2>
-        <p className="text-xs text-gray-400 mb-6">Enjoy the ambient track configured for this memory page</p>
+        <h2 className={`text-xl font-bold font-serif mb-2 ${boxTheme.title}`}>Our Song</h2>
+        <p className={`text-xs mb-6 ${boxTheme.subtitle}`}>Enjoy the ambient track configured for this memory page</p>
 
-        <div className="p-4 rounded-xl bg-pink-50/50 mb-6 text-sm">
-          <p className="font-bold text-pink-800">Background Harmony</p>
-          <p className="text-xs text-gray-500 mt-1">Playing in the background of your story.</p>
+        <div className={`p-4 rounded-xl mb-6 text-sm ${boxTheme.itemCard}`}>
+          <p className={`font-bold ${boxTheme.title}`}>Background Harmony</p>
+          <p className={`text-xs mt-1 ${boxTheme.subtitle}`}>Playing in the background of your story.</p>
         </div>
 
         <button onClick={onClose}
-          className="px-6 py-2.5 rounded-full text-xs uppercase tracking-widest font-bold text-white bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 transition-all cursor-pointer shadow-md">
+          className={`px-6 py-2.5 rounded-full text-xs uppercase tracking-widest font-bold shadow-md cursor-pointer ${boxTheme.accentBtn}`}>
           Enjoy Music 🎵
         </button>
       </motion.div>
@@ -1461,7 +1633,7 @@ function MusicModal({ project, onClose }: { project: Project; onClose: () => voi
 // ─────────────────────────────────────────────
 // MAIN THEME COMPONENT
 // ─────────────────────────────────────────────
-type ModalType = 'award' | 'memories' | 'letter' | 'jar' | 'music' | 'vows' | 'video' | 'wish' | 'cake' | 'heroNote' | 'endingNote' | null;
+type ModalType = 'award' | 'memories' | 'letter' | 'jar' | 'music' | 'vows' | 'video' | 'wish' | 'cake' | 'heroNote' | 'endingNote' | 'filmstrip' | 'dates' | null;
 
 export default function SweetDiaryTheme({ project }: { project: Project }) {
   const cfg = project.heroConfig || {};
@@ -1493,50 +1665,54 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
     return { ...item, angle };
   });
 
-  const radius = 125;
+  // Orbital Radius: 135px inside phone, 155px full page
+  const radius = cfg.enablePhoneFrameAfterPin ? 130 : 155;
 
   // Orbital Wheel / Gift Box view
-  const renderOrbitalStage = () => (
+  const renderOrbitalStage = (isInsidePhone: boolean) => (
     <div className="flex flex-col items-center justify-between flex-1 py-2 w-full">
+      {/* Cover Polaroid Picture (Larger & Gracefully Positioned) */}
       <motion.div
         initial={{ y: -20, opacity: 0, rotate: -3 }}
-        animate={{ y: 0, opacity: 1, rotate: -3 }}
-        transition={{ duration: 0.7 }}
-        className="self-start ml-2 mb-2"
+        animate={{ y: [0, -6, 0], opacity: 1, rotate: [-3, -1, -3] }}
+        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+        className="mb-4 sm:mb-6"
         style={{
           background: 'white',
-          padding: '8px 8px 24px',
-          borderRadius: '8px',
-          boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
-          width: '125px',
+          padding: '10px 10px 24px',
+          borderRadius: '12px',
+          boxShadow: '0 15px 35px rgba(0,0,0,0.18)',
+          width: isInsidePhone ? '145px' : '190px',
         }}
       >
         {project.coverImageUrl ? (
-          <img src={project.coverImageUrl} alt="cover" className="w-full aspect-square object-cover rounded-md" />
+          <img src={project.coverImageUrl} alt="cover" className="w-full aspect-square object-cover rounded-lg" />
         ) : (
-          <div className="w-full aspect-square flex items-center justify-center text-4xl bg-pink-50 rounded-md">💕</div>
+          <div className="w-full aspect-square flex items-center justify-center text-4xl bg-pink-50 rounded-lg">💕</div>
         )}
-        <p className="text-center mt-2 text-[11px] font-bold text-pink-700 font-sans">
+        <p className="text-center mt-2.5 text-xs font-bold text-pink-700 font-sans">
           {project.startDate ? new Date(project.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Forever 🌸'}
         </p>
       </motion.div>
 
+      {/* Main Greeting Headline */}
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="text-center my-1"
+        className="text-center my-2 max-w-xl px-2"
       >
         <h1
-          className="font-extrabold leading-tight text-pink-900 drop-shadow-md text-2xl sm:text-3xl font-serif"
+          className={`font-extrabold leading-tight drop-shadow-md text-2xl sm:text-4xl font-serif ${boxTheme.title}`}
         >
           {cfg.celebrateText || `Happy Birthday, ${project.personTwoName || 'You'}! 🎂`}
         </h1>
         {project.subtitle && (
-          <p className="text-pink-800/80 text-xs mt-1 font-sans font-medium px-2">{project.subtitle}</p>
+          <p className={`text-xs sm:text-sm mt-1.5 font-sans font-medium px-2 ${boxTheme.subtitle}`}>{project.subtitle}</p>
         )}
       </motion.div>
 
-      <div className="relative flex items-center justify-center my-6" style={{ width: '280px', height: '280px' }}>
+      {/* 3D Orbital Menu Stage */}
+      <div className="relative flex items-center justify-center my-8" style={{ width: isInsidePhone ? '290px' : '350px', height: isInsidePhone ? '290px' : '350px' }}>
         {menuItems.map((item, i) => {
           const rad = ((item.angle - 90) * Math.PI) / 180;
           const x = radius * Math.cos(rad);
@@ -1546,24 +1722,20 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
               key={item.id}
               initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3 + i * 0.08, type: 'spring', stiffness: 220, damping: 18 }}
-              whileHover={{ scale: 1.15 }}
+              transition={{ delay: 0.2 + i * 0.07, type: 'spring', stiffness: 220, damping: 18 }}
+              whileHover={{ scale: 1.18 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setActiveModal(item.id as ModalType)}
               className="absolute flex flex-col items-center gap-1 cursor-pointer z-20"
-              style={{ left: `calc(50% + ${x}px - 27px)`, top: `calc(50% + ${y}px - 27px)`, width: '54px' }}
+              style={{ left: `calc(50% + ${x}px - 28px)`, top: `calc(50% + ${y}px - 28px)`, width: '56px' }}
             >
               <div
-                className="w-13 h-13 rounded-2xl flex items-center justify-center text-2xl border-2 border-white/80"
-                style={{
-                  background: 'white',
-                  boxShadow: '0 6px 18px rgba(244, 114, 182, 0.35)',
-                }}
+                className={`w-13 h-13 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl transition-transform ${boxTheme.iconBg}`}
               >
                 {item.emoji}
               </div>
               <span
-                className="text-pink-950 text-[10px] font-bold text-center leading-tight bg-white/85 backdrop-blur-xs px-1.5 py-0.5 rounded-full shadow-xs whitespace-nowrap"
+                className={`text-[10px] font-bold text-center leading-tight px-1.5 py-0.5 rounded-full whitespace-nowrap ${boxTheme.pill}`}
               >
                 {item.label}
               </span>
@@ -1573,25 +1745,25 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
 
         {/* Center 3D Gift Box */}
         <motion.div
-          animate={{ y: [0, -6, 0], rotate: [0, 1.5, -1.5, 0] }}
+          animate={{ y: [0, -7, 0], rotate: [0, 2, -2, 0] }}
           transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-          whileHover={{ scale: 1.15 }}
+          whileHover={{ scale: 1.18 }}
           whileTap={{ scale: 0.9 }}
           onClick={() => setActiveModal('wish')}
-          className="relative z-10 text-6xl cursor-pointer select-none"
+          className="relative z-10 text-6xl sm:text-7xl cursor-pointer select-none"
           title="Tap the gift to make a secret wish! 🎁"
         >
           🎁
           <motion.div
-            animate={{ scale: [1, 1.35, 1], opacity: [0.6, 0, 0.6] }}
+            animate={{ scale: [1, 1.4, 1], opacity: [0.6, 0, 0.6] }}
             transition={{ duration: 2.2, repeat: Infinity }}
-            className="absolute -inset-3 rounded-full"
+            className="absolute -inset-4 rounded-full"
             style={{ background: 'radial-gradient(circle, rgba(255, 105, 180, 0.4) 0%, transparent 70%)' }}
           />
         </motion.div>
       </div>
 
-      <p className="text-pink-800/80 text-xs text-center font-bold font-sans">
+      <p className={`text-xs text-center font-bold font-sans px-4 py-1.5 rounded-full ${boxTheme.pill}`}>
         ✨ Tap any icon or the Gift Box 🎁
       </p>
     </div>
@@ -1621,19 +1793,22 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
             <FilmstripColumn
               position="left"
               galleryItems={project.galleryItems || []}
-              onSelectPhoto={item => setSelectedGalleryPhoto(item)}
+              onOpenFilmstripModal={() => setActiveModal('filmstrip')}
             />
           )}
 
-          {cfg.showDatesFlowchart && (
-            <DatesFlowchart project={project} />
+          {cfg.showDatesFlowchart !== false && (
+            <DatesFlowchart
+              project={project}
+              onOpenModal={() => setActiveModal('dates')}
+            />
           )}
 
           {cfg.showRightFilmstrip !== false && (
             <FilmstripColumn
               position="right"
               galleryItems={project.galleryItems || []}
-              onSelectPhoto={item => setSelectedGalleryPhoto(item)}
+              onOpenFilmstripModal={() => setActiveModal('filmstrip')}
             />
           )}
         </>
@@ -1649,14 +1824,14 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
             </motion.div>
           ) : (
             <motion.div key="diary-view" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}>
-              {/* Home Stage: Phone Framed OR Full Responsive Layout based on setting */}
+              {/* Home Stage: Phone Framed OR Seamless Directly on Homepage */}
               {cfg.enablePhoneFrameAfterPin ? (
                 <PhoneFrame wallpaperUrl={cfg.wallpaperUrl} phoneTheme={phoneThemeKey}>
-                  {renderOrbitalStage()}
+                  {renderOrbitalStage(true)}
                 </PhoneFrame>
               ) : (
-                <div className={`my-6 p-6 sm:p-10 rounded-[38px] ${boxTheme.card} transition-all max-w-2xl mx-auto`}>
-                  {renderOrbitalStage()}
+                <div className="my-6 max-w-3xl mx-auto flex flex-col items-center">
+                  {renderOrbitalStage(false)}
                 </div>
               )}
 
@@ -1672,13 +1847,13 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
                     className={`p-6 sm:p-8 rounded-[32px] ${boxTheme.card} cursor-pointer hover:scale-[1.02] transition-transform`}
                   >
                     <h2 className={`font-serif text-2xl sm:text-3xl font-bold ${boxTheme.title} mb-3`}>
-                      {cfg.heroTagline || `For You, ${project.personTwoName || 'My Love'}`}
+                      {cfg.heroTagline || `FOR YOU, ${project.personTwoName?.toUpperCase() || 'MY LOVE'}`}
                     </h2>
                     <p className={`italic font-medium text-sm leading-relaxed font-sans ${boxTheme.subtitle}`}>
                       {cfg.heroGreetingText || cfg.heroMessage || cfg.welcomePopupText ||
                         `"Every single moment shared with you is a treasure. I built this special memory diary to celebrate your smile, your warmth, and the joy you bring into my life." 💕`}
                     </p>
-                    <span className="inline-block mt-3 text-[11px] font-bold text-pink-600 uppercase tracking-wider">
+                    <span className="inline-block mt-4 text-[11px] font-bold text-pink-600 uppercase tracking-wider">
                       Tap to view opening message ✨
                     </span>
                   </div>
@@ -1686,7 +1861,7 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
 
                 {/* 2. Birthday Cake & Candle Station */}
                 <section>
-                  <BirthdayCakeStation name={project.personTwoName || 'You'} />
+                  <BirthdayCakeStation name={project.personTwoName || 'You'} boxTheme={boxTheme} />
                 </section>
 
                 {/* 3. Our Memories Timeline Section */}
@@ -1717,7 +1892,7 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
                             {m.emoji} {m.title}
                           </h4>
                           {m.description && (
-                            <p className="text-xs text-gray-700 leading-relaxed font-sans mb-3">{m.description}</p>
+                            <p className={`text-xs leading-relaxed font-sans mb-3 ${boxTheme.subtitle}`}>{m.description}</p>
                           )}
                           {m.imageUrl && (
                             <div className="rounded-2xl overflow-hidden border border-pink-100 max-h-56">
@@ -1801,12 +1976,12 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
                     <p className={`text-sm leading-relaxed font-sans mb-4 ${boxTheme.subtitle}`}>
                       {project.endingConfig?.message || 'Thank you for making every single day sweeter and brighter.'}
                     </p>
-                    <p className="font-serif italic font-bold text-pink-700 text-base mb-3">
-                      — With Love, {project.personOneName || 'Me'} 💕
+                    <p className={`font-serif italic font-bold text-base mb-3 ${boxTheme.title}`}>
+                      {project.endingConfig?.endingSignature || `— With Love, ${project.personOneName || 'Me'} 💕`}
                     </p>
                     <button
                       type="button"
-                      className="px-5 py-2 bg-gradient-to-r from-pink-500 to-rose-400 text-white rounded-full text-xs font-bold uppercase tracking-wider shadow-md"
+                      className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider shadow-md ${boxTheme.accentBtn}`}
                     >
                       Read Full Ending Note 💌
                     </button>
@@ -1815,7 +1990,7 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
 
                 {/* 7. Panda Selfie Widget */}
                 {cfg.enableSelfieThankYou && (
-                  <PandaSelfieWidget projectSlug={project.slug} />
+                  <PandaSelfieWidget projectSlug={project.slug} boxTheme={boxTheme} />
                 )}
               </div>
             </motion.div>
@@ -1827,15 +2002,31 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
       {/* MODALS & OVERLAYS */}
       {/* ───────────────────────────────────────────── */}
       <AnimatePresence>
-        {activeModal === 'award' && <AwardModal project={project} onClose={() => setActiveModal(null)} />}
-        {activeModal === 'jar' && <JarModal project={project} onClose={() => setActiveModal(null)} />}
-        {activeModal === 'music' && <MusicModal project={project} onClose={() => setActiveModal(null)} />}
-        {activeModal === 'vows' && <PromiseWallModal project={project} onClose={() => setActiveModal(null)} />}
-        {activeModal === 'memories' && <MemoriesModal project={project} onClose={() => setActiveModal(null)} />}
+        {activeModal === 'award' && <AwardModal project={project} boxTheme={boxTheme} onClose={() => setActiveModal(null)} />}
+        {activeModal === 'jar' && <JarModal project={project} boxTheme={boxTheme} onClose={() => setActiveModal(null)} />}
+        {activeModal === 'music' && <MusicModal project={project} boxTheme={boxTheme} onClose={() => setActiveModal(null)} />}
+        {activeModal === 'vows' && <PromiseWallModal project={project} boxTheme={boxTheme} onClose={() => setActiveModal(null)} />}
+        {activeModal === 'memories' && <MemoriesModal project={project} boxTheme={boxTheme} onClose={() => setActiveModal(null)} />}
+        {activeModal === 'filmstrip' && (
+          <FullscreenFilmstripModal
+            galleryItems={project.galleryItems || []}
+            onSelectPhoto={item => setSelectedGalleryPhoto(item)}
+            onClose={() => setActiveModal(null)}
+            boxTheme={boxTheme}
+          />
+        )}
+        {activeModal === 'dates' && (
+          <FullscreenStoryTrackModal
+            project={project}
+            onClose={() => setActiveModal(null)}
+            boxTheme={boxTheme}
+          />
+        )}
         {activeModal === 'heroNote' && (
           <HeroMessageModal
             tagline={cfg.heroTagline}
             message={cfg.heroGreetingText || cfg.heroMessage || cfg.welcomePopupText}
+            boxTheme={boxTheme}
             onClose={() => setActiveModal(null)}
           />
         )}
@@ -1843,7 +2034,8 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
           <EndingLetterModal
             title={project.endingConfig?.title}
             message={project.endingConfig?.message}
-            signature={project.personOneName || undefined}
+            signature={project.endingConfig?.endingSignature || (project.personOneName ? `— With Love, ${project.personOneName} 💕` : undefined)}
+            boxTheme={boxTheme}
             onClose={() => setActiveModal(null)}
           />
         )}
@@ -1853,6 +2045,7 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
         {activeModal === 'wish' && (
           <MakeAWishModal
             recipientName={project.personTwoName || ''}
+            boxTheme={boxTheme}
             onClose={() => setActiveModal(null)}
             customPrompt={cfg.giftBoxWishPrompt}
           />
@@ -1862,14 +2055,14 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
             onClick={(e) => { if (e.target === e.currentTarget) setActiveModal(null); }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-pink-900/60 backdrop-blur-md"
           >
-            <div className="relative w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl">
+            <div className={`relative w-full max-w-md rounded-3xl p-6 shadow-2xl ${boxTheme.modal}`}>
               <button
                 onClick={() => setActiveModal(null)}
                 className="absolute top-4 right-4 w-8 h-8 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-base cursor-pointer z-50"
               >
                 ✕
               </button>
-              <BirthdayCakeStation name={project.personTwoName || 'You'} onWishSuccess={() => {}} />
+              <BirthdayCakeStation name={project.personTwoName || 'You'} boxTheme={boxTheme} onWishSuccess={() => {}} />
             </div>
           </div>
         )}
@@ -1892,6 +2085,7 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
             emoji={selectedPromise.emoji}
             text={selectedPromise.text}
             secretNote={selectedPromise.secretNote}
+            boxTheme={boxTheme}
             onClose={() => setSelectedPromise(null)}
           />
         )}
