@@ -1947,61 +1947,41 @@ export default function SweetDiaryTheme({ project, initialUnlocked = false }: { 
       <WhiteHeartsTrail />
 
       {/* Side Panels */}
-      {unlocked && (
-        <>
-          {cfg.showLeftFilmstrip && (
-            <FilmstripColumn
-              position="left"
-              galleryItems={project.galleryItems || []}
-              onOpenFilmstripModal={() => setActiveModal('filmstrip')}
-            />
-          )}
+      {cfg.showLeftFilmstrip && (
+        <FilmstripColumn
+          position="left"
+          galleryItems={project.galleryItems || []}
+          onOpenFilmstripModal={() => setActiveModal('filmstrip')}
+        />
+      )}
 
-          {cfg.showDatesFlowchart !== false && (
-            <DatesFlowchart
-              project={project}
-              onOpenModal={() => setActiveModal('dates')}
-            />
-          )}
+      {cfg.showDatesFlowchart !== false && (
+        <DatesFlowchart
+          project={project}
+          onOpenModal={() => setActiveModal('dates')}
+        />
+      )}
 
-          {cfg.showRightFilmstrip !== false && (
-            <FilmstripColumn
-              position="right"
-              galleryItems={project.galleryItems || []}
-              onOpenFilmstripModal={() => setActiveModal('filmstrip')}
-            />
-          )}
-        </>
+      {cfg.showRightFilmstrip !== false && (
+        <FilmstripColumn
+          position="right"
+          galleryItems={project.galleryItems || []}
+          onOpenFilmstripModal={() => setActiveModal('filmstrip')}
+        />
       )}
 
       <div className="relative z-10 max-w-4xl mx-auto px-4 py-6 sm:py-10">
-        <AnimatePresence mode="wait">
-          {!unlocked ? (
-            <motion.div key="lock-view" initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }}>
-              <PhoneFrame wallpaperUrl={cfg.wallpaperUrl} phoneTheme={phoneThemeKey}>
-                <PasscodeScreen
-                  correctCode={passcode}
-                  onUnlock={() => setUnlocked(true)}
-                  title={cfg.passcodeTitle}
-                  subtitle={cfg.passcodeSubtitle}
-                  showGreeting={cfg.showPasscodeGreeting !== false}
-                  greetingPosition={cfg.passcodeGreetingPosition || 'top'}
-                  cardOpacity={cfg.passcodeCardOpacity !== undefined ? Number(cfg.passcodeCardOpacity) : 30}
-                />
-              </PhoneFrame>
-            </motion.div>
+        <motion.div key="diary-view" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}>
+          {/* Home Stage: Phone Framed OR Seamless Directly on Homepage */}
+          {cfg.enablePhoneFrameAfterPin ? (
+            <PhoneFrame wallpaperUrl={cfg.wallpaperUrl} phoneTheme={phoneThemeKey}>
+              {renderOrbitalStage(true)}
+            </PhoneFrame>
           ) : (
-            <motion.div key="diary-view" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}>
-              {/* Home Stage: Phone Framed OR Seamless Directly on Homepage */}
-              {cfg.enablePhoneFrameAfterPin ? (
-                <PhoneFrame wallpaperUrl={cfg.wallpaperUrl} phoneTheme={phoneThemeKey}>
-                  {renderOrbitalStage(true)}
-                </PhoneFrame>
-              ) : (
-                <div className="my-6 max-w-3xl mx-auto flex flex-col items-center">
-                  {renderOrbitalStage(false)}
-                </div>
-              )}
+            <div className="my-6 max-w-3xl mx-auto flex flex-col items-center">
+              {renderOrbitalStage(false)}
+            </div>
+          )}
 
               {/* ───────────────────────────────────────────── */}
               {/* SCROLLABLE STORY SECTIONS BELOW */}
@@ -2216,9 +2196,7 @@ export default function SweetDiaryTheme({ project, initialUnlocked = false }: { 
                 )}
               </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+          </div>
 
       {/* ───────────────────────────────────────────── */}
       {/* MODALS & OVERLAYS */}
