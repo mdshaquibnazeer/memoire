@@ -348,6 +348,7 @@ export default function EditProjectPage() {
               </Field>
             </Section>
 
+            {project?.theme !== 'VELVET_ROMANCE' && (
             <Section title="🎊 Celebration Settings (Celestial Birthday)">
               <Field label="Celebrate Text (max 30 words)">
                 <input value={form.celebrateText} onChange={e => {
