@@ -1784,11 +1784,10 @@ function GrandFinaleOverlay({
 // ─────────────────────────────────────────────
 type ModalType = 'award' | 'memories' | 'letter' | 'jar' | 'music' | 'vows' | 'video' | 'wish' | 'cake' | 'heroNote' | 'endingNote' | 'filmstrip' | 'dates' | 'finale' | null;
 
-export default function SweetDiaryTheme({ project, initialUnlocked = false }: { project: Project; initialUnlocked?: boolean }) {
+export default function SweetDiaryTheme({ project }: { project: Project }) {
   const cfg = project.heroConfig || {};
-  const isPhoneUnlockEnabled = cfg.enablePhoneUnlock !== false;
   const passcode = project.isPasswordProtected && project.accessPassword ? project.accessPassword : (cfg.passcode || '1234');
-  const [unlocked, setUnlocked] = useState(initialUnlocked || !isPhoneUnlockEnabled);
+  const [unlocked, setUnlocked] = useState(false);
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [selectedGalleryPhoto, setSelectedGalleryPhoto] = useState<GalleryItem | null>(null);
   const [selectedPromise, setSelectedPromise] = useState<any | null>(null);
@@ -1947,41 +1946,61 @@ export default function SweetDiaryTheme({ project, initialUnlocked = false }: { 
       <WhiteHeartsTrail />
 
       {/* Side Panels */}
-      {cfg.showLeftFilmstrip && (
-        <FilmstripColumn
-          position="left"
-          galleryItems={project.galleryItems || []}
-          onOpenFilmstripModal={() => setActiveModal('filmstrip')}
-        />
-      )}
+      {unlocked && (
+        <>
+          {cfg.showLeftFilmstrip && (
+            <FilmstripColumn
+              position="left"
+              galleryItems={project.galleryItems || []}
+              onOpenFilmstripModal={() => setActiveModal('filmstrip')}
+            />
+          )}
 
-      {cfg.showDatesFlowchart !== false && (
-        <DatesFlowchart
-          project={project}
-          onOpenModal={() => setActiveModal('dates')}
-        />
-      )}
+          {cfg.showDatesFlowchart !== false && (
+            <DatesFlowchart
+              project={project}
+              onOpenModal={() => setActiveModal('dates')}
+            />
+          )}
 
-      {cfg.showRightFilmstrip !== false && (
-        <FilmstripColumn
-          position="right"
-          galleryItems={project.galleryItems || []}
-          onOpenFilmstripModal={() => setActiveModal('filmstrip')}
-        />
+          {cfg.showRightFilmstrip !== false && (
+            <FilmstripColumn
+              position="right"
+              galleryItems={project.galleryItems || []}
+              onOpenFilmstripModal={() => setActiveModal('filmstrip')}
+            />
+          )}
+        </>
       )}
 
       <div className="relative z-10 max-w-4xl mx-auto px-4 py-6 sm:py-10">
-        <motion.div key="diary-view" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}>
-          {/* Home Stage: Phone Framed OR Seamless Directly on Homepage */}
-          {cfg.enablePhoneFrameAfterPin ? (
-            <PhoneFrame wallpaperUrl={cfg.wallpaperUrl} phoneTheme={phoneThemeKey}>
-              {renderOrbitalStage(true)}
-            </PhoneFrame>
+        <AnimatePresence mode="wait">
+          {!unlocked ? (
+            <motion.div key="lock-view" initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }}>
+              <PhoneFrame wallpaperUrl={cfg.wallpaperUrl} phoneTheme={phoneThemeKey}>
+                <PasscodeScreen
+                  correctCode={passcode}
+                  onUnlock={() => setUnlocked(true)}
+                  title={cfg.passcodeTitle}
+                  subtitle={cfg.passcodeSubtitle}
+                  showGreeting={cfg.showPasscodeGreeting !== false}
+                  greetingPosition={cfg.passcodeGreetingPosition || 'top'}
+                  cardOpacity={cfg.passcodeCardOpacity !== undefined ? Number(cfg.passcodeCardOpacity) : 30}
+                />
+              </PhoneFrame>
+            </motion.div>
           ) : (
-            <div className="my-6 max-w-3xl mx-auto flex flex-col items-center">
-              {renderOrbitalStage(false)}
-            </div>
-          )}
+            <motion.div key="diary-view" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}>
+              {/* Home Stage: Phone Framed OR Seamless Directly on Homepage */}
+              {cfg.enablePhoneFrameAfterPin ? (
+                <PhoneFrame wallpaperUrl={cfg.wallpaperUrl} phoneTheme={phoneThemeKey}>
+                  {renderOrbitalStage(true)}
+                </PhoneFrame>
+              ) : (
+                <div className="my-6 max-w-3xl mx-auto flex flex-col items-center">
+                  {renderOrbitalStage(false)}
+                </div>
+              )}
 
               {/* ───────────────────────────────────────────── */}
               {/* SCROLLABLE STORY SECTIONS BELOW */}
@@ -2196,7 +2215,9 @@ export default function SweetDiaryTheme({ project, initialUnlocked = false }: { 
                 )}
               </div>
             </motion.div>
-          </div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* ───────────────────────────────────────────── */}
       {/* MODALS & OVERLAYS */}
