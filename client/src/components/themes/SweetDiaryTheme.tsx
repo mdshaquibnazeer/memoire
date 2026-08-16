@@ -345,7 +345,7 @@ function PhoneFrame({
 }
 
 // ─────────────────────────────────────────────
-// PASSCODE SCREEN (CLEAN, ROMANTIC & ADJUSTABLE)
+// PASSCODE SCREEN (CLEAN, ADJUSTABLE & ERGONOMIC)
 // ─────────────────────────────────────────────
 function PasscodeScreen({
   correctCode,
@@ -353,12 +353,16 @@ function PasscodeScreen({
   title,
   subtitle,
   showGreeting = true,
+  greetingPosition = 'top',
+  cardOpacity = 30,
 }: {
   correctCode: string;
   onUnlock: () => void;
   title?: string;
   subtitle?: string;
   showGreeting?: boolean;
+  greetingPosition?: 'top' | 'above-pin';
+  cardOpacity?: number;
 }) {
   const [input, setInput] = useState('');
   const [shake, setShake] = useState(false);
@@ -388,72 +392,93 @@ function PasscodeScreen({
   };
 
   const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', 'del'];
+  const opacityVal = Math.max(0, Math.min(90, cardOpacity ?? 30)) / 100;
+
+  const greetingCard = showGreeting !== false ? (
+    <div
+      className="flex flex-col items-center px-5 py-3 rounded-2xl border border-white/20 shadow-lg text-center max-w-[270px] backdrop-blur-md transition-all"
+      style={{
+        background: `rgba(0, 0, 0, ${opacityVal})`,
+      }}
+    >
+      <motion.div
+        animate={{ scale: [1, 1.15, 1] }}
+        transition={{ duration: 2.2, repeat: Infinity }}
+        className="w-9 h-9 rounded-full flex items-center justify-center text-lg bg-white/25 border border-white/40 mb-1 shadow-sm"
+      >
+        🔒
+      </motion.div>
+      <h2 className="text-base font-bold text-white font-serif tracking-wide drop-shadow-md">
+        {title || 'Welcome, My Love 🌸'}
+      </h2>
+      <p className="text-[11px] text-white/90 font-medium font-sans drop-shadow-xs mt-0.5">
+        {subtitle || 'Enter your 4-digit secret PIN'}
+      </p>
+    </div>
+  ) : null;
 
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex-1 flex flex-col items-center justify-between py-6 px-2"
+      className={`flex-1 flex flex-col items-center px-2 pb-6 pt-2 ${
+        greetingPosition === 'top' ? 'justify-between' : 'justify-end gap-5'
+      }`}
     >
-      {/* Top Header / Greeting Card with High-Legibility Semi-Transparent Backdrop */}
-      {showGreeting !== false && (
-        <div className="flex flex-col items-center mt-1 px-5 py-3 rounded-2xl bg-black/25 backdrop-blur-md border border-white/20 shadow-lg text-center max-w-[270px]">
-          <motion.div
-            animate={{ scale: [1, 1.15, 1] }}
-            transition={{ duration: 2.2, repeat: Infinity }}
-            className="w-10 h-10 rounded-full flex items-center justify-center text-xl bg-white/25 border border-white/40 mb-1.5 shadow-sm"
-          >
-            🔒
-          </motion.div>
-          <h2 className="text-base font-bold text-white font-serif tracking-wide drop-shadow-md">
-            {title || 'Welcome, My Love 🌸'}
-          </h2>
-          <p className="text-[11px] text-white/90 font-medium font-sans drop-shadow-xs mt-0.5">
-            {subtitle || 'Enter your 4-digit secret PIN'}
-          </p>
+      {/* Top Greeting Position */}
+      {greetingPosition === 'top' && (
+        <div className="mt-2 flex justify-center w-full">
+          {greetingCard}
         </div>
       )}
 
-      {/* Passcode Indicator Dots */}
-      <div className="flex flex-col items-center my-3">
-        <motion.div
-          animate={shake ? { x: [-10, 10, -10, 10, 0] } : {}}
-          transition={{ duration: 0.4 }}
-          className="flex gap-4 mb-2"
-        >
-          {Array.from({ length: correctCode.length }).map((_, i) => (
-            <motion.div
-              key={i}
-              animate={input.length > i ? { scale: [1, 1.35, 1] } : {}}
-              className={`w-3.5 h-3.5 rounded-full transition-all duration-200 border-2 ${
-                input.length > i
-                  ? 'bg-pink-500 border-white shadow-md shadow-pink-500/60'
-                  : 'border-white/70 bg-white/30 backdrop-blur-xs'
-              }`}
-            />
-          ))}
-        </motion.div>
-        {hint && (
-          <p className="text-rose-200 text-xs font-bold font-sans bg-rose-900/60 px-3 py-1 rounded-full border border-rose-400/40 animate-pulse">
-            {hint}
-          </p>
-        )}
-      </div>
+      {/* Group: (Greeting if above-pin) + PIN Dots + PIN Keypad positioned lower */}
+      <div className="flex flex-col items-center w-full max-w-[270px] space-y-4">
+        {/* Above-PIN Greeting Position */}
+        {greetingPosition === 'above-pin' && greetingCard}
 
-      {/* Aesthetic Frosted Glass PIN Pad */}
-      <div
-        className="grid grid-cols-3 gap-2.5 w-full max-w-[270px] p-3.5 rounded-3xl backdrop-blur-xl bg-black/25 border border-white/25 shadow-2xl"
-      >
-        {keys.map(k => (
-          <motion.button
-            key={k}
-            whileTap={{ scale: 0.88 }}
-            onClick={() => press(k)}
-            className="flex items-center justify-center h-12 rounded-2xl text-lg font-bold cursor-pointer select-none transition-all bg-white/80 hover:bg-white text-pink-950 shadow-sm border border-white/60 active:bg-pink-100"
+        {/* Passcode Indicator Dots */}
+        <div className="flex flex-col items-center">
+          <motion.div
+            animate={shake ? { x: [-10, 10, -10, 10, 0] } : {}}
+            transition={{ duration: 0.4 }}
+            className="flex gap-4 mb-1"
           >
-            {k === 'del' ? '⌫' : k}
-          </motion.button>
-        ))}
+            {Array.from({ length: correctCode.length }).map((_, i) => (
+              <motion.div
+                key={i}
+                animate={input.length > i ? { scale: [1, 1.35, 1] } : {}}
+                className={`w-3.5 h-3.5 rounded-full transition-all duration-200 border-2 ${
+                  input.length > i
+                    ? 'bg-pink-500 border-white shadow-md shadow-pink-500/60'
+                    : 'border-white/70 bg-white/30 backdrop-blur-xs'
+                }`}
+              />
+            ))}
+          </motion.div>
+          {hint && (
+            <p className="text-rose-200 text-xs font-bold font-sans bg-rose-900/70 px-3 py-0.5 rounded-full border border-rose-400/40 animate-pulse mt-1">
+              {hint}
+            </p>
+          )}
+        </div>
+
+        {/* Aesthetic Frosted Glass PIN Pad (Ergonomic & Proportional) */}
+        <div
+          className="grid grid-cols-3 gap-2.5 w-full p-3.5 rounded-3xl backdrop-blur-xl border border-white/25 shadow-2xl"
+          style={{ background: `rgba(0, 0, 0, ${Math.max(0.15, opacityVal)})` }}
+        >
+          {keys.map(k => (
+            <motion.button
+              key={k}
+              whileTap={{ scale: 0.88 }}
+              onClick={() => press(k)}
+              className="flex items-center justify-center h-12 rounded-2xl text-lg font-bold cursor-pointer select-none transition-all bg-white/85 hover:bg-white text-pink-950 shadow-sm border border-white/60 active:bg-pink-100"
+            >
+              {k === 'del' ? '⌫' : k}
+            </motion.button>
+          ))}
+        </div>
       </div>
     </motion.div>
   );
@@ -858,7 +883,7 @@ function BirthdayCakeStation({
 }
 
 // ─────────────────────────────────────────────
-// HERO MESSAGE POPUP MODAL (TAGLINE CLICK)
+// HERO MESSAGE POPUP MODAL (FULL TEXT DISPLAY)
 // ─────────────────────────────────────────────
 function HeroMessageModal({
   tagline,
@@ -895,9 +920,9 @@ function HeroMessageModal({
         <h3 className={`font-serif font-bold text-xl mb-2 ${boxTheme.title}`}>
           {tagline || 'Hero Opening Note'}
         </h3>
-        <div className={`p-4 rounded-2xl ${boxTheme.itemCard} text-sm leading-relaxed font-sans text-left my-4`}>
+        <div className={`p-5 rounded-2xl ${boxTheme.itemCard} text-sm leading-relaxed font-sans text-left my-4`}>
           <p className="whitespace-pre-wrap italic font-medium">
-            {message || 'No opening message specified yet.'}
+            {message || 'Every single moment shared with you is a treasure. I built this special memory diary to celebrate your smile, your warmth, and the joy you bring into my life. 💕'}
           </p>
         </div>
         <button
@@ -912,7 +937,7 @@ function HeroMessageModal({
 }
 
 // ─────────────────────────────────────────────
-// ENDING LETTER POPUP MODAL
+// ENDING LETTER POPUP MODAL (FULL TEXT DISPLAY)
 // ─────────────────────────────────────────────
 function EndingLetterModal({
   title,
@@ -1823,6 +1848,8 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
                   title={cfg.passcodeTitle}
                   subtitle={cfg.passcodeSubtitle}
                   showGreeting={cfg.showPasscodeGreeting !== false}
+                  greetingPosition={cfg.passcodeGreetingPosition || 'top'}
+                  cardOpacity={cfg.passcodeCardOpacity !== undefined ? Number(cfg.passcodeCardOpacity) : 30}
                 />
               </PhoneFrame>
             </motion.div>
@@ -1843,23 +1870,23 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
               {/* SCROLLABLE STORY SECTIONS BELOW */}
               {/* ───────────────────────────────────────────── */}
               <div className="mt-12 space-y-16">
-                {/* 1. Hero Greeting Note / Clickable Tagline */}
+                {/* 1. Hero Greeting Note Card (Shows ONLY Tagline & Teaser; Full text revealed in Popup Modal) */}
                 <section className="text-center max-w-xl mx-auto px-4">
-                  <span className="text-3xl mb-2 block animate-pulse">💌</span>
                   <div
                     onClick={() => setActiveModal('heroNote')}
                     className={`p-6 sm:p-8 rounded-[32px] ${boxTheme.card} cursor-pointer hover:scale-[1.02] transition-transform`}
                   >
-                    <h2 className={`font-serif text-2xl sm:text-3xl font-bold ${boxTheme.title} mb-3`}>
-                      {cfg.heroTagline || `FOR YOU, ${project.personTwoName?.toUpperCase() || 'MY LOVE'}`}
+                    <h2 className={`font-serif text-2xl sm:text-3xl font-bold ${boxTheme.title} mb-2`}>
+                      {cfg.heroTagline || `FOR YOU MY CARINO 🤍`}
                     </h2>
-                    <p className={`italic font-medium text-sm leading-relaxed font-sans ${boxTheme.subtitle}`}>
-                      {cfg.heroGreetingText || cfg.heroMessage || cfg.welcomePopupText ||
-                        `"Every single moment shared with you is a treasure. I built this special memory diary to celebrate your smile, your warmth, and the joy you bring into my life." 💕`}
+                    <p className={`italic font-semibold text-sm sm:text-base font-sans my-3 ${boxTheme.subtitle}`}>
+                      {cfg.heroTeaserText || cfg.welcomePopupText || `CLICKK KROO MOTIII 🫣🥹`}
                     </p>
-                    <span className="inline-block mt-4 text-[11px] font-bold text-pink-600 uppercase tracking-wider">
-                      Tap to view opening message ✨
-                    </span>
+                    <div className="mt-4 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/90 border border-pink-300/80 shadow-xs">
+                      <span className="text-[11px] font-extrabold text-pink-600 uppercase tracking-widest">
+                        TAP TO VIEW OPENING MESSAGE ✨
+                      </span>
+                    </div>
                   </div>
                 </section>
 
@@ -1967,7 +1994,7 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
                   </section>
                 )}
 
-                {/* 6. Closing Section (Themed Box + Popup Trigger) */}
+                {/* 6. Closing Section (Themed Box + Popup Trigger; Full text revealed in Modal) */}
                 <section className="text-center max-w-xl mx-auto px-4 pt-6">
                   <div
                     onClick={() => setActiveModal('endingNote')}
@@ -1977,15 +2004,15 @@ export default function SweetDiaryTheme({ project }: { project: Project }) {
                     <h3 className={`font-serif text-2xl font-bold ${boxTheme.title} mb-2`}>
                       {project.endingConfig?.title || 'Forever & Always'}
                     </h3>
-                    <p className={`text-sm leading-relaxed font-sans mb-4 ${boxTheme.subtitle}`}>
-                      {project.endingConfig?.message || 'Thank you for making every single day sweeter and brighter.'}
+                    <p className={`text-xs italic font-medium font-sans mb-3 ${boxTheme.subtitle}`}>
+                      A final heartfelt note written with all my love 💕
                     </p>
-                    <p className={`font-serif italic font-bold text-base mb-3 ${boxTheme.title}`}>
+                    <p className={`font-serif italic font-bold text-base mb-4 ${boxTheme.title}`}>
                       {project.endingConfig?.endingSignature || `— With Love, ${project.personOneName || 'Me'} 💕`}
                     </p>
                     <button
                       type="button"
-                      className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider shadow-md ${boxTheme.accentBtn}`}
+                      className={`px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-md ${boxTheme.accentBtn}`}
                     >
                       Read Full Ending Note 💌
                     </button>

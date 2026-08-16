@@ -96,6 +96,8 @@ export default function EditProjectPage() {
         secretVideoCaption: data.project.heroConfig?.secretVideoCaption || '',
         passcodeTitle: data.project.heroConfig?.passcodeTitle || '',
         passcodeSubtitle: data.project.heroConfig?.passcodeSubtitle || '',
+        passcodeGreetingPosition: data.project.heroConfig?.passcodeGreetingPosition || 'top',
+        passcodeCardOpacity: data.project.heroConfig?.passcodeCardOpacity !== undefined ? data.project.heroConfig.passcodeCardOpacity : 30,
         showPasscodeGreeting: data.project.heroConfig?.showPasscodeGreeting !== undefined ? data.project.heroConfig.showPasscodeGreeting : true,
         enableSelfieThankYou: data.project.heroConfig?.enableSelfieThankYou !== undefined ? data.project.heroConfig.enableSelfieThankYou : false,
         showCameraRollStrip: data.project.heroConfig?.showCameraRollStrip !== undefined ? data.project.heroConfig.showCameraRollStrip : true,
@@ -106,6 +108,7 @@ export default function EditProjectPage() {
         boxTheme: data.project.heroConfig?.boxTheme || 'frosted-rose',
         phoneTheme: data.project.heroConfig?.phoneTheme || 'rose-gold',
         heroGreetingText: data.project.heroConfig?.heroGreetingText || '',
+        heroTeaserText: data.project.heroConfig?.heroTeaserText || '',
         giftBoxWishPrompt: data.project.heroConfig?.giftBoxWishPrompt || '',
         selfies: data.project.heroConfig?.selfies || [],
       });
@@ -168,6 +171,8 @@ export default function EditProjectPage() {
           secretVideoCaption: form.secretVideoCaption,
           passcodeTitle: form.passcodeTitle,
           passcodeSubtitle: form.passcodeSubtitle,
+          passcodeGreetingPosition: form.passcodeGreetingPosition || 'top',
+          passcodeCardOpacity: Number(form.passcodeCardOpacity !== undefined ? form.passcodeCardOpacity : 30),
           showPasscodeGreeting: form.showPasscodeGreeting !== undefined ? form.showPasscodeGreeting : true,
           enableSelfieThankYou: form.enableSelfieThankYou,
           showCameraRollStrip: form.showCameraRollStrip !== undefined ? form.showCameraRollStrip : true,
@@ -178,6 +183,7 @@ export default function EditProjectPage() {
           boxTheme: form.boxTheme || 'frosted-rose',
           phoneTheme: form.phoneTheme || 'rose-gold',
           heroGreetingText: form.heroGreetingText,
+          heroTeaserText: form.heroTeaserText,
           giftBoxWishPrompt: form.giftBoxWishPrompt,
           selfies: form.selfies || [],
         },
@@ -541,7 +547,18 @@ export default function EditProjectPage() {
                   className="input-romantic resize-none font-sans text-sm"
                 />
                 <p className="text-[11px] text-rose-cream/40 mt-1 font-sans">
-                  Appears in the story intro section right below the mobile phone frame. (If left blank, it automatically uses your Hero Opening Message).
+                  Full text revealed inside the popup when the recipient clicks the hero card. (If left blank, defaults to your Hero Opening Message).
+                </p>
+              </Field>
+              <Field label="Hero Card Teaser Line (Shown on Homepage Card)">
+                <input
+                  value={form.heroTeaserText}
+                  onChange={e => update('heroTeaserText', e.target.value)}
+                  placeholder="CLICKK KROO MOTIII 🫣🥹"
+                  className="input-romantic"
+                />
+                <p className="text-[11px] text-rose-cream/40 mt-1 font-sans">
+                  Short teaser line on the homepage card (the full message is revealed inside the popup).
                 </p>
               </Field>
               <Field label="Gift Box Surprise Wish Prompt">
@@ -599,6 +616,31 @@ export default function EditProjectPage() {
                 >
                   <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${form.showPasscodeGreeting !== false ? 'left-7' : 'left-1'}`} />
                 </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
+                <Field label="Greeting Card Position">
+                  <select
+                    value={form.passcodeGreetingPosition || 'top'}
+                    onChange={e => update('passcodeGreetingPosition', e.target.value)}
+                    className="input-romantic bg-noir-midnight"
+                  >
+                    <option value="top">Top of Phone Screen (Normal)</option>
+                    <option value="above-pin">Just Above PIN Pad</option>
+                  </select>
+                </Field>
+
+                <Field label={`Card Background Opacity (${form.passcodeCardOpacity ?? 30}%)`}>
+                  <input
+                    type="range"
+                    min="0"
+                    max="90"
+                    step="5"
+                    value={form.passcodeCardOpacity ?? 30}
+                    onChange={e => update('passcodeCardOpacity', Number(e.target.value))}
+                    className="w-full accent-pink-500 cursor-pointer mt-2"
+                  />
+                </Field>
               </div>
 
               <Field label="Passcode Screen Title">
