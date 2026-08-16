@@ -160,6 +160,7 @@ enum ThemeName {
   SCRAPBOOK_LOVE
   AURORA_DREAMS
   CELESTIAL_BIRTHDAY
+  SWEET_DIARY
 }
 
 enum MediaType {

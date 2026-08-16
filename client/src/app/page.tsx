@@ -49,6 +49,14 @@ const themes = [
     accent: '#ff69b4',
     preview: '🎂',
   },
+  {
+    id: 'SWEET_DIARY',
+    name: 'Sweet Diary Box',
+    description: 'Passcode-locked pink diary with gift box menu, love letter, jar of reasons & music player',
+    gradient: 'from-pink-400/30 via-rose-300/20 to-noir-midnight',
+    accent: '#ff8da1',
+    preview: '🎁',
+  },
 ];
 
 const features = [

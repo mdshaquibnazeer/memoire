@@ -249,6 +249,99 @@ export const DEMO_PROJECTS = [
       }
     ],
     _count: { memories: 1, galleryItems: 1 }
+  },
+  {
+    id: 'demo-sweet-diary',
+    slug: 'demo-sweet-diary',
+    userId: 'system-demo',
+    title: 'My Sweet Diary',
+    subtitle: 'A little gift, wrapped with love 🎁',
+    theme: 'SWEET_DIARY',
+    status: 'PUBLISHED',
+    personOneName: 'Sofia',
+    personTwoName: 'Mia',
+    occasion: 'Birthday',
+    startDate: new Date('2026-08-16T00:00:00.000Z'),
+    coverImageUrl: '/images/demo/demo_sweet_diary.png',
+    backgroundMusicUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3',
+    heroConfig: {
+      passcode: '1234',
+      message: 'Happy Birthday, Mia! This little diary holds all the reasons why you are my favourite person in the entire universe. Open each section and feel all the love! 💕',
+      celebrateText: 'Happy Birthday Mia! 🎂',
+      welcomePopupText: 'A Sweet Gift Just For You 🎀',
+      awardTitle: 'Lifetime Bestie Award',
+      awardDescription: 'Presented to Mia for being the most beautiful, kind-hearted and funniest human being I have ever had the privilege of calling my best friend.',
+      jarReasons: [
+        'Your contagious laughter',
+        'How you always know what to say',
+        'Our late night conversations',
+        'Your kind and warm heart',
+        'The way you light up every room',
+        'Our adventures together',
+        'How you make everything fun',
+        'Your genuine smile'
+      ],
+      loveLetterText: 'My dearest Mia, on your special day, I want you to know that knowing you has been one of the greatest gifts of my life. You are sunshine on a cloudy day, laughter in a quiet room, and warmth in the coldest winter. Happy Birthday to the most wonderful person I know. With all my love forever.',
+      vinylSong: 'Happy Birthday',
+      vinylArtist: 'With Love, Sofia'
+    },
+    endingConfig: {
+      title: 'Happy Birthday! 🎉',
+      message: 'May your day be as magical and beautiful as you are. Love you always!'
+    },
+    viewCount: 512,
+    publishedAt: new Date('2026-08-16T00:00:00.000Z'),
+    createdAt: new Date('2026-08-16T00:00:00.000Z'),
+    updatedAt: new Date('2026-08-16T00:00:00.000Z'),
+    user: {
+      id: 'system-demo',
+      displayName: 'Mémoire Showcase',
+      isSuspended: false,
+      themeExpirations: {}
+    },
+    memories: [
+      {
+        id: 'demo-m1-sweet-diary',
+        projectId: 'demo-sweet-diary',
+        title: 'The Day We Met',
+        description: 'A friendship that changed everything. From that first day, I knew you were going to be someone very special in my life.',
+        date: new Date('2022-06-01T00:00:00.000Z'),
+        imageUrl: '/images/demo/demo_sweet_diary.png',
+        emoji: '🌸',
+        sortOrder: 0
+      },
+      {
+        id: 'demo-m2-sweet-diary',
+        projectId: 'demo-sweet-diary',
+        title: 'Our Best Adventure',
+        description: 'That road trip we planned last minute turned into the most beautiful memory I have ever made.',
+        date: new Date('2023-12-20T00:00:00.000Z'),
+        imageUrl: '/images/demo/demo_sweet_diary.png',
+        emoji: '🗺️',
+        sortOrder: 1
+      },
+      {
+        id: 'demo-m3-sweet-diary',
+        projectId: 'demo-sweet-diary',
+        title: 'Laughing Until We Cried',
+        description: 'There are moments in life you wish could last forever. This was definitely one of them.',
+        date: new Date('2024-03-15T00:00:00.000Z'),
+        imageUrl: '/images/demo/demo_sweet_diary.png',
+        emoji: '😂',
+        sortOrder: 2
+      }
+    ],
+    galleryItems: [
+      {
+        id: 'demo-g1-sweet-diary',
+        projectId: 'demo-sweet-diary',
+        mediaUrl: '/images/demo/demo_sweet_diary.png',
+        mediaType: 'IMAGE',
+        caption: 'Us, always 💕',
+        sortOrder: 0
+      }
+    ],
+    _count: { memories: 3, galleryItems: 1 }
   }
 ];
 

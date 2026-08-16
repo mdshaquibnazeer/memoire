@@ -50,6 +50,14 @@ const THEMES = [
     gradient: 'from-pink-600 via-purple-700 to-purple-900',
     accent: '#ff69b4',
   },
+  {
+    id: 'SWEET_DIARY',
+    name: 'Sweet Diary Box',
+    desc: 'Pink kawaii diary with passcode lock, gift box menu, love letter & jar of reasons',
+    preview: '🎁',
+    gradient: 'from-pink-300 via-pink-400 to-rose-400',
+    accent: '#ff8da1',
+  },
 ];
 
 const OCCASIONS = [
