@@ -127,6 +127,10 @@ export default function EditProjectPage() {
         awardRecipientName: data.project.heroConfig?.awardRecipientName || '',
         awardDescription: data.project.heroConfig?.awardDescription || '',
         awardSignerName: data.project.heroConfig?.awardSignerName || '',
+        ourSongTitle: data.project.heroConfig?.ourSongTitle || '',
+        ourSongArtist: data.project.heroConfig?.ourSongArtist || '',
+        ourSongUrl: data.project.heroConfig?.ourSongUrl || '',
+        ourSongNote: data.project.heroConfig?.ourSongNote || '',
         selfies: data.project.heroConfig?.selfies || [],
       });
     }).catch(() => {
@@ -222,6 +226,10 @@ export default function EditProjectPage() {
           awardRecipientName: form.awardRecipientName,
           awardDescription: form.awardDescription,
           awardSignerName: form.awardSignerName,
+          ourSongTitle: form.ourSongTitle,
+          ourSongArtist: form.ourSongArtist,
+          ourSongUrl: form.ourSongUrl,
+          ourSongNote: form.ourSongNote,
           selfies: form.selfies || [],
         },
         endingConfig: { 
@@ -790,6 +798,52 @@ export default function EditProjectPage() {
                   onChange={e => update('awardSignerName', e.target.value)}
                   placeholder={form.personOneName || "Sender"}
                   className="input-romantic"
+                />
+              </Field>
+            </Section>
+
+            <Section title="🎵 Dedicated Song & Music Player ('Our Song')">
+              <Field label="Dedicated Song Title">
+                <input
+                  value={form.ourSongTitle}
+                  onChange={e => update('ourSongTitle', e.target.value)}
+                  placeholder="Our Special Song 🎵"
+                  className="input-romantic"
+                />
+              </Field>
+              <Field label="Artist / Dedicated By">
+                <input
+                  value={form.ourSongArtist}
+                  onChange={e => update('ourSongArtist', e.target.value)}
+                  placeholder="The melody of our hearts 💕"
+                  className="input-romantic"
+                />
+              </Field>
+              <Field label="Dedicated Audio Track or MP4 Video Song URL">
+                <input
+                  value={form.ourSongUrl}
+                  onChange={e => update('ourSongUrl', e.target.value)}
+                  placeholder="https://... or /music/..."
+                  className="input-romantic mb-3"
+                />
+                <MediaUploader
+                  projectId={id as string}
+                  accept="all"
+                  maxFiles={1}
+                  label="Upload MP3 audio or MP4 video song"
+                  onUpload={({ url }) => update('ourSongUrl', url)}
+                />
+                <p className="text-[11px] text-rose-cream/40 mt-1 font-sans">
+                  Upload an MP3 audio track or an MP4 video song dedicated to your recipient.
+                </p>
+              </Field>
+              <Field label="Special Love Dedication Note">
+                <textarea
+                  value={form.ourSongNote}
+                  onChange={e => update('ourSongNote', e.target.value)}
+                  placeholder="Every time I listen to this, I think of your beautiful smile and all the magical memories we share... 💕"
+                  rows={2}
+                  className="input-romantic resize-none"
                 />
               </Field>
             </Section>

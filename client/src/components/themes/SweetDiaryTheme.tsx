@@ -1687,38 +1687,97 @@ function JarModal({ project, onClose, boxTheme }: { project: Project; onClose: (
 }
 
 // ─────────────────────────────────────────────
-// MUSIC PLAYER MODAL
+// MUSIC PLAYER / DEDICATED SONG MODAL ('OUR SONG')
 // ─────────────────────────────────────────────
 function MusicModal({ project, onClose, boxTheme }: { project: Project; onClose: () => void; boxTheme: ThemeStyles }) {
+  const cfg = project.heroConfig || {};
+  const songUrl = cfg.ourSongUrl || project.backgroundMusicUrl || '/music/celebration.mp3';
+  const songTitle = cfg.ourSongTitle || 'Our Dedicated Song';
+  const songArtist = cfg.ourSongArtist || (project.personOneName ? `Dedicated with love by ${project.personOneName} 💕` : 'The melody of our story 💕');
+  const songNote = cfg.ourSongNote || 'Every time I hear this song, I think of you and all our sweet moments together.';
+
+  const isVideo = songUrl && (
+    songUrl.endsWith('.mp4') ||
+    songUrl.endsWith('.webm') ||
+    songUrl.endsWith('.mov') ||
+    songUrl.includes('/video/')
+  );
+
   return (
     <div
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-pink-900/60 backdrop-blur-md"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-pink-950/70 backdrop-blur-md"
     >
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className={`w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl relative ${boxTheme.modal}`}
+        className={`w-full max-w-md rounded-3xl p-6 sm:p-8 text-center shadow-2xl relative ${boxTheme.modal} max-h-[88vh] overflow-y-auto`}
       >
         <button
           onClick={(e) => { e.stopPropagation(); onClose(); }}
-          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-lg cursor-pointer"
+          className="absolute top-4 right-4 w-11 h-11 rounded-full bg-pink-100/80 hover:bg-pink-200 text-pink-700 flex items-center justify-center font-bold text-xl cursor-pointer z-50 shadow-sm"
+          title="Close"
         >
           ✕
         </button>
-        <span className="text-7xl block mb-4 animate-spin" style={{ animationDuration: '8s' }}>💿</span>
-        <h2 className={`text-xl font-bold font-serif mb-2 ${boxTheme.title}`}>Our Song</h2>
-        <p className={`text-xs mb-6 ${boxTheme.subtitle}`}>Enjoy the ambient track configured for this memory page</p>
 
-        <div className={`p-4 rounded-xl mb-6 text-sm ${boxTheme.itemCard}`}>
-          <p className={`font-bold ${boxTheme.title}`}>Background Harmony</p>
-          <p className={`text-xs mt-1 ${boxTheme.subtitle}`}>Playing in the background of your story.</p>
-        </div>
+        {isVideo ? (
+          <div className="my-2">
+            <div className="w-14 h-14 rounded-2xl bg-pink-500/20 text-pink-500 flex items-center justify-center text-3xl mx-auto mb-3">
+              🎬
+            </div>
+            <h2 className={`text-xl font-bold font-serif mb-1 ${boxTheme.title}`}>{songTitle}</h2>
+            <p className={`text-xs mb-3 font-medium ${boxTheme.subtitle}`}>{songArtist}</p>
+            
+            <div className="rounded-2xl overflow-hidden shadow-lg border border-pink-300/30 bg-black/80 my-3">
+              <video
+                src={songUrl}
+                controls
+                autoPlay
+                playsInline
+                className="w-full max-h-[260px] object-contain mx-auto"
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="my-2">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
+              className="w-24 h-24 rounded-full bg-gradient-to-tr from-gray-900 via-pink-950 to-gray-900 border-4 border-pink-300 shadow-xl flex items-center justify-center mx-auto mb-4 relative"
+            >
+              <div className="w-8 h-8 rounded-full bg-pink-400 border-2 border-white flex items-center justify-center text-xs">
+                🎵
+              </div>
+            </motion.div>
 
-        <button onClick={onClose}
-          className={`px-6 py-2.5 rounded-full text-xs uppercase tracking-widest font-bold shadow-md cursor-pointer ${boxTheme.accentBtn}`}>
-          Enjoy Music 🎵
+            <h2 className={`text-xl font-bold font-serif mb-1 ${boxTheme.title}`}>{songTitle}</h2>
+            <p className={`text-xs mb-4 font-medium ${boxTheme.subtitle}`}>{songArtist}</p>
+
+            <div className={`p-4 rounded-2xl mb-4 ${boxTheme.itemCard}`}>
+              <audio
+                src={songUrl}
+                controls
+                autoPlay
+                className="w-full accent-pink-500 rounded-lg"
+              />
+            </div>
+          </div>
+        )}
+
+        {songNote && (
+          <div className={`p-4 rounded-2xl mb-5 text-xs leading-relaxed italic font-sans text-left ${boxTheme.itemCard}`}>
+            <p className="font-semibold text-pink-600 block mb-1 uppercase tracking-wider text-[10px]">Special Note:</p>
+            <p className={`${boxTheme.title}`}>"{songNote}"</p>
+          </div>
+        )}
+
+        <button
+          onClick={onClose}
+          className={`px-8 py-2.5 rounded-full text-xs uppercase tracking-widest font-bold shadow-md cursor-pointer ${boxTheme.accentBtn}`}
+        >
+          Enjoy Melody 💖
         </button>
       </motion.div>
     </div>
