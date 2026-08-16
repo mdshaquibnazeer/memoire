@@ -581,8 +581,8 @@ function EnvelopeLetterModal({
   const localAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const fullText = message || '';
-  const words = fullText.split(/\s+/).filter(Boolean);
-  const totalCount = words.length;
+  const tokens = fullText.match(/\S+|\s+/g) || [];
+  const totalCount = tokens.length;
 
   useEffect(() => {
     if (musicUrl && localAudioRef.current) {
@@ -612,11 +612,11 @@ function EnvelopeLetterModal({
     if (visibleCount >= totalCount) return;
     const timer = setTimeout(() => {
       setVisibleCount(c => c + 1);
-    }, 120);
+    }, 60);
     return () => clearTimeout(timer);
   }, [phase, visibleCount, totalCount]);
 
-  const visibleText = words.slice(0, visibleCount).join(' ');
+  const visibleText = tokens.slice(0, visibleCount).join('');
 
   return (
     <motion.div
