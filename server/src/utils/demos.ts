@@ -342,6 +342,110 @@ export const DEMO_PROJECTS = [
       }
     ],
     _count: { memories: 3, galleryItems: 1 }
+  },
+  {
+    id: 'demo-velvet-romance',
+    slug: 'demo-velvet-romance',
+    userId: 'system-demo',
+    title: 'For Eternity',
+    subtitle: 'Our Crimson Love Symphony 🌹',
+    theme: 'VELVET_ROMANCE',
+    status: 'PUBLISHED',
+    personOneName: 'Julian',
+    personTwoName: 'Valerie',
+    occasion: 'Anniversary',
+    startDate: new Date('2021-10-14T00:00:00.000Z'),
+    coverImageUrl: '/images/demo/demo_velvet_romance.png',
+    backgroundMusicUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+    heroConfig: {
+      heroTagline: 'For You, My Love',
+      message: 'My beloved Valerie, three years ago you stepped into my life and made every ordinary moment feel like absolute poetry. This is my tribute to our eternal love.',
+      welcomePopupText: 'Break the seal to view our love letter... 💌',
+      envelopeStyle: 'gold',
+      envelopeOpenEffect: 'shimmer',
+      letterMessage: 'To My Valerie,\n\nFrom the moment I met you on that rainy October afternoon, I knew my heart would never belong to anyone else. You are my home, my anchor, and my greatest adventure. Every day with you is a gift that I cherish more than words could ever describe.\n\nThank you for loving me so fully, for holding my hand through every storm, and for lighting up my world with your beautiful smile.\n\nWith all my soul, forever,\nJulian',
+      letterMusicUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+      letterScrollSpeed: 30,
+      letterAnimType: 'word',
+      letterWordDelay: 100,
+      quillSignature: 'Julian',
+      promiseWallTitle: 'My Romantic Vows To You 💍',
+      promiseCardStyle: 'gold',
+      confettiOnComplete: true,
+      promises: [
+        { emoji: '💍', text: 'I promise to love you unconditionally, in sickness and in health.', secretNote: 'You are my ultimate dream come true.' },
+        { emoji: '🌹', text: 'I promise to keep the romance alive, today and every single day.', secretNote: 'I will buy you roses every week!' },
+        { emoji: '💑', text: 'I promise to stand by your side through every journey.', secretNote: 'No matter where life takes us, we go together.' },
+        { emoji: '🕯️', text: 'I promise to be your warm sanctuary when the world feels cold.', secretNote: 'You will always find peace in my arms.' },
+        { emoji: '✉️', text: 'I promise to always communicate, listen, and grow with you.', secretNote: 'Your thoughts are my favorite songs.' },
+        { emoji: '✨', text: 'I promise to never stop chasing magical moments with you.', secretNote: 'Let us build a lifetime of magical stardust!' }
+      ],
+      galleryTitle: 'Frames of our Lifetime 📸',
+      galleryQuote: 'In your eyes, I have found my home.',
+      sepiaFilter: true,
+      featuredPhotoUrl: '/images/demo/demo_velvet_romance.png',
+      featuredPhotoCaption: 'Ours in Paris, Oct 2023 💕',
+      showStats: true,
+      customStatLabel1: 'Days of pure laughter',
+      customStatValue1: 1095,
+      customStatLabel2: 'Coffee dates shared',
+      customStatValue2: 432,
+      customStatLabel3: 'Heartbeats skipped',
+      customStatValue3: 884000,
+      loveCategories: [
+        { label: 'Sunset walks', percent: 30 },
+        { label: 'Late night talk', percent: 45 },
+        { label: 'Spontaneous trips', percent: 25 }
+      ]
+    },
+    endingConfig: {
+      title: 'Forever Yours 🌹',
+      message: 'Here is to a lifetime of sunset walks, warm coffee dates, and matching heartbeats. I love you to the stars and back.',
+      finaleStyle: 'all'
+    },
+    viewCount: 1204,
+    publishedAt: new Date('2026-08-16T00:00:00.000Z'),
+    createdAt: new Date('2026-08-16T00:00:00.000Z'),
+    updatedAt: new Date('2026-08-16T00:00:00.000Z'),
+    user: {
+      id: 'system-demo',
+      displayName: 'Mémoire Showcase',
+      isSuspended: false,
+      themeExpirations: {}
+    },
+    memories: [
+      {
+        id: 'demo-v1-velvet',
+        projectId: 'demo-velvet-romance',
+        title: 'Our First Hello',
+        description: 'Where the symphony began. An accidental coffee spill that led to a three-hour conversation.',
+        date: new Date('2021-10-14T00:00:00.000Z'),
+        imageUrl: '/images/demo/demo_velvet_romance.png',
+        emoji: '☕',
+        sortOrder: 0
+      },
+      {
+        id: 'demo-v2-velvet',
+        projectId: 'demo-velvet-romance',
+        title: 'The Sunset Kiss',
+        description: 'Looking over the city lights, knowing with absolute certainty that you were my forever.',
+        date: new Date('2022-08-19T00:00:00.000Z'),
+        imageUrl: '/images/demo/demo_velvet_romance.png',
+        emoji: '🌅',
+        sortOrder: 1
+      }
+    ],
+    galleryItems: [
+      {
+        id: 'demo-vg1-velvet',
+        projectId: 'demo-velvet-romance',
+        mediaUrl: '/images/demo/demo_velvet_romance.png',
+        mediaType: 'IMAGE',
+        caption: 'Under the Paris lights 💫',
+        sortOrder: 0
+      }
+    ],
+    _count: { memories: 2, galleryItems: 1 }
   }
 ];
 

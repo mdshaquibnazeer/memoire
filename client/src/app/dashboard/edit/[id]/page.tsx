@@ -67,6 +67,29 @@ export default function EditProjectPage() {
         endingMessage: data.project.endingConfig?.message || '',
         isPasswordProtected: data.project.isPasswordProtected || false,
         accessPassword: '',
+        // Velvet Romance Theme Fields
+        heroTagline: data.project.heroConfig?.heroTagline || '',
+        envelopeStyle: data.project.heroConfig?.envelopeStyle || 'gold',
+        envelopeOpenEffect: data.project.heroConfig?.envelopeOpenEffect || 'shimmer',
+        quillSignature: data.project.heroConfig?.quillSignature || '',
+        promiseWallTitle: data.project.heroConfig?.promiseWallTitle || '',
+        promiseCardStyle: data.project.heroConfig?.promiseCardStyle || 'gold',
+        confettiOnComplete: data.project.heroConfig?.confettiOnComplete !== undefined ? data.project.heroConfig.confettiOnComplete : true,
+        promises: data.project.heroConfig?.promises || [],
+        galleryTitle: data.project.heroConfig?.galleryTitle || '',
+        galleryQuote: data.project.heroConfig?.galleryQuote || '',
+        sepiaFilter: data.project.heroConfig?.sepiaFilter || false,
+        featuredPhotoUrl: data.project.heroConfig?.featuredPhotoUrl || '',
+        featuredPhotoCaption: data.project.heroConfig?.featuredPhotoCaption || '',
+        showStats: data.project.heroConfig?.showStats || false,
+        customStatLabel1: data.project.heroConfig?.customStatLabel1 || '',
+        customStatValue1: data.project.heroConfig?.customStatValue1 || 0,
+        customStatLabel2: data.project.heroConfig?.customStatLabel2 || '',
+        customStatValue2: data.project.heroConfig?.customStatValue2 || 0,
+        customStatLabel3: data.project.heroConfig?.customStatLabel3 || '',
+        customStatValue3: data.project.heroConfig?.customStatValue3 || 0,
+        loveCategories: data.project.heroConfig?.loveCategories || [],
+        finaleStyle: data.project.endingConfig?.finaleStyle || 'all',
       });
     }).catch(() => {
       toast.error('Project not found');
@@ -100,8 +123,34 @@ export default function EditProjectPage() {
           letterMessage: form.letterMessage,
           letterAnimType: form.letterAnimType,
           letterCharDelay: form.letterCharDelay,
+          // Velvet Romance config values
+          heroTagline: form.heroTagline,
+          envelopeStyle: form.envelopeStyle,
+          envelopeOpenEffect: form.envelopeOpenEffect,
+          quillSignature: form.quillSignature,
+          promiseWallTitle: form.promiseWallTitle,
+          promiseCardStyle: form.promiseCardStyle,
+          confettiOnComplete: form.confettiOnComplete,
+          promises: form.promises,
+          galleryTitle: form.galleryTitle,
+          galleryQuote: form.galleryQuote,
+          sepiaFilter: form.sepiaFilter,
+          featuredPhotoUrl: form.featuredPhotoUrl,
+          featuredPhotoCaption: form.featuredPhotoCaption,
+          showStats: form.showStats,
+          customStatLabel1: form.customStatLabel1,
+          customStatValue1: Number(form.customStatValue1) || 0,
+          customStatLabel2: form.customStatLabel2,
+          customStatValue2: Number(form.customStatValue2) || 0,
+          customStatLabel3: form.customStatLabel3,
+          customStatValue3: Number(form.customStatValue3) || 0,
+          loveCategories: form.loveCategories,
         },
-        endingConfig: { title: form.endingTitle, message: form.endingMessage },
+        endingConfig: { 
+          title: form.endingTitle, 
+          message: form.endingMessage,
+          finaleStyle: form.finaleStyle,
+        },
         isPasswordProtected: form.isPasswordProtected,
         ...(form.accessPassword && { accessPassword: form.accessPassword }),
       });
@@ -637,6 +686,456 @@ export default function EditProjectPage() {
                 </div>
               )}
             </Section>
+            )}
+
+            {project?.theme === 'VELVET_ROMANCE' && (
+              <>
+                <Section title="🌹 Velvet Romance - Hero & Envelope Settings">
+                  <Field label="Hero Tagline (Embossed gold text)">
+                    <input
+                      value={form.heroTagline}
+                      onChange={e => update('heroTagline', e.target.value)}
+                      placeholder="FOR YOU, MY LOVE"
+                      className="input-romantic"
+                    />
+                  </Field>
+                  <Field label="Hero Opening Message">
+                    <textarea
+                      value={form.heroMessage}
+                      onChange={e => update('heroMessage', e.target.value)}
+                      placeholder="My beloved..."
+                      rows={4}
+                      className="input-romantic resize-none"
+                    />
+                  </Field>
+                  <div className="grid grid-cols-2 gap-4">
+                    <Field label="Envelope Seal Color">
+                      <select
+                        value={form.envelopeStyle}
+                        onChange={e => update('envelopeStyle', e.target.value)}
+                        className="input-romantic bg-noir-midnight"
+                      >
+                        <option value="gold">Gold Seal 💛</option>
+                        <option value="crimson">Crimson Seal ❤️</option>
+                        <option value="rose">Rose Gold Seal 🩷</option>
+                      </select>
+                    </Field>
+                    <Field label="Envelope Opening Animation">
+                      <select
+                        value={form.envelopeOpenEffect}
+                        onChange={e => update('envelopeOpenEffect', e.target.value)}
+                        className="input-romantic bg-noir-midnight"
+                      >
+                        <option value="shimmer">Golden Shimmer ✨</option>
+                        <option value="burst">Romantic Burst 💥</option>
+                        <option value="fade">Ethereal Fade 💫</option>
+                      </select>
+                    </Field>
+                  </div>
+                  <Field label="Welcome Popup Text">
+                    <input
+                      value={form.welcomePopupText}
+                      onChange={e => update('welcomePopupText', e.target.value)}
+                      placeholder="Break the seal to view our love letter..."
+                      className="input-romantic"
+                    />
+                  </Field>
+                </Section>
+
+                <Section title="✍️ Velvet Romance - Secret Love Letter Scroll">
+                  <Field label="Scroll Letter Message">
+                    <textarea
+                      value={form.letterMessage}
+                      onChange={e => update('letterMessage', e.target.value)}
+                      placeholder="Write your scroll letter here..."
+                      rows={6}
+                      className="input-romantic font-sans text-sm w-full p-3 resize-none"
+                    />
+                  </Field>
+                  <Field label="Letter Quill Signature">
+                    <input
+                      value={form.quillSignature}
+                      onChange={e => update('quillSignature', e.target.value)}
+                      placeholder="Your signature (e.g. Julian)"
+                      className="input-romantic"
+                    />
+                  </Field>
+                  <Field label="Letter Background Music URL">
+                    <input
+                      value={form.letterMusicUrl}
+                      onChange={e => update('letterMusicUrl', e.target.value)}
+                      placeholder="https://..."
+                      className="input-romantic mb-3"
+                    />
+                    <MediaUploader
+                      projectId={id as string}
+                      accept="audio"
+                      maxFiles={1}
+                      label="Upload letter music"
+                      onUpload={({ url }) => update('letterMusicUrl', url)}
+                    />
+                  </Field>
+                  <div className="flex items-center justify-between p-3 glass-card mb-4 mt-6">
+                    <div>
+                      <p className="text-rose-cream font-serif text-sm">Disable Letter Auto-Scroll</p>
+                      <p className="text-rose-cream/30 text-xs font-sans">Stop the letter container from scrolling to the bottom automatically</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => update('disableLetterAutoScroll', !form.disableLetterAutoScroll)}
+                      className={`w-12 h-6 rounded-full transition-all duration-300 relative ${form.disableLetterAutoScroll ? 'bg-rose-blush' : 'bg-white/10'}`}
+                    >
+                      <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${form.disableLetterAutoScroll ? 'left-7' : 'left-1'}`} />
+                    </button>
+                  </div>
+                  <div className="flex items-center justify-between p-3 glass-card mb-4">
+                    <div>
+                      <p className="text-rose-cream font-serif text-sm">Disable Word-by-Word Animation</p>
+                      <p className="text-rose-cream/30 text-xs font-sans">Show the entire letter text immediately instead of drawing it word-by-word</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => update('disableWordByWord', !form.disableWordByWord)}
+                      className={`w-12 h-6 rounded-full transition-all duration-300 relative ${form.disableWordByWord ? 'bg-rose-blush' : 'bg-white/10'}`}
+                    >
+                      <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${form.disableWordByWord ? 'left-7' : 'left-1'}`} />
+                    </button>
+                  </div>
+                </Section>
+
+                <Section title="💍 Velvet Romance - Promise Wall Settings">
+                  <Field label="Promise Wall Header Title">
+                    <input
+                      value={form.promiseWallTitle}
+                      onChange={e => update('promiseWallTitle', e.target.value)}
+                      placeholder="My Romantic Vows To You"
+                      className="input-romantic"
+                    />
+                  </Field>
+                  <div className="grid grid-cols-2 gap-4">
+                    <Field label="Card Border Glow Style">
+                      <select
+                        value={form.promiseCardStyle}
+                        onChange={e => update('promiseCardStyle', e.target.value)}
+                        className="input-romantic bg-noir-midnight"
+                      >
+                        <option value="gold">Gold Glow 🌟</option>
+                        <option value="velvet">Crimson Glow 💖</option>
+                      </select>
+                    </Field>
+                    <div className="flex items-center justify-between p-3 glass-card mt-5">
+                      <div>
+                        <p className="text-rose-cream font-serif text-sm">Confetti on Complete</p>
+                        <p className="text-rose-cream/30 text-xs font-sans">Burst confetti when all vows are clicked</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => update('confettiOnComplete', !form.confettiOnComplete)}
+                        className={`w-12 h-6 rounded-full transition-all duration-300 relative ${form.confettiOnComplete ? 'bg-rose-blush' : 'bg-white/10'}`}
+                      >
+                        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${form.confettiOnComplete ? 'left-7' : 'left-1'}`} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 border-t border-white/10 pt-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <p className="font-serif text-sm text-rose-cream">Promise Cards (Max 6)</p>
+                      <button
+                        type="button"
+                        disabled={(form.promises || []).length >= 6}
+                        onClick={() => {
+                          const current = form.promises || [];
+                          update('promises', [...current, { emoji: '💍', text: '', secretNote: '' }]);
+                        }}
+                        className="text-xs font-sans px-3 py-1.5 rounded-lg border border-rose-cream/10 bg-white/5 hover:bg-white/10 text-rose-cream flex items-center gap-1 disabled:opacity-50"
+                      >
+                        <Plus size={12} /> Add Promise
+                      </button>
+                    </div>
+
+                    <div className="space-y-4">
+                      {(form.promises || []).map((p: any, idx: number) => (
+                        <div key={idx} className="p-4 glass-card rounded-xl border border-white/5 space-y-3 relative">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const current = form.promises || [];
+                              update('promises', current.filter((_: any, i: number) => i !== idx));
+                            }}
+                            className="absolute top-2 right-2 text-rose-cream/40 hover:text-red-400"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                          <div className="flex gap-3">
+                            <div style={{ width: '80px' }}>
+                              <label className="text-xs text-rose-cream/50">Emoji</label>
+                              <select
+                                value={p.emoji || '💍'}
+                                onChange={e => {
+                                  const current = [...(form.promises || [])];
+                                  current[idx] = { ...current[idx], emoji: e.target.value };
+                                  update('promises', current);
+                                }}
+                                className="input-romantic bg-noir-midnight text-sm mt-1"
+                              >
+                                {['💍', '🌹', '💑', '🕯️', '✉️', '✨', '💖', '🦋', '💝', '🎀'].map(em => (
+                                  <option key={em} value={em}>{em}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div className="flex-1">
+                              <label className="text-xs text-rose-cream/50">Vow Promise Text (Max 60 char)</label>
+                              <input
+                                value={p.text || ''}
+                                maxLength={60}
+                                onChange={e => {
+                                  const current = [...(form.promises || [])];
+                                  current[idx] = { ...current[idx], text: e.target.value };
+                                  update('promises', current);
+                                }}
+                                placeholder="I promise to..."
+                                className="input-romantic text-sm mt-1"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="text-xs text-rose-cream/50">Secret Note (Shown when card flips)</label>
+                            <input
+                              value={p.secretNote || ''}
+                              onChange={e => {
+                                const current = [...(form.promises || [])];
+                                  current[idx] = { ...current[idx], secretNote: e.target.value };
+                                  update('promises', current);
+                              }}
+                              placeholder="My hidden note..."
+                              className="input-romantic text-xs mt-1"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </Section>
+
+                <Section title="📸 Velvet Romance - Gallery Settings">
+                  <Field label="Gallery Section Title">
+                    <input
+                      value={form.galleryTitle}
+                      onChange={e => update('galleryTitle', e.target.value)}
+                      placeholder="Frames of our Lifetime"
+                      className="input-romantic"
+                    />
+                  </Field>
+                  <Field label="Romantic Quote Overlay">
+                    <input
+                      value={form.galleryQuote}
+                      onChange={e => update('galleryQuote', e.target.value)}
+                      placeholder="In your eyes, I have found my home."
+                      className="input-romantic"
+                    />
+                  </Field>
+                  <div className="flex items-center justify-between p-3 glass-card mb-4 mt-6">
+                    <div>
+                      <p className="text-rose-cream font-serif text-sm">Apply Romantic Sepia Filter</p>
+                      <p className="text-rose-cream/30 text-xs font-sans">Give photos a warm film vintage aesthetic</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => update('sepiaFilter', !form.sepiaFilter)}
+                      className={`w-12 h-6 rounded-full transition-all duration-300 relative ${form.sepiaFilter ? 'bg-rose-blush' : 'bg-white/10'}`}
+                    >
+                      <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${form.sepiaFilter ? 'left-7' : 'left-1'}`} />
+                    </button>
+                  </div>
+                  <Field label="Hero Featured Photo URL">
+                    <input
+                      value={form.featuredPhotoUrl}
+                      onChange={e => update('featuredPhotoUrl', e.target.value)}
+                      placeholder="https://..."
+                      className="input-romantic mb-3"
+                    />
+                    <MediaUploader
+                      projectId={id as string}
+                      accept="image"
+                      maxFiles={1}
+                      label="Upload featured photo"
+                      onUpload={({ url }) => update('featuredPhotoUrl', url)}
+                    />
+                  </Field>
+                  <Field label="Featured Photo Caption">
+                    <input
+                      value={form.featuredPhotoCaption}
+                      onChange={e => update('featuredPhotoCaption', e.target.value)}
+                      placeholder="Us in Paris, Oct 2023 💕"
+                      className="input-romantic"
+                    />
+                  </Field>
+                </Section>
+
+                <Section title="📊 Velvet Romance - Relationship Infographics">
+                  <div className="flex items-center justify-between p-3 glass-card mb-6">
+                    <div>
+                      <p className="text-rose-cream font-serif text-sm">Show Love Stats Counters</p>
+                      <p className="text-rose-cream/30 text-xs font-sans">Display counters and a distribution pie chart of your relationship</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => update('showStats', !form.showStats)}
+                      className={`w-12 h-6 rounded-full transition-all duration-300 relative ${form.showStats ? 'bg-rose-blush' : 'bg-white/10'}`}
+                    >
+                      <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${form.showStats ? 'left-7' : 'left-1'}`} />
+                    </button>
+                  </div>
+
+                  {form.showStats && (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-3 gap-3">
+                        <div className="p-3 glass-card rounded-xl border border-white/5">
+                          <label className="text-xs text-rose-cream/50">Stat 1 Label</label>
+                          <input
+                            value={form.customStatLabel1}
+                            onChange={e => update('customStatLabel1', e.target.value)}
+                            placeholder="Coffee dates"
+                            className="input-romantic text-xs mt-1"
+                          />
+                          <label className="text-xs text-rose-cream/50 mt-2 block">Stat 1 Value</label>
+                          <input
+                            type="number"
+                            value={form.customStatValue1}
+                            onChange={e => update('customStatValue1', e.target.value)}
+                            className="input-romantic text-xs mt-1"
+                          />
+                        </div>
+                        <div className="p-3 glass-card rounded-xl border border-white/5">
+                          <label className="text-xs text-rose-cream/50">Stat 2 Label</label>
+                          <input
+                            value={form.customStatLabel2}
+                            onChange={e => update('customStatLabel2', e.target.value)}
+                            placeholder="Late nights"
+                            className="input-romantic text-xs mt-1"
+                          />
+                          <label className="text-xs text-rose-cream/50 mt-2 block">Stat 2 Value</label>
+                          <input
+                            type="number"
+                            value={form.customStatValue2}
+                            onChange={e => update('customStatValue2', e.target.value)}
+                            className="input-romantic text-xs mt-1"
+                          />
+                        </div>
+                        <div className="p-3 glass-card rounded-xl border border-white/5">
+                          <label className="text-xs text-rose-cream/50">Stat 3 Label</label>
+                          <input
+                            value={form.customStatLabel3}
+                            onChange={e => update('customStatLabel3', e.target.value)}
+                            placeholder="Heartbeats skipped"
+                            className="input-romantic text-xs mt-1"
+                          />
+                          <label className="text-xs text-rose-cream/50 mt-2 block">Stat 3 Value</label>
+                          <input
+                            type="number"
+                            value={form.customStatValue3}
+                            onChange={e => update('customStatValue3', e.target.value)}
+                            className="input-romantic text-xs mt-1"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="border-t border-white/10 pt-4">
+                        <div className="flex items-center justify-between mb-4">
+                          <p className="font-serif text-sm text-rose-cream">Pie Chart Distribution (Max 5)</p>
+                          <button
+                            type="button"
+                            disabled={(form.loveCategories || []).length >= 5}
+                            onClick={() => {
+                              const current = form.loveCategories || [];
+                              update('loveCategories', [...current, { label: '', percent: 20 }]);
+                            }}
+                            className="text-xs font-sans px-3 py-1.5 rounded-lg border border-rose-cream/10 bg-white/5 hover:bg-white/10 text-rose-cream flex items-center gap-1 disabled:opacity-50"
+                          >
+                            <Plus size={12} /> Add Item
+                          </button>
+                        </div>
+
+                        <div className="space-y-3">
+                          {(form.loveCategories || []).map((cat: any, idx: number) => (
+                            <div key={idx} className="flex gap-3 items-center">
+                              <input
+                                value={cat.label || ''}
+                                onChange={e => {
+                                  const current = [...(form.loveCategories || [])];
+                                  current[idx] = { ...current[idx], label: e.target.value };
+                                  update('loveCategories', current);
+                                }}
+                                placeholder="Activity label (e.g. Sunset walks)"
+                                className="input-romantic text-xs flex-1"
+                              />
+                              <div style={{ width: '80px' }}>
+                                <input
+                                  type="number"
+                                  min={0}
+                                  max={100}
+                                  value={cat.percent}
+                                  onChange={e => {
+                                    const current = [...(form.loveCategories || [])];
+                                    current[idx] = { ...current[idx], percent: Number(e.target.value) || 0 };
+                                    update('loveCategories', current);
+                                  }}
+                                  placeholder="%"
+                                  className="input-romantic text-xs text-center"
+                                />
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const current = form.loveCategories || [];
+                                  update('loveCategories', current.filter((_: any, i: number) => i !== idx));
+                                }}
+                                className="text-rose-cream/40 hover:text-red-400 p-1"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </Section>
+
+                <Section title="🎉 Velvet Romance - Finale Settings">
+                  <Field label="Closing Title">
+                    <input
+                      value={form.endingTitle}
+                      onChange={e => update('endingTitle', e.target.value)}
+                      placeholder="Forever Yours"
+                      className="input-romantic"
+                    />
+                  </Field>
+                  <Field label="Closing Heartfelt Message">
+                    <textarea
+                      value={form.endingMessage}
+                      onChange={e => update('endingMessage', e.target.value)}
+                      placeholder="Your final note..."
+                      rows={3}
+                      className="input-romantic resize-none"
+                    />
+                  </Field>
+                  <Field label="Grand Finale Style">
+                    <select
+                      value={form.finaleStyle}
+                      onChange={e => update('finaleStyle', e.target.value)}
+                      className="input-romantic bg-noir-midnight"
+                    >
+                      <option value="all">Grand Finale (All Three) 🎆</option>
+                      <option value="fireworks">Fireworks Only 🎇</option>
+                      <option value="roseRain">Rose Rain Only 🌹</option>
+                      <option value="confetti">Gold Confetti Only ✨</option>
+                    </select>
+                  </Field>
+                </Section>
+              </>
+            )}
           </motion.div>
         )}
 

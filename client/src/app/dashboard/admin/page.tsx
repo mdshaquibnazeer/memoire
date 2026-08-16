@@ -58,6 +58,7 @@ const ALL_TEMPLATES = [
   { id: 'AURORA_DREAMS', name: 'Aurora Dreams', emoji: '✨' },
   { id: 'CELESTIAL_BIRTHDAY', name: 'Celestial Birthday', emoji: '🎂' },
   { id: 'SWEET_DIARY', name: 'Sweet Diary Box', emoji: '🎁' },
+  { id: 'VELVET_ROMANCE', name: 'Velvet Romance', emoji: '🌹' },
 ];
 
 export default function AdminCornerPage() {

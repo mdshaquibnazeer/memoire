@@ -57,6 +57,14 @@ const themes = [
     accent: '#ff8da1',
     preview: '🎁',
   },
+  {
+    id: 'VELVET_ROMANCE',
+    name: 'Velvet Romance',
+    description: 'Deep crimson & liquid gold theme with rose petal rain, golden vows and animated promise wall',
+    gradient: 'from-rose-950/40 via-red-900/20 to-noir-midnight',
+    accent: '#f5c842',
+    preview: '🌹',
+  },
 ];
 
 const features = [

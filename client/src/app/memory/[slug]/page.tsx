@@ -12,6 +12,7 @@ import ScrapbookLoveTheme from '@/components/themes/ScrapbookLoveTheme';
 import AuroraDreamsTheme from '@/components/themes/AuroraDreamsTheme';
 import CelestialBirthdayTheme from '@/components/themes/CelestialBirthdayTheme';
 import SweetDiaryTheme from '@/components/themes/SweetDiaryTheme';
+import VelvetRomanceTheme from '@/components/themes/VelvetRomanceTheme';
 import MusicPlayer from '@/components/shared/MusicPlayer';
 
 interface Project {
@@ -184,6 +185,7 @@ export default function MemoryPage() {
       {project.theme === 'AURORA_DREAMS' && <AuroraDreamsTheme project={project} />}
       {project.theme === 'CELESTIAL_BIRTHDAY' && <CelestialBirthdayTheme project={project} />}
       {project.theme === 'SWEET_DIARY' && <SweetDiaryTheme project={project} />}
+      {project.theme === 'VELVET_ROMANCE' && <VelvetRomanceTheme project={project} />}
     </>
   );
 }

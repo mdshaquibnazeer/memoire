@@ -58,6 +58,14 @@ const THEMES = [
     gradient: 'from-pink-300 via-pink-400 to-rose-400',
     accent: '#ff8da1',
   },
+  {
+    id: 'VELVET_ROMANCE',
+    name: 'Velvet Romance',
+    desc: 'Deep crimson & liquid gold theme with rose petal rain, golden vows and animated promise wall',
+    preview: '🌹',
+    gradient: 'from-rose-950 via-red-900 to-noir-dark',
+    accent: '#f5c842',
+  },
 ];
 
 const OCCASIONS = [

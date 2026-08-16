@@ -32,6 +32,7 @@ const themeColors: Record<string, string> = {
   AURORA_DREAMS: '#8b5cf6',
   CELESTIAL_BIRTHDAY: '#ff69b4',
   SWEET_DIARY: '#ff8da1',
+  VELVET_ROMANCE: '#f5c842',
 };
 
 const themeNames: Record<string, string> = {
@@ -41,6 +42,7 @@ const themeNames: Record<string, string> = {
   AURORA_DREAMS: 'Aurora Dreams',
   CELESTIAL_BIRTHDAY: 'Celestial Birthday',
   SWEET_DIARY: 'Sweet Diary Box',
+  VELVET_ROMANCE: 'Velvet Romance',
 };
 
 export default function ProjectsPage() {

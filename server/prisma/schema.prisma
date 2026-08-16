@@ -161,6 +161,7 @@ enum ThemeName {
   AURORA_DREAMS
   CELESTIAL_BIRTHDAY
   SWEET_DIARY
+  VELVET_ROMANCE
 }
 
 enum MediaType {
