@@ -20,6 +20,9 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Enable trust proxy for Render, Netlify, and Cloudflare reverse proxies
+app.set('trust proxy', 1);
+
 // ============================================
 // SECURITY MIDDLEWARE
 // ============================================
@@ -28,28 +31,68 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
 }));
 
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  process.env.APP_URL,
+  'https://memoireforwish.netlify.app',
+  'http://localhost:3000',
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (
+      allowedOrigins.includes(origin) ||
+      origin.endsWith('.netlify.app') ||
+      origin.endsWith('.vercel.app') ||
+      origin.includes('localhost') ||
+      process.env.NODE_ENV !== 'production'
+    ) {
+      return callback(null, true);
+    }
+    return callback(null, true);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-// General rate limiter
+// ============================================
+// HEALTH CHECK (Unmetered / before rate limits)
+// ============================================
+
+const healthHandler = (_req: express.Request, res: express.Response) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV,
+  });
+};
+
+app.get('/health', healthHandler);
+app.get('/api/health', healthHandler);
+
+// ============================================
+// RATE LIMITING
+// ============================================
+
+// General rate limiter (2000 requests per 15 minutes)
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 200,
+  max: 2000,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false, default: false },
   message: { error: 'Too many requests, please try again later.' },
 });
 
-// Strict limiter for auth routes
+// Strict limiter for auth routes (30 attempts per 15 seconds)
 const authLimiter = rateLimit({
   windowMs: 15 * 1000, // 15 seconds
-  max: 10,
+  max: 30,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false, default: false },
   message: { error: 'Too many authentication attempts. Please wait 15 seconds.' },
 });
 
@@ -69,18 +112,6 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 if (process.env.NODE_ENV !== 'test') {
   app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 }
-
-// ============================================
-// HEALTH CHECK
-// ============================================
-
-app.get('/health', (_req, res) => {
-  res.json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    env: process.env.NODE_ENV,
-  });
-});
 
 // ============================================
 // ROUTES
