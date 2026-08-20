@@ -20,9 +20,6 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Enable trust proxy for Render, Netlify, and Cloudflare reverse proxies
-app.set('trust proxy', 1);
-
 // ============================================
 // SECURITY MIDDLEWARE
 // ============================================
@@ -31,27 +28,8 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
 }));
 
-const allowedOrigins = [
-  process.env.CLIENT_URL,
-  process.env.APP_URL,
-  'https://memoireforwish.netlify.app',
-  'http://localhost:3000',
-].filter(Boolean);
-
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (
-      allowedOrigins.includes(origin) ||
-      origin.endsWith('.netlify.app') ||
-      origin.endsWith('.vercel.app') ||
-      origin.includes('localhost') ||
-      process.env.NODE_ENV !== 'production'
-    ) {
-      return callback(null, true);
-    }
-    return callback(null, true);
-  },
+  origin: process.env.CLIENT_URL || 'http://localhost:3000',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -60,20 +38,18 @@ app.use(cors({
 // General rate limiter
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 300,
+  max: 200,
   standardHeaders: true,
   legacyHeaders: false,
-  validate: { xForwardedForHeader: false, default: false },
   message: { error: 'Too many requests, please try again later.' },
 });
 
 // Strict limiter for auth routes
 const authLimiter = rateLimit({
   windowMs: 15 * 1000, // 15 seconds
-  max: 20,
+  max: 10,
   standardHeaders: true,
   legacyHeaders: false,
-  validate: { xForwardedForHeader: false, default: false },
   message: { error: 'Too many authentication attempts. Please wait 15 seconds.' },
 });
 
@@ -98,16 +74,13 @@ if (process.env.NODE_ENV !== 'test') {
 // HEALTH CHECK
 // ============================================
 
-const healthHandler = (_req: express.Request, res: express.Response) => {
+app.get('/health', (_req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
     env: process.env.NODE_ENV,
   });
-};
-
-app.get('/health', healthHandler);
-app.get('/api/health', healthHandler);
+});
 
 // ============================================
 // ROUTES
